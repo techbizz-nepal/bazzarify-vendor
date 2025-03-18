@@ -9,7 +9,7 @@ type TSessionContextValue = {
 const SessionContext = createContext<TSessionContextValue | null>(null);
 
 const SessionProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState(false);
+  const [session, setSession] = useState(true);
   const toggleSession = () => {
     setSession((prevState) => !prevState);
   };

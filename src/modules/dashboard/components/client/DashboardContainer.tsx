@@ -3,6 +3,7 @@
 import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 
 export default function DashboardContainer() {
   const sessionCtx = use(SessionContext);
@@ -17,9 +18,11 @@ export default function DashboardContainer() {
       return router.replace("/login");
     }
   }, [router, session]);
-  return (
-    <div className="w-screen h-screen flex flex-col items-center justify-center">
-      <p>Welcome to dashboard.</p>
-    </div>
-  );
+  return <Statistics />;
 }
+
+const Statistics = () => (
+  <Card className="px-4 items-center justify-center" id="stats">
+    <p>Welcome to dashboard.</p>
+  </Card>
+);

@@ -10,9 +10,9 @@ export default function AuthLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <div>
+      <div className="bg-slate-200 flex w-screen h-screen flex-col px-2 flex-1">
         <SidebarTrigger />
-        <div className=" bg-slate-200 overflow-y-auto">{children}</div>
+        {children}
       </div>
     </SidebarProvider>
   );
