@@ -1,8 +1,8 @@
 "use server";
 
 import { AUTH_ROUTES } from "@/modules/auth/config/auth.routes";
-import { ResetPasswordFormValues } from "@/form.schema/reset.password.form";
-import axiosInstance from "@/lib/utils.axios";
+import { ResetPasswordFormValues } from "@/modules/guest/config/schemas/reset.password.form";
+import axiosInstance from "@/modules/core/lib/utils.axios";
 import { AxiosError } from "axios";
 
 export const actionResetPassword = async (data: ResetPasswordFormValues) => {

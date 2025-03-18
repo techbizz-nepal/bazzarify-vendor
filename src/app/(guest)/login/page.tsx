@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import LoginForm from "@/components/client/LoginForm";
+import LoginForm from "@/modules/guest/components/client/LoginForm";
 
 export const metadata: Metadata = {
   title: "Login",

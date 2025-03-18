@@ -1,4 +1,4 @@
-import ResetPasswordForm from "@/components/client/ResetPasswordForm";
+import ResetPasswordForm from "@/modules/guest/components/client/ResetPasswordForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

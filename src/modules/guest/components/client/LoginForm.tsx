@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormTitle from "@/components/common/FormTitle";
+import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -15,10 +15,23 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { LoginFormSchema, LoginFormValues } from "@/form.schema/login.form";
+import {
+  LoginFormSchema,
+  LoginFormValues,
+} from "@/modules/guest/config/schemas/login.form";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
+import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 
 export default function LoginForm() {
+  const sessionCtx = use(SessionContext);
+  if (!sessionCtx) {
+    throw new Error("ThemeSwitcher must be used within a ThemeProvider");
+  }
+  const { session, toggleSession } = sessionCtx;
+  const router = useRouter();
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
@@ -27,6 +40,12 @@ export default function LoginForm() {
       remember: false,
     },
   });
+  console.log("session: ", session);
+  useEffect(() => {
+    if (session) {
+      return router.replace("/");
+    }
+  }, [router, session]);
 
   function handleSubmit(data: LoginFormValues) {
     toast("You submitted the following values:", {
@@ -36,6 +55,10 @@ export default function LoginForm() {
         </pre>
       ),
     });
+    setTimeout(() => {
+      toggleSession();
+      router.replace("/");
+    }, 3000);
   }
 
   return (
@@ -55,6 +78,7 @@ export default function LoginForm() {
                 <FormLabel className="text-slate-500">Email</FormLabel>
                 <FormControl>
                   <Input
+                    autoComplete={""}
                     className="border border-slate-300 placeholder:text-slate-400"
                     type="email"
                     placeholder="Enter email address"

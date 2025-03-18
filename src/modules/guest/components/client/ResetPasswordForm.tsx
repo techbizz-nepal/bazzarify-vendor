@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormTitle from "@/components/common/FormTitle";
+import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -16,16 +16,22 @@ import { Button } from "@/components/ui/button";
 import {
   ResetPasswordFormSchema,
   ResetPasswordFormValues,
-} from "@/form.schema/reset.password.form";
+} from "@/modules/guest/config/schemas/reset.password.form";
 import Link from "next/link";
-import { actionResetPassword } from "@/modules/auth/actions/auth";
 import { cn } from "@/lib/utils";
-import { ResponseDTO } from "@/modules/core/types";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
+import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
+import { SeparatorHorizontal } from "lucide-react";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
+  const sessionCtx = use(SessionContext);
+  if (!sessionCtx) {
+    throw new Error("Session must be used within a SessionContextProvider");
+  }
+  const { session } = sessionCtx;
+
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordFormSchema),
     defaultValues: {
@@ -33,30 +39,35 @@ export default function ResetPasswordForm() {
       phone: "",
     },
   });
-
+  useEffect(() => {
+    if (session) {
+      return router.replace("/");
+    }
+  }, [router, session]);
   const handleSubmit = (data: ResetPasswordFormValues) => {
     const phoneWithPrefix = !data.phone.includes("+977")
       ? process.env.NEXT_PUBLIC_PHONE_PREFIX
         ? process.env.NEXT_PUBLIC_PHONE_PREFIX.concat(data.phone.trim())
         : data.phone
       : data.phone;
-    actionResetPassword({
-      ...data,
-      phone: phoneWithPrefix,
-    })
-      .then((response: ResponseDTO) => {
-        if (response.metaData.error) {
-          toast.error(response.metaData.error, {
-            style: {
-              color: "white",
-              backgroundColor: "red",
-            },
-          });
-        }
-        toast("redirecting to otp");
-        router.replace("/opt-verify?phone=" + phoneWithPrefix);
-      })
-      .catch((e) => console.error(e));
+    // actionResetPassword({
+    //   ...data,
+    //   phone: phoneWithPrefix,
+    // })
+    //   .then((response: ResponseDTO) => {
+    //     if (response.metaData.error) {
+    //       toast.error(response.metaData.error, {
+    //         style: {
+    //           color: "white",
+    //           backgroundColor: "red",
+    //         },
+    //       });
+    //     }
+    //     toast("redirecting to otp");
+    //     router.replace("/opt-verify?phone=" + phoneWithPrefix);
+    //   })
+    //   .catch((e) => console.error(e));
+    router.replace("/opt-verify?phone=" + phoneWithPrefix);
   };
 
   return (
@@ -115,7 +126,7 @@ export default function ResetPasswordForm() {
           </Button>
         </form>
       </Form>
-      <div className="border border-b-slate-300" />
+      <SeparatorHorizontal />
       <Link
         href="/login"
         className="w-full text-md py-3 border border-muted flex items-center justify-center"

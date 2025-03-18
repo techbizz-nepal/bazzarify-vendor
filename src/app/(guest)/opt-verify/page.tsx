@@ -1,3 +1,3 @@
-import VerifyOTPForm from "@/components/client/VerifyOTPForm";
+import VerifyOTPForm from "@/modules/guest/components/client/VerifyOTPForm";
 
 export default VerifyOTPForm;
