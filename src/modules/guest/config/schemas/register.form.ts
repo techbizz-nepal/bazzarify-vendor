@@ -1,8 +1,13 @@
 import { z } from "zod";
 
-export const VerifyOtpFormSchema = z
+export const RegisterFormSchema = z
   .object({
-    otp: z.string({ message: "OTP is required." }).min(6).max(6),
+    name: z.string().min(3, { message: "Name is required" }),
+    email: z.string().email({ message: "Email is required" }),
+    phone: z
+      .string()
+      .min(10, { message: "Phone number must be 10 digit" })
+      .max(10, { message: "Phone number must be 10 digit" }),
     password: z
       .string({ message: "Password is required." })
       .min(8, { message: "Password must contain at least 8 character(s)" })
@@ -22,4 +27,4 @@ export const VerifyOtpFormSchema = z
     message: "Passwords do not match",
     path: ["password_confirmation"],
   });
-export type VerifyOtpFormValues = z.infer<typeof VerifyOtpFormSchema>;
+export type RegisterFormValues = z.infer<typeof RegisterFormSchema>;
