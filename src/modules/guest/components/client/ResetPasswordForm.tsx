@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
-import { SeparatorHorizontal } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -45,11 +45,6 @@ export default function ResetPasswordForm() {
     }
   }, [router, session]);
   const handleSubmit = (data: ResetPasswordFormValues) => {
-    const phoneWithPrefix = !data.phone.includes("+977")
-      ? process.env.NEXT_PUBLIC_PHONE_PREFIX
-        ? process.env.NEXT_PUBLIC_PHONE_PREFIX.concat(data.phone.trim())
-        : data.phone
-      : data.phone;
     // actionResetPassword({
     //   ...data,
     //   phone: phoneWithPrefix,
@@ -64,10 +59,10 @@ export default function ResetPasswordForm() {
     //       });
     //     }
     //     toast("redirecting to otp");
-    //     router.replace("/opt-verify?phone=" + phoneWithPrefix);
+    //     router.replace("/verify-otp?phone=" + phoneWithPrefix);
     //   })
     //   .catch((e) => console.error(e));
-    router.replace("/opt-verify?phone=" + phoneWithPrefix);
+    router.replace("/verify-otp?phone=" + data.phone);
   };
 
   return (
@@ -126,7 +121,7 @@ export default function ResetPasswordForm() {
           </Button>
         </form>
       </Form>
-      <SeparatorHorizontal />
+      <Separator />
       <Link
         href="/login"
         className="w-full text-md py-3 border border-muted flex items-center justify-center"

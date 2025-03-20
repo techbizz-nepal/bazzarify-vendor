@@ -24,18 +24,33 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { toast } from "sonner";
 import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 
-export default function VerifyOTPForm() {
+interface IVerifyOTPForm {
+  className?: string;
+  formTitle: string;
+  formHelpText: string;
+  buttonLabel: string;
+  onSubmitAction: (data: VerifyOtpFormValues) => void;
+}
+
+export default function VerifyOTPForm({
+  className,
+  formTitle,
+  formHelpText,
+  buttonLabel,
+  onSubmitAction,
+}: IVerifyOTPForm) {
   const router = useRouter();
+  const urlSearchParams = useSearchParams();
   const sessionCtx = use(SessionContext);
   if (!sessionCtx) {
-    throw new Error("ThemeSwitcher must be used within a ThemeProvider");
+    throw new Error("SessionProvider must be used in correct place.");
   }
+
   const form = useForm<VerifyOtpFormValues>({
     resolver: zodResolver(VerifyOtpFormSchema),
     defaultValues: {
@@ -44,27 +59,28 @@ export default function VerifyOTPForm() {
       password_confirmation: "",
     },
   });
+
   const { session } = sessionCtx;
+
   useEffect(() => {
     if (session) {
       return router.replace("/");
     }
-  }, [router, session]);
-  const handleSubmit = (data: VerifyOtpFormValues) => {
-    console.log(data);
-    toast.success("VerifyOTP form successfully!");
-    setTimeout(() => router.replace("/login"), 5000);
-  };
+    const phone = urlSearchParams.get("phone")?.trim() || "";
+    if (!phone || !/^9\d{9}$/.test(phone)) {
+      throw new Error("403");
+    }
+  }, [router, session, urlSearchParams]);
   return (
-    <div className="flex w-4/12 flex-col space-y-6 rounded-md bg-white p-16">
+    <div className={className}>
       <FormTitle
-        label="Password Reset"
-        helpText="We Will Help You Reset your Password"
+        label={formTitle}
+        helpText={formHelpText}
         className="flex w-full items-center justify-center"
       />
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(handleSubmit)}
+          onSubmit={form.handleSubmit(onSubmitAction)}
           className="flex-col space-y-6"
         >
           <FormField
@@ -138,7 +154,7 @@ export default function VerifyOTPForm() {
               form.formState.isSubmitting ? "animate-pulse" : undefined,
             )}
           >
-            Update Password
+            {buttonLabel}
           </Button>
         </form>
       </Form>

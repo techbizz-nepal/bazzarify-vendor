@@ -53,7 +53,7 @@ export function AppSidebar() {
       <SidebarContent className="bg-sidebar-primary text-primary-foreground">
         <SidebarGroup>
           <SidebarGroupLabel className="bg-white py-6">
-            <Image src="/splashLogo.png" alt="logo" width="150" height={50} />
+            <Image src="/logo.png" alt="logo" width="150" height={50} />
           </SidebarGroupLabel>
           <SidebarGroupContent className="mt-6">
             <SidebarMenu>

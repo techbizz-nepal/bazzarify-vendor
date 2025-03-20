@@ -26,7 +26,7 @@ import {
 export default function RegisterForm() {
   const sessionCtx = use(SessionContext);
   if (!sessionCtx) {
-    throw new Error("ThemeSwitcher must be used within a ThemeProvider");
+    throw new Error("SessionProvider must be used in correct place.");
   }
   const { session, toggleSession } = sessionCtx;
   const router = useRouter();

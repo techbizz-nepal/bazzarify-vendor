@@ -5,4 +5,10 @@ export const metadata: Metadata = {
   title: "Reset Password",
   description: "Reset your password",
 };
-export default ResetPasswordForm;
+export default function Page() {
+  return (
+    <div className="w-full h-screen bg-slate-200 flex flex-col justify-center items-center">
+      <ResetPasswordForm />
+    </div>
+  );
+}

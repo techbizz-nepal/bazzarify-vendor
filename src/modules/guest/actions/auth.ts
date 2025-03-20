@@ -1,9 +1,11 @@
 "use server";
 
-import { AUTH_ROUTES } from "@/modules/auth/config/auth.routes";
 import { ResetPasswordFormValues } from "@/modules/guest/config/schemas/reset.password.form";
 import axiosInstance from "@/modules/core/lib/utils.axios";
 import { AxiosError } from "axios";
+import { AUTH_ROUTES } from "@/modules/guest/config/auth.routes";
+import { VerifyOtpFormValues } from "@/modules/guest/config/schemas/verify.otp.form";
+import { redirect } from "next/navigation";
 
 export const actionResetPassword = async (data: ResetPasswordFormValues) => {
   try {
@@ -26,4 +28,15 @@ export const actionResetPassword = async (data: ResetPasswordFormValues) => {
       },
     };
   }
+};
+export const handlePasswordResetVerification = async (
+  data: VerifyOtpFormValues,
+) => {
+  console.log(data);
+  redirect("/login");
+};
+
+export const handleRegisterVerification = async (data: VerifyOtpFormValues) => {
+  console.log(data);
+  redirect("/register?verified=true");
 };

@@ -27,7 +27,7 @@ import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 export default function LoginForm() {
   const sessionCtx = use(SessionContext);
   if (!sessionCtx) {
-    throw new Error("ThemeSwitcher must be used within a ThemeProvider");
+    throw new Error("SessionProvider must be used in correct place.");
   }
   const { session, toggleSession } = sessionCtx;
   const router = useRouter();
