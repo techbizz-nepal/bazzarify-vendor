@@ -8,7 +8,8 @@ const Header = () => (
       alt="logo"
       width={250}
       height={68}
-      className="hidden md:block"
+      className="hidden md:block w-auto h-auto"
+      priority={true}
     />
     <Button className="h-14 rounded-md px-8 has-[>svg]:px-4">
       <p className="text-2xl">Get App</p>

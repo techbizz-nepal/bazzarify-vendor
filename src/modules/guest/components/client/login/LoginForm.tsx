@@ -75,13 +75,13 @@ export default function LoginForm() {
           <FormField
             render={({ field }) => (
               <FormItem className="flex flex-col gap-y-2">
-                <FormLabel className="text-slate-500">Email</FormLabel>
+                <FormLabel className="text-slate-500">Email/Phone</FormLabel>
                 <FormControl>
                   <Input
                     autoComplete={""}
                     className="border border-slate-300 placeholder:text-slate-400"
                     type="email"
-                    placeholder="Enter email address"
+                    placeholder="Enter your email/phone"
                     {...field}
                   />
                 </FormControl>

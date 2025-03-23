@@ -1,8 +1,5 @@
 import { Metadata } from "next";
 import VendorRegistrationForm from "@/modules/guest/components/client/VendorRegistrationForm";
-import { VerifyOtpFormValues } from "@/modules/guest/config/schemas/verify.otp.form";
-import { toast } from "sonner";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Register",

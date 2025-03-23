@@ -1,0 +1,11 @@
+node_modules
+.git
+.next/cache
+.env
+*.md
+tsconfig.json
+src/**/*.test.tsx
+src/**/*.test.ts
+.idea
+eslint.config.mjs
+postcss.config.mjs
