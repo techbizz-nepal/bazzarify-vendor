@@ -4,8 +4,6 @@ import {useRouter, useSearchParams} from "next/navigation";
 import useSession from "@/modules/core/hooks/useSession";
 import useVendorRegistration from "@/modules/guest/hooks/useVendorRegistration";
 import Banner from "@/modules/guest/components/client/registration/Banner";
-import Header from "@/modules/guest/components/client/registration/Header";
-import WhySellOnBazzarify from "@/modules/guest/components/client/registration/WhySellOnBazzarify";
 import OTPVerificationRequestForm from "@/modules/guest/components/client/registration/OTPVerificationRequestForm";
 import VerifyOTPForm from "@/modules/guest/components/client/VerifyOTPForm";
 import SetBusinessAndEmailForm from "@/modules/guest/components/client/registration/SetBusinessAndEmailForm";
@@ -27,7 +25,6 @@ export default function VendorRegistrationForm() {
     );
     return (
         <>
-            <Header/>
             <Banner>
                 {searchParams.size == 0 && (
                     <OTPVerificationRequestForm
@@ -51,7 +48,6 @@ export default function VendorRegistrationForm() {
                         onSubmit={handleSetBusinessAndEmailSubmit}
                     />}
             </Banner>
-            <WhySellOnBazzarify/>
         </>
     );
 }
