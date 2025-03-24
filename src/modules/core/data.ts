@@ -44,16 +44,16 @@ export const footerData = {
       },
     ],
     Account: [
-      {
-        id: 8,
-        label: "Log In",
-        link: "#",
-      },
-      {
-        id: 9,
-        label: "Registration",
-        link: "#",
-      },
+      // {
+      //   id: 8,
+      //   label: "Log In",
+      //   link: "#",
+      // },
+      // {
+      //   id: 9,
+      //   label: "Registration",
+      //   link: "#",
+      // },
       {
         id: 10,
         label: "Vendor Log In",

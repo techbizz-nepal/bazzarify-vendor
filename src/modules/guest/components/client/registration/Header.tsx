@@ -14,7 +14,7 @@ const Header = () => (
     <Link
       className="h-14 rounded-md px-8 has-[>svg]:px-4 bg-primary items-center flex justify-center text-primary-foreground text-2xl hover:animate-pulse"
       target={"_blank"}
-      href="https://play.google.com/apps/testing/com.techbizz.bazzarify"
+      href="https://play.google.com/store/apps/details?id=com.techbizz.bazzarify"
     >
       Get App
     </Link>

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { SessionProvider } from "@/modules/core/contexts/SessionContextProvider";
 import React from "react";
 
-const poppins = Poppins({
+const sora = Sora({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.className} antialiased`}
+        className={`${sora.className} antialiased`}
         suppressHydrationWarning={true}
       >
         <SessionProvider>

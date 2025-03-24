@@ -25,7 +25,7 @@ const Banner = ({ children }: { children: ReactNode }) => {
         <div className="hidden md:block w-1/2 md:w-7/12">
           <div
             className="font-normal text-white leading-tight"
-            style={{ fontSize: "2.8rem" }}
+            style={{ fontSize: "2.3rem" }}
           >
             <p>Grow your business online, reach more</p>
             <p>customers, and sell effortlessly with</p>
@@ -36,8 +36,8 @@ const Banner = ({ children }: { children: ReactNode }) => {
           <div
             className="relative"
             style={{
-              left: lastLineBounds.width - 80,
-              top: -120,
+              left: lastLineBounds.width - 50,
+              top: -100,
               height: "50vh",
               width: "35vw",
             }}
