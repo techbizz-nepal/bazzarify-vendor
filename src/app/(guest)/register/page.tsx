@@ -8,7 +8,8 @@ import { categoriesData, footerData } from "@/modules/core/data";
 import { PiDotOutlineBold, PiMapPinLineLight } from "react-icons/pi";
 import { LuHeadphones, LuMail } from "react-icons/lu";
 import { FaBusinessTime } from "react-icons/fa";
-import { Separator } from "@/components/ui/separator";
+import { Suspense } from "react";
+import { Loader } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Register",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <>
+    <Suspense fallback={<Loader />}>
       <main className="w-full flex-col py-2 ">
         <Header />
         <VendorRegistrationForm />
@@ -27,7 +28,7 @@ export default function Page() {
         <NewsLetterBanner />
       </main>
       <Footer />
-    </>
+    </Suspense>
   );
 }
 

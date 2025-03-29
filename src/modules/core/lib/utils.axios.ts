@@ -1,18 +1,17 @@
 import axios from "axios";
+import process from "node:process";
 
 const remoteData: Record<string, string> = {
-  remote: "https://local-ne.bazzarify.com/api/v1", // remove android:usesCleartextTraffic="true" after ssl activated for the domain
-  local: "http://192.168.1.64/api/v1",
-  appKey: process.env.APP_KEY as string,
+  apiUrl: process.env.API_URL || "http://local-ne.larashops.local:8081/api/v1",
+  appKey: process.env.APP_KEY || "",
 };
 
 const axiosInstance = axios.create({
-  baseURL: remoteData.local,
+  baseURL: remoteData.apiUrl,
   headers: {
-    Authorization: `Bearer ${remoteData.appKey}`,
+    "User-Agent": "BazzarifyVendor",
     "Content-Type": "application/json",
-    Accept: "application/json",
-    "X-APP-KEY": remoteData.appKey,
+    "X-APP-Key": remoteData.appKey,
   },
   validateStatus: (status) => status < 500,
 });

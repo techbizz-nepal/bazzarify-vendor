@@ -1,11 +1,7 @@
 node_modules
 .git
-.next/cache
-.env
+.gitignore
 *.md
-tsconfig.json
-src/**/*.test.tsx
-src/**/*.test.ts
+dist
+.next
 .idea
-eslint.config.mjs
-postcss.config.mjs
