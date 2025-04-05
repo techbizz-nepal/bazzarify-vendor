@@ -83,7 +83,7 @@ export default function CoreDataTable<TData>({
       sorting,
       columnFilters,
     });
-  }, [pagination, sorting, columnFilters]);
+  }, [pagination, sorting, columnFilters, fetchDataAction]);
 
   const table = useReactTable({
     data,

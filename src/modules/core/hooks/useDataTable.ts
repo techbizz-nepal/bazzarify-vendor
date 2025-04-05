@@ -42,7 +42,7 @@ export default function useDataTable<
         }
       })
       .catch((error) => console.error("Error fetching data:", error));
-  }, [page, payloadKey, filterValue, onlyLastChildren]);
+  }, [page, payloadKey, filterValue, onlyLastChildren, getAction]);
   return {
     page,
     rows,

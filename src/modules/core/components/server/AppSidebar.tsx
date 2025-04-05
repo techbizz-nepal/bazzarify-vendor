@@ -15,7 +15,6 @@ import SidebarMenuButtonComponent from "@/modules/core/components/client/Sidebar
 import { TMenuItem } from "@/modules/core/data";
 import { FaHome } from "react-icons/fa";
 import Image from "next/image";
-import { CgAttribution } from "react-icons/cg";
 
 const items: TMenuItem[] = [
   {
@@ -27,11 +26,6 @@ const items: TMenuItem[] = [
     title: "Categories",
     path: "/categories",
     icon: TbCategory,
-  },
-  {
-    title: "Category Attributes",
-    path: "/category-attributes",
-    icon: CgAttribution,
   },
   {
     title: "Products",
