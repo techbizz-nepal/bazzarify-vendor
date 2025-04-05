@@ -1,3 +1,5 @@
+import { IconType } from "react-icons";
+
 export const footerData = {
   contactDetails: {
     address: "Kathmandu - Janakpurdham",
@@ -99,3 +101,9 @@ export const categoriesData = [
   "Sports & Outdoor",
   "Motors, Tools & DIY",
 ];
+
+export type TMenuItem = {
+  icon: IconType;
+  title: string;
+  path: string;
+};

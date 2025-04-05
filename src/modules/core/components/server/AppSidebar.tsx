@@ -5,66 +5,82 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Home, Settings } from "lucide-react";
-import { FaFirstOrder, FaProductHunt } from "react-icons/fa6";
+import { Settings } from "lucide-react";
+import { FaFirstOrder, FaProductHunt, FaUsers } from "react-icons/fa6";
 import { AiFillProduct } from "react-icons/ai";
 import { TbCategory } from "react-icons/tb";
+import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
+import { TMenuItem } from "@/modules/core/data";
+import { FaHome } from "react-icons/fa";
 import Image from "next/image";
+import { CgAttribution } from "react-icons/cg";
 
-const items = [
+const items: TMenuItem[] = [
   {
     title: "Dashboard",
-    url: "/",
-    icon: Home,
+    path: "/",
+    icon: FaHome,
   },
   {
     title: "Categories",
-    url: "#",
+    path: "/categories",
     icon: TbCategory,
   },
   {
-    title: "Order",
-    url: "#",
-    icon: FaFirstOrder,
+    title: "Category Attributes",
+    path: "/category-attributes",
+    icon: CgAttribution,
   },
   {
     title: "Products",
-    url: "#",
+    path: "/products",
     icon: FaProductHunt,
   },
   {
+    title: "Order",
+    path: "#",
+    icon: FaFirstOrder,
+  },
+  {
     title: "Vendor Products",
-    url: "#",
+    path: "#",
     icon: AiFillProduct,
   },
   {
-    title: "Settings",
-    url: "#",
+    title: "Users",
+    path: "#",
+    icon: FaUsers,
+  },
+  {
+    title: "Vendors",
+    path: "#",
     icon: Settings,
   },
 ];
 
-export function AppSidebar() {
+export async function AppSidebar({ className }: { className?: string }) {
   return (
-    <Sidebar>
-      <SidebarContent className="bg-sidebar-primary text-primary-foreground">
+    <Sidebar className={className}>
+      <SidebarContent className="bg-sidebar-primary">
         <SidebarGroup>
           <SidebarGroupLabel className="bg-white py-6">
             <Image src="/logo.png" alt="logo" width="150" height={50} />
           </SidebarGroupLabel>
-          <SidebarGroupContent className="mt-6">
+          <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="py-6">
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
+                <SidebarMenuItem
+                  key={item.title}
+                  className="text-sidebar-primary-foreground hover:text-sidebar-accent-foreground"
+                >
+                  <SidebarMenuButtonComponent
+                    routePath={item.path}
+                    title={item.title}
+                  >
+                    <item.icon />
+                  </SidebarMenuButtonComponent>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

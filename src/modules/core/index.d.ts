@@ -24,3 +24,30 @@ export const defaultResponseDTO: ResponseDTO = {
     executionTime: 0,
   },
 };
+
+export interface IApiResponse<T> {
+  data: {
+    message: string;
+    payload: T;
+  };
+  metaData: {
+    error: string;
+    errorCode: string;
+  };
+}
+
+export type TURLSearchParams = {
+  page?: number;
+  perPage?: number;
+  with?: array;
+  filter?: string;
+  onlyLastChildren?: boolean;
+};
+
+export type IRoute = {
+  [key: string]: {
+    path: string;
+    name: string;
+    method?: string;
+  };
+};

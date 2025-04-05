@@ -1,11 +1,8 @@
-"use client";
-
 import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
 
-export default function DashboardContainer() {
+export default function usePageAuthentication() {
   const sessionCtx = use(SessionContext);
   const router = useRouter();
   if (!sessionCtx) {
@@ -17,11 +14,8 @@ export default function DashboardContainer() {
       return router.replace("/login");
     }
   }, [router, session]);
-  return <Statistics />;
-}
 
-const Statistics = () => (
-  <Card className="px-4 items-center justify-center" id="stats">
-    <p>Welcome to dashboard.</p>
-  </Card>
-);
+  return {
+    router,
+  };
+}
