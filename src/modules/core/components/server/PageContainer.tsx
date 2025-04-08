@@ -1,15 +1,13 @@
 import { ReactNode } from "react";
 import Breadcrumb from "@/modules/core/components/server/Breadcrumb";
 import PageTitle from "@/modules/core/components/server/PageTitle";
-import { Button } from "@/components/ui/button";
 
 interface Props {
   children: ReactNode;
   pageTitle: string;
-  onAddClick?: () => void;
 }
 
-const PageContainer = ({ children, pageTitle, onAddClick }: Props) => {
+const PageContainer = ({ children, pageTitle }: Props) => {
   return (
     <>
       <Breadcrumb />
@@ -18,7 +16,6 @@ const PageContainer = ({ children, pageTitle, onAddClick }: Props) => {
           title={pageTitle}
           className="text-lg font-semibold text-primary uppercase"
         />
-        {onAddClick && <Button onClick={onAddClick}>Add</Button>}
       </div>
       {children}
     </>

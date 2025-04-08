@@ -38,16 +38,17 @@ export interface IApiResponse<T> {
 
 export type TURLSearchParams = {
   page?: number;
-  perPage?: number;
+  perPage?: string;
   with?: array;
   filter?: string;
   onlyLastChildren?: boolean;
 };
-
+export type TEntities = "category" | "product" | "attribute" | "specification";
 export type IRoute = {
-  [key: string]: {
-    path: string;
-    name: string;
-    method?: string;
+  [entity in TEntities]: {
+    [action: string]: {
+      path: string;
+      method?: string;
+    };
   };
 };

@@ -1,6 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { IApiResponse, TURLSearchParams } from "@/modules/core";
 import { IPaginatedData } from "@/modules/product.management";
+import { useRouter } from "next/navigation";
 
 export default function useDataTable<
   IEntity,
@@ -16,9 +17,10 @@ export default function useDataTable<
   const [rowsCount, setRowsCount] = useState(0);
   const [filterValue, setFilterValue] = useState("");
   const [onlyLastChildren, setOnlyLastChildren] = useState(false);
+  const router = useRouter();
   useEffect(() => {
     getAction({
-      perPage: 15,
+      perPage: "15",
       filter: filterValue,
       page,
       with: ["parent", "children"],
@@ -53,5 +55,9 @@ export default function useDataTable<
     handleFilterChange: (event: ChangeEvent<HTMLInputElement>) =>
       setFilterValue(event.target.value),
     handleOnlyLastChildrenFilter: () => setOnlyLastChildren(!onlyLastChildren),
+    handleViewAction: (slug: string) =>
+      router.push("/categories/".concat(slug).concat("/view")),
+    handleEditAction: (slug: string) =>
+      router.push("/categories/".concat(slug).concat("/edit")),
   };
 }

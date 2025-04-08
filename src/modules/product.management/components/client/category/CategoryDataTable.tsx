@@ -35,7 +35,7 @@ export default function CategoryDataTable({
                 <Input
                   onChange={onFilterChangeAction}
                   placeholder="filter by name"
-                  className="w-44"
+                  className="w-44 focus-visible:ring-primary"
                 />
                 <Button
                   onClick={onOnlyLastChildrenAction}

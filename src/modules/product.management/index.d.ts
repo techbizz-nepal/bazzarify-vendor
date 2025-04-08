@@ -12,8 +12,10 @@ export type TCategory = {
   name: string;
   position: string;
   slug: string;
-  specifications: TSpecification[];
-  attributes: TAttribute[];
+  specifications: string[];
+  specificationsWithModel: TSpecification[];
+  attributes: string[];
+  attributesWithModel?: TAttribute[];
   parent?: TCategory;
   children?: TCategory[];
 };

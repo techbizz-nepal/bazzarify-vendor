@@ -2,11 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   actionUpdateCategory,
   actionViewCategory,
-} from "@/modules/product.management/actions";
+} from "@/modules/product.management/actions/category";
 import {
   TAttribute,
   TCategory,
@@ -14,6 +14,8 @@ import {
 } from "@/modules/product.management";
 import { Loader } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useSuspenseQueries } from "@tanstack/react-query";
+import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
 
 export default function CategoryView({ slug }: { slug: string }) {
   const [category, setCategory] = useState<TCategory | null>(null);
@@ -24,7 +26,6 @@ export default function CategoryView({ slug }: { slug: string }) {
   const [allAttributes, setAllAttributes] = useState<TAttribute[]>([]);
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
 
-  console.log(selectedAttributes);
   useEffect(() => {
     actionViewCategory(slug)
       .then((result) => {
@@ -174,7 +175,13 @@ export default function CategoryView({ slug }: { slug: string }) {
   );
 }
 
-const DetailRow = ({ label, value }: { label: string; value: string }) => (
+export const DetailRow = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) => (
   <div className="flex items-center space-x-3">
     <div className="uppercase" id="column">
       {label}
