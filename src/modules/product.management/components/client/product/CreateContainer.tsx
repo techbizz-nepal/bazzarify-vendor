@@ -1,10 +1,18 @@
+"use client";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import CategoryDropdown from "@/modules/product.management/ui/CategoryDropdown";
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import { useQuery } from "@tanstack/react-query";
+import { actionGetCategories } from "@/modules/product.management/actions/category";
 
 export default function CreateContainer() {
+  useQuery({
+    queryKey: ["categories"],
+    queryFn: () => actionGetCategories,
+  });
   return (
     <PageContainer pageTitle="Create Products">
       <Card>

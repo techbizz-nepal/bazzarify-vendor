@@ -1,6 +1,6 @@
 import { TCategory } from "@/modules/product.management";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DetailRow } from "@/modules/product.management/components/client/category/CategoryView";
+import { CategoryDetailField } from "@/modules/product.management/components/client/category/ui/CategoryDetailField";
 
 const CategoryCard = ({ category }: { category: TCategory }) => {
   const { name, parent, position, children } = category;
@@ -11,11 +11,11 @@ const CategoryCard = ({ category }: { category: TCategory }) => {
       </CardHeader>
       <CardContent>
         <div className="flex-col space-y-2">
-          <DetailRow label="name" value={name} />
-          <DetailRow label="position" value={position} />
-          {parent && <DetailRow label="parent" value={parent.name} />}
+          <CategoryDetailField label="name" value={name} />
+          <CategoryDetailField label="position" value={position} />
+          {parent && <CategoryDetailField label="parent" value={parent.name} />}
           {children && children.length > 0 && (
-            <DetailRow
+            <CategoryDetailField
               label="children"
               value={children.map((child) => child.name).join(", ")}
             />

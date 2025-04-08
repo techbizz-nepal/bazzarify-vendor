@@ -2,15 +2,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TAttribute } from "@/modules/product.management";
+
 interface ICategoryAttributesCard {
   attributes: TAttribute[];
   selectedIds: string[] | null;
   onAttributeChange: (id: TAttribute["uuid"]) => void;
+  onUpdateAction: (entity: "specifications" | "attributes") => void;
 }
+
 const CategoryAttributesCard = ({
   attributes,
   selectedIds,
   onAttributeChange,
+  onUpdateAction,
 }: ICategoryAttributesCard) => {
   return (
     <Card>
@@ -18,7 +22,7 @@ const CategoryAttributesCard = ({
         <div className="flex justify-between">
           <CardTitle className="text-lg">Attributes</CardTitle>
           <Button
-            // onClick={() => handleUpdateCategory("attributes")}
+            onClick={() => onUpdateAction("attributes")}
             className="hover:animate-pulse"
           >
             Update Attributes

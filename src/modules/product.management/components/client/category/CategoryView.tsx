@@ -1,82 +1,91 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Suspense, useEffect, useState } from "react";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import {
   actionUpdateCategory,
   actionViewCategory,
 } from "@/modules/product.management/actions/category";
+import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
+import { Loader } from "lucide-react";
+import { Suspense, useState } from "react";
 import {
+  IPaginatedData,
   TAttribute,
   TCategory,
   TSpecification,
 } from "@/modules/product.management";
-import { Loader } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useSuspenseQueries } from "@tanstack/react-query";
-import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
+import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
+import CategoryCard from "@/modules/product.management/components/client/category/ui/CategoryCard";
+import CategoryAttributesCard from "@/modules/product.management/components/client/category/ui/CategoryAttributesCard";
+import CategorySpecificationsCard from "@/modules/product.management/components/client/category/ui/CategorySpecificationsCard";
 
 export default function CategoryView({ slug }: { slug: string }) {
-  const [category, setCategory] = useState<TCategory | null>(null);
-  const [allSpecification, setAllSpecification] = useState<TSpecification[]>(
-    [],
+  const [specificationPage, setSpecificationPage] = useState<number>(1);
+  const [specificationPerPage, setSpecificationPerPage] = useState<string>("");
+  const [
+    { data: categoryResponse },
+    { data: specificationsResponse },
+    { data: attributesResponse },
+  ] = useSuspenseQueries({
+    queries: [
+      {
+        queryKey: ["category", slug],
+        queryFn: () => actionViewCategory(slug),
+      },
+      {
+        queryKey: ["specification", specificationPage, specificationPerPage],
+        queryFn: () =>
+          actionGetSpecifications({
+            page: specificationPage,
+            perPage: specificationPerPage,
+          }),
+      },
+      { queryKey: ["attribute"], queryFn: actionGetAttributes },
+    ],
+  });
+  // declarations;
+  const response = {
+    category: categoryResponse.data.payload.category as TCategory,
+    attributes: attributesResponse.data.payload.attributes as TAttribute[],
+    specifications: specificationsResponse.data.payload
+      .specifications as IPaginatedData<TSpecification[]>,
+  };
+  // states
+  const [selectedAttributes, setSelectedAttributes] = useState<string[]>(
+    response.category.attributes || [],
   );
-  const [selectedSpecIds, setSelectedSpecsIds] = useState<string[]>([]);
-  const [allAttributes, setAllAttributes] = useState<TAttribute[]>([]);
-  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
+  const [selectedSpecifications, setSelectedSpecifications] = useState<
+    string[]
+  >(response.category.specifications || []);
 
-  useEffect(() => {
-    actionViewCategory(slug)
-      .then((result) => {
-        if (result?.data?.message) {
-          const payload = result.data.payload;
-          const category = payload["category"] as TCategory | undefined;
-          const allSpecification = payload[
-            "allSpecifications"
-          ] as TSpecification[];
-          const allAttributes = payload["allAttributes"] as TAttribute[];
-          if (category) {
-            setCategory(category);
-            setSelectedSpecsIds(
-              category.specifications?.map((spec) => spec.uuid) || [],
-            );
-            setSelectedAttributes(
-              category.attributes?.map((attribute) => attribute.uuid) || [],
-            );
-          }
-          if (allSpecification) setAllSpecification(allSpecification);
-          if (allAttributes) setAllAttributes(allAttributes);
-        }
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, [slug]);
-  if (category == null) {
-    return <Loader />;
-  }
-
-  const { name, parent, position, children } = category;
-  const handleSpecChange = (specId: string) => {
-    setSelectedSpecsIds((prevState) =>
+  const handleAttributeChange = (uuid: string) => {
+    setSelectedAttributes((prevState) =>
+      prevState.includes(uuid)
+        ? prevState.filter((id) => id !== uuid)
+        : [...prevState, uuid],
+    );
+  };
+  const handleSpecificationChange = (specId: string) => {
+    setSelectedSpecifications((prevState) =>
       prevState.includes(specId)
         ? prevState.filter((id) => id !== specId)
         : [...prevState, specId],
     );
   };
-  const handleAttributeChange = (attrId: string) => {
-    setSelectedAttributes((prevState) =>
-      prevState.includes(attrId)
-        ? prevState.filter((id) => id !== attrId)
-        : [...prevState, attrId],
-    );
-  };
+
+  const handleSpecificationNextPage = () =>
+    setSpecificationPage((prev) => prev + 1);
+  const handleSpecificationPrevPage = () =>
+    setSpecificationPage((prev) => Math.max(prev - 1, 1));
+  const handleSpecificationPerPage = (value: string) =>
+    setSpecificationPerPage(value);
   const handleUpdateCategory = (entity: string) => {
     let body = null;
     if (entity === "attributes") {
       body = { attributes: selectedAttributes };
     }
     if (entity === "specifications") {
-      body = { specifications: selectedSpecIds };
+      body = { specifications: selectedSpecifications };
     }
     if (!body) alert("invalid request");
     actionUpdateCategory(slug, JSON.stringify(body)).then((result) => {
@@ -85,108 +94,28 @@ export default function CategoryView({ slug }: { slug: string }) {
   };
   return (
     <div className="flex-col space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Detail</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex-col space-y-2">
-            <DetailRow label="name" value={name} />
-            <DetailRow label="position" value={position} />
-            {parent && <DetailRow label="parent" value={parent.name} />}
-            {children && children.length > 0 && (
-              <DetailRow
-                label="children"
-                value={children.map((child) => child.name).join(", ")}
-              />
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between">
-            <CardTitle className="text-lg">Attributes</CardTitle>
-            <Button
-              onClick={() => handleUpdateCategory("attributes")}
-              className="hover:animate-pulse"
-            >
-              Update Attributes
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-6 space-x-2">
-            {allAttributes.length > 0
-              ? allAttributes.map((item) => (
-                  <div
-                    className="uppercase flex space-x-2 items-center"
-                    key={item.uuid}
-                  >
-                    <div>
-                      <Checkbox
-                        checked={selectedAttributes.includes(item.uuid)}
-                        onClick={() => handleAttributeChange(item.uuid)}
-                      />
-                    </div>
-                    <div>{item.name}</div>
-                  </div>
-                ))
-              : "N/A"}
-          </div>
-        </CardContent>
-      </Card>
-      {children && children.length < 1 && (
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between">
-              <CardTitle className="text-lg">Specifications</CardTitle>
-              <Button
-                className="hover:animate-pulse"
-                onClick={() => handleUpdateCategory("specifications")}
-              >
-                Update Specifications
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-6 space-x-2">
-              {allSpecification.length > 0
-                ? allSpecification.map((item) => (
-                    <div
-                      className="uppercase flex space-x-2 items-center"
-                      key={item.uuid}
-                    >
-                      <div>
-                        <Checkbox
-                          checked={selectedSpecIds.includes(item.uuid)}
-                          onClick={() => handleSpecChange(item.uuid)}
-                        />
-                      </div>
-                      <div>{item.key.replaceAll("-", " ")}</div>
-                    </div>
-                  ))
-                : "N/A"}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Suspense fallback={<Loader />}>
+        <CategoryCard category={response.category} />
+        {!response.category.children?.length && (
+          <>
+            <CategoryAttributesCard
+              attributes={response.attributes}
+              selectedIds={selectedAttributes}
+              onAttributeChange={handleAttributeChange}
+              onUpdateAction={handleUpdateCategory}
+            />
+            <CategorySpecificationsCard
+              specifications={response.specifications.data}
+              onSpecificationChange={handleSpecificationChange}
+              selectedIds={selectedSpecifications}
+              onNextPage={handleSpecificationNextPage}
+              onPreviousPage={handleSpecificationPrevPage}
+              onPerPageChange={handleSpecificationPerPage}
+              onUpdateAction={handleUpdateCategory}
+            />
+          </>
+        )}
+      </Suspense>
     </div>
   );
 }
-
-export const DetailRow = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) => (
-  <div className="flex items-center space-x-3">
-    <div className="uppercase" id="column">
-      {label}
-    </div>
-    <div>:</div>
-    <div>{value}</div>
-  </div>
-);

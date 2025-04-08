@@ -25,6 +25,7 @@ interface ICategorySpecificationsCard {
   onNextPage: () => void;
   onPreviousPage: () => void;
   onPerPageChange: (value: string) => void;
+  onUpdateAction: (entity: "specifications" | "attributes") => void;
 }
 
 const CategorySpecificationsCard = ({
@@ -34,6 +35,7 @@ const CategorySpecificationsCard = ({
   onPreviousPage,
   onNextPage,
   onPerPageChange,
+  onUpdateAction,
 }: ICategorySpecificationsCard) => {
   return (
     <Card>
@@ -43,7 +45,7 @@ const CategorySpecificationsCard = ({
             <CardTitle className="text-lg">Specifications</CardTitle>
             <Button
               className="hover:animate-pulse"
-              // onClick={() => handleUpdateCategory("specifications")}
+              onClick={() => onUpdateAction("specifications")}
             >
               Update Specifications
             </Button>

@@ -2,7 +2,7 @@ import { TURLSearchParams } from "@/modules/core";
 import axiosInstance from "@/modules/core/lib/utils.axios";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config";
 
-export const actionGetCategories = async (params: TURLSearchParams) => {
+export const actionGetCategories = async (params?: TURLSearchParams) => {
   try {
     const response = await axiosInstance.get(
       PRODUCT_MANAGEMENT_ROUTES.category.index.path,
