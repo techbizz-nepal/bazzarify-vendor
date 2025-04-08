@@ -1,11 +1,13 @@
 import { ChangeEvent } from "react";
 
 export type TSpecification = {
+  uuid: string;
   id: string;
   key: string;
   type: string;
 };
 export type TCategory = {
+  uuid: string;
   id: string;
   name: string;
   position: string;
@@ -16,6 +18,7 @@ export type TCategory = {
   children?: TCategory[];
 };
 export type TAttribute = {
+  uuid: string;
   id: string;
   name: string;
   values: [];

@@ -8,28 +8,32 @@ import { usePathname } from "next/navigation";
 
 export const Breadcrumb = () => {
   const pathname = usePathname();
+  const paths = pathname.split("/").filter(Boolean);
+
+  const getHref = (index: number) => "/" + paths.slice(0, index + 1).join("/");
+
   return (
     <div
-      className={cn(`flex`, `items-center`, `space-x-1`, `text-primary`)}
+      className={cn("flex items-center text-primary space-x-2")}
       id="breadcrumbs"
     >
-      {pathname.split("/").map((path, index) =>
-        index === 0 ? (
-          <Link href="/" key={path}>
-            <FaHome size="20" />
-          </Link>
-        ) : index === 1 ? (
-          <span className="flex items-center space-x-2" key={path}>
-            <FaAngleRight size={20} />
-            <Link href={"/".concat(path)}>{path}</Link>
-          </span>
-        ) : (
-          <span className="flex items-center" key={path}>
-            <FaAngleRight size={20} />
-            {path}
-          </span>
-        ),
-      )}
+      <Link href="/" className="flex items-center space-x-2 text-md">
+        <FaHome size={20} />
+      </Link>
+
+      {paths.map((path, index) => {
+        const isLast = index === paths.length - 1;
+        return (
+          <div className="flex items-center space-x-2 text-md" key={index}>
+            <FaAngleRight size={14} />
+            {isLast ? (
+              <span>{path}</span>
+            ) : (
+              <Link href={getHref(index)}>{path}</Link>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

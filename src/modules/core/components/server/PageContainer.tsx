@@ -16,7 +16,7 @@ const PageContainer = ({ children, pageTitle, onAddClick }: Props) => {
       <div className="flex justify-between items-center">
         <PageTitle
           title={pageTitle}
-          className="text-2xl text-primary uppercase"
+          className="text-lg font-semibold text-primary uppercase"
         />
         {onAddClick && <Button onClick={onAddClick}>Add</Button>}
       </div>

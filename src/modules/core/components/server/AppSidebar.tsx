@@ -3,7 +3,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
@@ -57,11 +57,18 @@ const items: TMenuItem[] = [
 export async function AppSidebar({ className }: { className?: string }) {
   return (
     <Sidebar className={className}>
+      <SidebarHeader>
+        <Image
+          src="/logo.png"
+          alt="logo"
+          width={200}
+          height={100}
+          loading="lazy"
+          priority={false}
+        />
+      </SidebarHeader>
       <SidebarContent className="bg-sidebar-primary">
         <SidebarGroup>
-          <SidebarGroupLabel className="bg-white py-6">
-            <Image src="/logo.png" alt="logo" width="150" height={50} />
-          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

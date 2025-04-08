@@ -1,3 +1,3 @@
-import ProductContainer from "@/modules/dashboard/components/client/ProductContainer";
+import IndexContainer from "@/modules/product.management/components/client/product/IndexContainer";
 
-export default ProductContainer;
+export default IndexContainer;

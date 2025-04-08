@@ -4,6 +4,7 @@ import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
+import PageContainer from "@/modules/core/components/server/PageContainer";
 
 export default function DashboardContainer() {
   const sessionCtx = use(SessionContext);
@@ -17,7 +18,11 @@ export default function DashboardContainer() {
       return router.replace("/login");
     }
   }, [router, session]);
-  return <Statistics />;
+  return (
+    <PageContainer pageTitle={"Dashboard"}>
+      <Statistics />
+    </PageContainer>
+  );
 }
 
 const Statistics = () => (

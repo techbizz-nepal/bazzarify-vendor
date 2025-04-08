@@ -38,12 +38,11 @@ export default function CategoryView({ slug }: { slug: string }) {
           if (category) {
             setCategory(category);
             setSelectedSpecsIds(
-              category.specifications?.map((spec) => spec.id) || [],
+              category.specifications?.map((spec) => spec.uuid) || [],
             );
             setSelectedAttributes(
-              category.attributes?.map((attribute) => attribute.id) || [],
+              category.attributes?.map((attribute) => attribute.uuid) || [],
             );
-            console.log("api: ", category.attributes);
           }
           if (allSpecification) setAllSpecification(allSpecification);
           if (allAttributes) setAllAttributes(allAttributes);
@@ -121,12 +120,12 @@ export default function CategoryView({ slug }: { slug: string }) {
               ? allAttributes.map((item) => (
                   <div
                     className="uppercase flex space-x-2 items-center"
-                    key={item.id}
+                    key={item.uuid}
                   >
                     <div>
                       <Checkbox
-                        checked={selectedAttributes.includes(item.id)}
-                        onClick={() => handleAttributeChange(item.id)}
+                        checked={selectedAttributes.includes(item.uuid)}
+                        onClick={() => handleAttributeChange(item.uuid)}
                       />
                     </div>
                     <div>{item.name}</div>
@@ -155,12 +154,12 @@ export default function CategoryView({ slug }: { slug: string }) {
                 ? allSpecification.map((item) => (
                     <div
                       className="uppercase flex space-x-2 items-center"
-                      key={item.id}
+                      key={item.uuid}
                     >
                       <div>
                         <Checkbox
-                          checked={selectedSpecIds.includes(item.id)}
-                          onClick={() => handleSpecChange(item.id)}
+                          checked={selectedSpecIds.includes(item.uuid)}
+                          onClick={() => handleSpecChange(item.uuid)}
                         />
                       </div>
                       <div>{item.key.replaceAll("-", " ")}</div>

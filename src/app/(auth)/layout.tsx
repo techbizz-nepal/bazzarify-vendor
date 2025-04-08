@@ -11,7 +11,7 @@ export default function AuthLayout({
     <div className="flex-col">
       <SidebarProvider className="flex-row">
         <AppSidebar className="flex-none" />
-        <main className="bg-slate-200 flex-1 space-y-10">
+        <main className="bg-slate-200 flex-1 space-y-3">
           <div className="bg-white h-16 flex items-center">
             <SidebarTrigger />
           </div>
