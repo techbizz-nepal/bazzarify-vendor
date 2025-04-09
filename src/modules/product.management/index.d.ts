@@ -13,9 +13,9 @@ export type TCategory = {
   position: string;
   slug: string;
   specifications: string[];
-  specificationsWithModel: TSpecification[];
+  specifications_with_model: TSpecification[];
   attributes: string[];
-  attributesWithModel?: TAttribute[];
+  attributes_with_model?: TAttribute[];
   parent?: TCategory;
   children?: TCategory[];
 };

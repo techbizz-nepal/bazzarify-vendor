@@ -41,7 +41,9 @@ export type TURLSearchParams = {
   perPage?: string;
   with?: array;
   filter?: string;
-  onlyLastChildren?: boolean;
+  subChildOnly?: boolean;
+  rootOnly?: boolean;
+  sort?: string;
 };
 export type TEntities = "category" | "product" | "attribute" | "specification";
 export type IRoute = {

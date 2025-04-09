@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -51,10 +50,10 @@ const CategorySpecificationsCard = ({
             </Button>
           </div>
           <div className="flex space-x-8">
-            <Input
-              placeholder="filter"
-              className="max-w-sm focus-visible:ring-primary h-10"
-            />
+            {/*<Input*/}
+            {/*  placeholder="filter"*/}
+            {/*  className="max-w-sm focus-visible:ring-primary h-10"*/}
+            {/*/>*/}
             <Select onValueChange={onPerPageChange}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Per Page" />

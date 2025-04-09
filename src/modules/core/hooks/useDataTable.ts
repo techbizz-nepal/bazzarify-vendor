@@ -16,7 +16,7 @@ export default function useDataTable<
   const [rows, setRows] = useState<IPaginatedData<IEntity[]> | null>(null);
   const [rowsCount, setRowsCount] = useState(0);
   const [filterValue, setFilterValue] = useState("");
-  const [onlyLastChildren, setOnlyLastChildren] = useState(false);
+  const [subChildOnly, setSubChildOnly] = useState(false);
   const router = useRouter();
   useEffect(() => {
     getAction({
@@ -24,7 +24,7 @@ export default function useDataTable<
       filter: filterValue,
       page,
       with: ["parent", "children"],
-      onlyLastChildren,
+      subChildOnly,
     })
       .then((result) => {
         if (result?.data?.message) {
@@ -44,7 +44,7 @@ export default function useDataTable<
         }
       })
       .catch((error) => console.error("Error fetching data:", error));
-  }, [page, payloadKey, filterValue, onlyLastChildren, getAction]);
+  }, [page, payloadKey, filterValue, subChildOnly, getAction]);
   return {
     page,
     rows,
@@ -54,7 +54,7 @@ export default function useDataTable<
     handlePreviousPage: () => setPage((prev) => Math.max(prev - 1, 1)),
     handleFilterChange: (event: ChangeEvent<HTMLInputElement>) =>
       setFilterValue(event.target.value),
-    handleOnlyLastChildrenFilter: () => setOnlyLastChildren(!onlyLastChildren),
+    handleOnlyLastChildrenFilter: () => setSubChildOnly(!subChildOnly),
     handleViewAction: (slug: string) =>
       router.push("/categories/".concat(slug).concat("/view")),
     handleEditAction: (slug: string) =>

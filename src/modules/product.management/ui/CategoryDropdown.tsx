@@ -1,5 +1,3 @@
-"use client";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,116 +5,137 @@ import {
 } from "@/components/ui/drop-down";
 import { cn } from "@/lib/utils";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
-import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { TCategory } from "@/modules/product.management";
 
-export default function CategoryDropdown() {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [listCategory, setListCategory] = useState([]);
-  useEffect(() => {
-    if (showDropdown) {
-      console.log("opened");
-    }
-  }, [showDropdown]);
+interface ICategoryDropdown {
+  open: boolean;
+  onOpenChangeAction: () => void;
+  rootCategories: TCategory[];
+  subCategories: TCategory[];
+  subChildCategories: TCategory[];
+  onClickRoot: (category: TCategory) => void;
+  onClickSub: (category: TCategory) => void;
+  onClickSubChild: (category: TCategory) => void;
+  onFilterChange: (level: "root" | "sub" | "subchild", value: string) => void;
+  selectedCategories: TCategory[] | [];
+}
 
+export default function CategoryDropdown({
+  open,
+  onOpenChangeAction,
+  rootCategories,
+  subCategories,
+  subChildCategories,
+  onClickRoot,
+  onClickSub,
+  onClickSubChild,
+  onFilterChange,
+  selectedCategories,
+}: ICategoryDropdown) {
+  const renderColumn = (
+    _label: string,
+    categories: TCategory[],
+    onClick: (category: TCategory) => void,
+    filterKey: "root" | "sub" | "subchild",
+    selectedCategory: TCategory | { uuid: string },
+  ) => (
+    <div className="flex-col space-y-3 overflow-y-scroll h-96 px-2">
+      <div className="pr-2">
+        <Input
+          placeholder="Filter"
+          onChange={(e) => onFilterChange(filterKey, e.target.value)}
+          className="focus-visible:ring-transparent"
+        />
+      </div>
+      {categories.map((category) => (
+        <ClickableCategory
+          selected={selectedCategory?.uuid === category.uuid}
+          key={category.uuid}
+          label={category.name}
+          onClick={() => onClick(category)}
+        />
+      ))}
+    </div>
+  );
   return (
-    <DropdownMenu onOpenChange={setShowDropdown} open={showDropdown}>
+    <DropdownMenu onOpenChange={onOpenChangeAction} open={open}>
       <DropdownMenuTrigger asChild>
         <div
           className={cn(
-            "items-center justify-between",
-            "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-            "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+            "items-center justify-between flex h-8 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs",
+            open ? "border-2 border-primary" : undefined,
           )}
         >
-          <p className="text-gray-500">here</p>
-          <div>
-            {showDropdown ? (
-              <FaAngleDown className="text-gray-500" />
-            ) : (
-              <FaAngleUp className="text-gray-500" />
-            )}
-          </div>
+          <p className="text-gray-500">
+            {selectedCategories.length
+              ? selectedCategories.map((category) => category.name).join(" > ")
+              : "Select a Category"}
+          </p>
+          <div>{open ? <FaAngleUp /> : <FaAngleDown />}</div>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="flex-col border border-gray-400 space-y-2 p-2 max-w-3xl w-full">
-        {/*<div>*/}
-        {/*  <Input placeholder="Filter" />*/}
-        {/*</div>*/}
-        <div className="flex flex-wrap space-x-2 gap-y-2">
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" selected={true} />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-          <RecentlyChosenItem label="item-1" />
-        </div>
-        <div className="grid grid-cols-3 ">
-          <div className="flex-col space-y-3 overflow-y-scroll h-96 ">
-            <div className="pr-2">
-              <Input
-                placeholder="Filter"
-                className="focus-visible:ring-transparent"
-              />
-            </div>
-            {Array.from({ length: 20 }).map(() => (
-              <ClickableCategory label="root category" />
-            ))}
-          </div>
-          <div className="flex-col space-y-3 overflow-y-scroll h-96 px-2">
-            <div className="pr-2">
-              <Input
-                placeholder="Filter"
-                className="focus-visible:ring-transparent"
-              />
-            </div>
-            {Array.from({ length: 20 }).map(() => (
-              <ClickableCategory label="root category" />
-            ))}
-          </div>
-          <div className="flex-col space-y-3 overflow-y-scroll h-96 px-2">
-            <div className="pr-2">
-              <Input
-                placeholder="Filter"
-                className="focus-visible:ring-transparent"
-              />
-            </div>
-            {Array.from({ length: 20 }).map(() => (
-              <ClickableCategory label="root category" />
-            ))}
-          </div>
+      <DropdownMenuContent className="flex-col border border-gray-400 space-y-2 p-2 w-lg md:w-2xl xl:w-5xl">
+        <div className="grid grid-cols-3 gap-2">
+          {renderColumn(
+            "Root",
+            rootCategories,
+            onClickRoot,
+            "root",
+            selectedCategories[0],
+          )}
+          {renderColumn(
+            "Sub",
+            subCategories,
+            onClickSub,
+            "sub",
+            selectedCategories[1],
+          )}
+          {renderColumn(
+            "SubChild",
+            subChildCategories,
+            onClickSubChild,
+            "subchild",
+            selectedCategories[2],
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-interface IRecentlyChosenItem {
-  label: string;
-  selected?: boolean;
-}
+// interface IRecentlyChosenItem {
+//   label: string;
+//   selected?: boolean;
+// }
+//
+// const RecentlyChosenItem = ({ label, selected }: IRecentlyChosenItem) => (
+//   <p
+//     className={cn(
+//       "text-sm rounded-md  p-1 cursor-pointer",
+//       selected ? "border border-primary text-primary" : "bg-slate-200",
+//     )}
+//   >
+//     {label}
+//   </p>
+// );
 
-const RecentlyChosenItem = ({ label, selected }: IRecentlyChosenItem) => (
+const ClickableCategory = ({
+  label,
+  onClick,
+  selected,
+}: {
+  label: string;
+  onClick: () => void;
+  selected?: boolean;
+}) => (
   <p
     className={cn(
-      "text-sm rounded-md  p-1 cursor-pointer",
-      selected ? "border border-primary text-primary" : "bg-slate-200",
+      `cursor-pointer hover:bg-slate-200 p-1 rounded text-sm`,
+      selected ? `bg-slate-200` : undefined,
     )}
+    onClick={onClick}
   >
-    {label}
-  </p>
-);
-
-const ClickableCategory = ({ label }: { label: string }) => (
-  <p className="cursor-pointer hover:bg-slate-200 p-1 rounded text-sm">
     {label}
   </p>
 );

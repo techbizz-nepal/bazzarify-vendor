@@ -61,10 +61,9 @@ export async function AppSidebar({ className }: { className?: string }) {
         <Image
           src="/logo.png"
           alt="logo"
-          width={200}
-          height={100}
-          loading="lazy"
-          priority={false}
+          width={342}
+          height={88}
+          priority={true}
         />
       </SidebarHeader>
       <SidebarContent className="bg-sidebar-primary">

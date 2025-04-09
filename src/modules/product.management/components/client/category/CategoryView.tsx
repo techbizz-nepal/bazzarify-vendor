@@ -77,8 +77,9 @@ export default function CategoryView({ slug }: { slug: string }) {
     setSpecificationPage((prev) => prev + 1);
   const handleSpecificationPrevPage = () =>
     setSpecificationPage((prev) => Math.max(prev - 1, 1));
-  const handleSpecificationPerPage = (value: string) =>
+  const handleSpecificationPerPage = (value: string) => {
     setSpecificationPerPage(value);
+  };
   const handleUpdateCategory = (entity: string) => {
     let body = null;
     if (entity === "attributes") {

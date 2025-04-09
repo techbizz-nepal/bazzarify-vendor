@@ -3,20 +3,15 @@ import axiosInstance from "@/modules/core/lib/utils.axios";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config";
 
 export const actionGetCategories = async (params?: TURLSearchParams) => {
-  try {
-    const response = await axiosInstance.get(
-      PRODUCT_MANAGEMENT_ROUTES.category.index.path,
-      {
-        params: {
-          ...params,
-        },
+  const response = await axiosInstance.get(
+    PRODUCT_MANAGEMENT_ROUTES.category.index.path,
+    {
+      params: {
+        ...params,
       },
-    );
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
+    },
+  );
+  return response.data;
 };
 export const actionViewCategory = async (
   slug: string,
