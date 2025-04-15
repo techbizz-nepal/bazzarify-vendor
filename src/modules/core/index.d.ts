@@ -40,10 +40,11 @@ export type TURLSearchParams = {
   page?: number;
   perPage?: string;
   with?: array;
-  filter?: string;
+  filter?: { [key: string]: string };
   subChildOnly?: boolean;
   rootOnly?: boolean;
   sort?: string;
+  include?: string;
 };
 export type TEntities = "category" | "product" | "attribute" | "specification";
 export type IRoute = {

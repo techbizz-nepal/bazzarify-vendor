@@ -5,7 +5,7 @@ import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config";
 export const actionGetProducts = async (params: TURLSearchParams) => {
   try {
     const response = await axiosInstance.get(
-      PRODUCT_MANAGEMENT_ROUTES.getProducts.path,
+      PRODUCT_MANAGEMENT_ROUTES.product.index.path,
       {
         params: {
           ...params,

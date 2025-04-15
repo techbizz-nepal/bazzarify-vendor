@@ -33,6 +33,7 @@ export default function CategoryDataTable({
               <div>Total {rowsCount} records.</div>
               <div className="flex items-center space-x-8">
                 <Input
+                  name="name"
                   onChange={onFilterChangeAction}
                   placeholder="filter by name"
                   className="w-44 focus-visible:ring-primary"

@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, Dispatch, ReactNode, SetStateAction } from "react";
 
 export type TSpecification = {
   uuid: string;
@@ -19,12 +19,28 @@ export type TCategory = {
   parent?: TCategory;
   children?: TCategory[];
 };
+export type TAttributeValue = {
+  uuid: string;
+  attribute_uuid: string;
+  label: string;
+  code: string;
+};
 export type TAttribute = {
   uuid: string;
   id: string;
   name: string;
-  values: [];
+  attribute_value: TAttributeValue[];
 };
+
+export interface VariantData {
+  stock?: string;
+  price?: string;
+  sku?: string;
+  images?: string[];
+  isValid?: boolean;
+  available?: boolean;
+}
+
 export type TProducts = {
   id: string;
   name: string;
@@ -51,4 +67,27 @@ export interface IDataTableProps<TEntity> {
   onEditAction: (slug: string) => void;
   onFilterChangeAction: (e: ChangeEvent<HTMLInputElement>) => void;
   onOnlyLastChildrenAction?: () => void;
+}
+
+export interface VariantState {
+  selections: Record<string, string[]>;
+  setSelections: Dispatch<SetStateAction<Record<string, string[]>>>;
+  toggleValue: (attribute: string, value: string) => void;
+  removeValue: (attribute: string, value: string) => void;
+  combinations: string[][];
+  variantData: Record<string, VariantData>;
+  handleVariantChange: <K extends keyof VariantData>(
+    combo: string[],
+    field: K,
+    value: VariantData[K],
+  ) => void;
+  handleImageUpload: (combo: string[], files: FileList) => void;
+  handleImageRemove: (combo: string[], image: string) => void;
+  columns: string[];
+  handleReorderColumns: (newOrder: string[]) => void;
+}
+
+export interface IProductCard {
+  title: string;
+  children?: ReactNode;
 }

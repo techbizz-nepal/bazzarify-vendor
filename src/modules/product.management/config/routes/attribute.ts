@@ -1,4 +1,4 @@
-import { IRoute, TEntities } from "@/modules/core";
+import { IRoute } from "@/modules/core";
 
 const attribute: IRoute["attribute"] = {
   index: {

@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import Breadcrumb from "@/modules/core/components/server/Breadcrumb";
 import PageTitle from "@/modules/core/components/server/PageTitle";
-import { cn } from "@/lib/utils";
 
 interface Props {
   children: ReactNode;

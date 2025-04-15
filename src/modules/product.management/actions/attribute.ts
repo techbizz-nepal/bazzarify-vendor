@@ -1,4 +1,3 @@
-import { TURLSearchParams } from "@/modules/core";
 import axiosInstance from "@/modules/core/lib/utils.axios";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config";
 

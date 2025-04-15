@@ -15,15 +15,15 @@ export default function useDataTable<
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<IPaginatedData<IEntity[]> | null>(null);
   const [rowsCount, setRowsCount] = useState(0);
-  const [filterValue, setFilterValue] = useState("");
+  const [filter, setFilter] = useState<{ [key: string]: string }>({});
   const [subChildOnly, setSubChildOnly] = useState(false);
   const router = useRouter();
   useEffect(() => {
     getAction({
       perPage: "15",
-      filter: filterValue,
+      filter: filter,
       page,
-      with: ["parent", "children"],
+      include: "parent,children",
       subChildOnly,
     })
       .then((result) => {
@@ -44,16 +44,16 @@ export default function useDataTable<
         }
       })
       .catch((error) => console.error("Error fetching data:", error));
-  }, [page, payloadKey, filterValue, subChildOnly, getAction]);
+  }, [page, payloadKey, filter, subChildOnly, getAction]);
   return {
     page,
     rows,
     rowsCount,
-    filterValue,
+    filter,
     handleNextPage: () => setPage((prev) => prev + 1),
     handlePreviousPage: () => setPage((prev) => Math.max(prev - 1, 1)),
     handleFilterChange: (event: ChangeEvent<HTMLInputElement>) =>
-      setFilterValue(event.target.value),
+      setFilter({ [event.target.name]: event.target.value }),
     handleOnlyLastChildrenFilter: () => setSubChildOnly(!subChildOnly),
     handleViewAction: (slug: string) =>
       router.push("/categories/".concat(slug).concat("/view")),

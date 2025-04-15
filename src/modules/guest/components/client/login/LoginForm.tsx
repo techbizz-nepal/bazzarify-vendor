@@ -12,7 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -37,10 +36,8 @@ export default function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
-      remember: false,
     },
   });
-  console.log("session: ", session);
   useEffect(() => {
     if (session) {
       return router.replace("/");
@@ -106,24 +103,6 @@ export default function LoginForm() {
               </FormItem>
             )}
             name="password"
-          />
-          <FormField
-            control={form.control}
-            name="remember"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start ">
-                <FormControl>
-                  <Checkbox
-                    className="border border-slate-400 accent-orange-600"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel className="text-slate-600">
-                  Keep me signed in
-                </FormLabel>
-              </FormItem>
-            )}
           />
           <Button className="w-full text-md py-6">Sign In</Button>
         </form>
