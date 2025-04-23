@@ -1,7 +1,6 @@
 "use client";
 
 import { UseFormReturn } from "react-hook-form";
-import { VerifyOtpFormValues } from "@/modules/guest/config/schemas/verify.otp.form";
 import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
@@ -17,53 +16,54 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import Link from "next/link";
+import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
+import { phoneRegex } from "@/modules/core/lib/utils.index";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
-interface IVerifyOTPForm {
+interface IRegistrationRequestVerification {
   className?: string;
   formTitle: string;
   formHelpText: string;
   buttonLabel: string;
-  onSubmitAction: (data: VerifyOtpFormValues) => void;
+  onSubmitAction: (data: RegistrationVerificationFormValues) => void;
   form: UseFormReturn<{
+    phone: string;
     otp: string;
     password: string;
     password_confirmation: string;
   }>;
 }
 
-export default function VerifyOTPForm({
+export default function RegistrationVerification({
   className,
   formTitle,
   formHelpText,
   buttonLabel,
   onSubmitAction,
   form,
-}: IVerifyOTPForm) {
+}: IRegistrationRequestVerification) {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const sessionCtx = use(SessionContext);
   if (!sessionCtx) {
     throw new Error("SessionProvider must be used in correct place.");
   }
-
   const { session } = sessionCtx;
-
+  const [phone] = useState<string>(urlSearchParams.get("phone")?.trim() || "");
   useEffect(() => {
     if (session) {
       return router.replace("/");
     }
-    const phone = urlSearchParams.get("phone")?.trim() || "";
-    if (!phone || !/^9\d{9}$/.test(phone)) {
+    if (!phone || !phoneRegex.test(phone)) {
       throw new Error("403");
     }
-  }, [router, session, urlSearchParams]);
+  }, [phone, router, session]);
   return (
     <div className={className}>
       <FormTitle
@@ -76,6 +76,11 @@ export default function VerifyOTPForm({
           onSubmit={form.handleSubmit(onSubmitAction)}
           className="flex-col space-y-6"
         >
+          <Input
+            type="hidden"
+            defaultValue={phone}
+            {...form.register("phone")}
+          />
           <FormField
             render={({ field }) => (
               <FormItem className="flex flex-col gap-y-2">
@@ -143,16 +148,19 @@ export default function VerifyOTPForm({
             )}
             name="password_confirmation"
           />
-          <Button className="w-full text-md py-6 cursor-pointer">
+          <ThemedButton
+            className="w-full text-md py-6 cursor-pointer"
+            type="submit"
+          >
             {buttonLabel}
-          </Button>
+          </ThemedButton>
+          <Link
+            className="w-full text-md py-3 cursor-pointer bg-foreground text-primary-foreground rounded-md flex items-center justify-center"
+            href="/register"
+          >
+            Back
+          </Link>
         </form>
-        <Link
-          className="w-full text-md py-3 cursor-pointer bg-foreground text-primary-foreground rounded-md flex items-center justify-center"
-          href="/register"
-        >
-          Back
-        </Link>
       </Form>
     </div>
   );

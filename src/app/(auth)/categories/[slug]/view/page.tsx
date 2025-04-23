@@ -7,8 +7,9 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const pageTitle = slug.replaceAll("-", " ");
   return (
-    <PageContainer pageTitle={`View ${slug.replaceAll("-", " ")}`}>
+    <PageContainer pageTitle={`View ${pageTitle}`}>
       <CategoryView slug={slug} />
     </PageContainer>
   );

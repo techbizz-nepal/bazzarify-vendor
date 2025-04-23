@@ -1,12 +1,17 @@
 import React, { ReactNode } from "react";
 import { AppSidebar } from "@/modules/core/components/server/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { getSessionPayload } from "@/modules/core/lib/utils.session";
+import { redirect } from "next/navigation";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  if (!(await getSessionPayload())) {
+    redirect("/login");
+  }
   return (
     <div className="flex-col">
       <SidebarProvider className="flex-row">

@@ -1,7 +1,15 @@
 import { z } from "zod";
+import { phoneRegex } from "@/modules/core/lib/utils.index";
 
-export const VerifyOtpFormSchema = z
+export const RegistrationVerificationFormSchema = z
   .object({
+    phone: z
+      .string()
+      .min(10, { message: "Phone number must be 10 digit" })
+      .max(10, { message: "Phone number must be 10 digit" })
+      .regex(phoneRegex, {
+        message: "Phone number is not valid",
+      }),
     otp: z.string({ message: "OTP is required." }).min(6).max(6),
     password: z
       .string({ message: "Password is required." })
@@ -22,4 +30,6 @@ export const VerifyOtpFormSchema = z
     message: "Passwords do not match",
     path: ["password_confirmation"],
   });
-export type VerifyOtpFormValues = z.infer<typeof VerifyOtpFormSchema>;
+export type RegistrationVerificationFormValues = z.infer<
+  typeof RegistrationVerificationFormSchema
+>;

@@ -4,6 +4,9 @@ const product: IRoute["product"] = {
   index: {
     path: "/product-management/products",
   },
+  store: {
+    path: "/product-management/products",
+  },
 };
 
 export default product;

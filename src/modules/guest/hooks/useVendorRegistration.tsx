@@ -1,44 +1,48 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  OTPRequestFormSchema,
-  OTPRequestFormValues,
-} from "@/modules/guest/config/schemas/otp.request.form";
 import { BaseSyntheticEvent } from "react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import {
-  VerifyOtpFormSchema,
-  VerifyOtpFormValues,
-} from "@/modules/guest/config/schemas/verify.otp.form";
-import {
-  actionOTPRequest,
-  actionOTPVerificationWithNewPassword,
-  actionSetBusinessAndEmail,
-} from "@/modules/guest/actions/auth";
+  RegistrationVerificationFormSchema,
+  RegistrationVerificationFormValues,
+} from "@/modules/guest/config/schemas/registrationVerificationForm";
+import { actionSetBusinessAndEmail } from "@/modules/guest/actions/auth";
 import {
   BusinessAndEmailFormValues,
   SetBusinessAndEmailSchema,
 } from "@/modules/guest/config/schemas/set.business.email.form";
+import {
+  RegistrationRequestFormSchema,
+  RegistrationRequestFormValues,
+} from "@/modules/guest/config/schemas/registrationRequestForm";
+import {
+  actionRequestRegistration,
+  actionVerifyRegistration,
+} from "@/modules/guest/actions/register";
+import { ReadonlyURLSearchParams } from "next/navigation";
 
 export default function useVendorRegistration(
   router: AppRouterInstance,
+  searchParams: ReadonlyURLSearchParams,
   toggleSession: () => void,
 ) {
-  const otpRequestForm = useForm<OTPRequestFormValues>({
-    resolver: zodResolver(OTPRequestFormSchema),
+  const registrationRequestForm = useForm<RegistrationRequestFormValues>({
+    resolver: zodResolver(RegistrationRequestFormSchema),
     defaultValues: {
       phone: "",
     },
   });
 
-  const verifyOTPForm = useForm<VerifyOtpFormValues>({
-    resolver: zodResolver(VerifyOtpFormSchema),
-    defaultValues: {
-      otp: undefined,
-      password: "",
-      password_confirmation: "",
-    },
-  });
+  const registrationRequestVerificationForm =
+    useForm<RegistrationVerificationFormValues>({
+      resolver: zodResolver(RegistrationVerificationFormSchema),
+      defaultValues: {
+        phone: searchParams.get("phone") || "",
+        otp: undefined,
+        password: "",
+        password_confirmation: "",
+      },
+    });
 
   const businessAndEmailForm = useForm({
     resolver: zodResolver(SetBusinessAndEmailSchema),
@@ -48,21 +52,36 @@ export default function useVendorRegistration(
     },
   });
 
-  const handleOTPRequestSubmit = (
-    data: OTPRequestFormValues,
+  const handleRequestRegistration = (
+    data: RegistrationRequestFormValues,
     e: BaseSyntheticEvent | undefined,
   ) => {
     if (!(e?.nativeEvent instanceof SubmitEvent)) return;
     const submitter = e.nativeEvent.submitter as HTMLButtonElement;
     const channel: string = submitter.value;
-    actionOTPRequest({ ...data, channel }).then(() =>
-      router.push("/register?phone=".concat(data.phone)),
-    );
+    actionRequestRegistration({ ...data, channel })
+      .then((res) => {
+        if (res.data.message != "success") {
+          return alert("Something went wrong!");
+        }
+        router.push("/register?phone=".concat(data.phone));
+      })
+      .catch(() => alert("Something went wrong!"));
   };
 
-  const handleOTPVerificationSubmit = (data: VerifyOtpFormValues) => {
-    actionOTPVerificationWithNewPassword(data)
-      .then(() => router.push("/register?verified=true"))
+  const handleRegistrationVerification = (
+    data: RegistrationVerificationFormValues,
+  ) => {
+    const phone = searchParams.get("phone");
+    if (!phone) return alert("Invalid request");
+    actionVerifyRegistration(data)
+      .then((res) => {
+        console.log(res);
+        if (res.data.message != "success") {
+          return alert("Something went wrong!");
+        }
+        // router.push("/register?verified=true");
+      })
       .catch((err) => console.log(err));
   };
 
@@ -73,11 +92,11 @@ export default function useVendorRegistration(
       })
       .catch((error) => console.log(error));
   return {
-    otpRequestForm,
-    verifyOTPForm,
+    registrationRequestForm,
+    registrationRequestVerificationForm,
     businessAndEmailForm,
-    handleOTPRequestSubmit,
-    handleOTPVerificationSubmit,
+    handleRequestRegistration,
+    handleRegistrationVerification,
     handleSetBusinessAndEmailSubmit,
   };
 }

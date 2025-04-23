@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TAttribute } from "@/modules/product.management";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 interface ICategoryAttributesCard {
   attributes: TAttribute[];
@@ -21,12 +21,9 @@ const CategoryAttributesCard = ({
       <CardHeader>
         <div className="flex justify-between">
           <CardTitle className="text-lg">Attributes</CardTitle>
-          <Button
-            onClick={() => onUpdateAction("attributes")}
-            className="hover:animate-pulse"
-          >
+          <ThemedButton onClick={() => onUpdateAction("attributes")}>
             Update Attributes
-          </Button>
+          </ThemedButton>
         </div>
       </CardHeader>
       <CardContent>

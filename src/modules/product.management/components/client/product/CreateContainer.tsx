@@ -11,8 +11,8 @@ import { TCategory } from "@/modules/product.management";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 export default function CreateContainer() {
   const {
@@ -152,7 +152,7 @@ export default function CreateContainer() {
             />
           </ProductCard>
           <Card>
-            <Button onClick={handleSubmit}>Submit</Button>
+            <ThemedButton onClick={handleSubmit}>Submit</ThemedButton>
           </Card>
         </>
       )}

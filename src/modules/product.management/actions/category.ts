@@ -1,16 +1,17 @@
+"use server";
+
 import { TURLSearchParams } from "@/modules/core";
-import axiosInstance from "@/modules/core/lib/utils.axios";
-import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config";
+import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
+import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";
 
 export const actionGetCategories = async (params?: TURLSearchParams) => {
-  const response = await axiosInstance.get(
-    PRODUCT_MANAGEMENT_ROUTES.category.index.path,
-    {
-      params: {
-        ...params,
-      },
+  const response = await (
+    await authAxiosInstance()
+  ).get(PRODUCT_MANAGEMENT_ROUTES.category.index.path, {
+    params: {
+      ...params,
     },
-  );
+  });
   return response.data;
 };
 export const actionViewCategory = async (
@@ -18,14 +19,13 @@ export const actionViewCategory = async (
   params?: TURLSearchParams,
 ) => {
   try {
-    const response = await axiosInstance.get(
-      PRODUCT_MANAGEMENT_ROUTES.category.show.path.replace(":slug", slug),
-      {
-        params: {
-          ...params,
-        },
+    const response = await (
+      await authAxiosInstance()
+    ).get(PRODUCT_MANAGEMENT_ROUTES.category.show.path.replace(":slug", slug), {
+      params: {
+        ...params,
       },
-    );
+    });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -39,7 +39,9 @@ export const actionUpdateCategory = async (
   params?: TURLSearchParams,
 ) => {
   try {
-    const response = await axiosInstance.put(
+    const response = await (
+      await authAxiosInstance()
+    ).put(
       PRODUCT_MANAGEMENT_ROUTES.category.update.path.replace(":slug", slug),
       body,
       {

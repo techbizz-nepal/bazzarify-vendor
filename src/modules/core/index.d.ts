@@ -46,12 +46,20 @@ export type TURLSearchParams = {
   sort?: string;
   include?: string;
 };
-export type TEntities = "category" | "product" | "attribute" | "specification";
+export type TEntities =
+  | "category"
+  | "product"
+  | "attribute"
+  | "specification"
+  | "login"
+  | "register"
+  | "reset";
+
+export interface RouteConfig {
+  path: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+}
+
 export type IRoute = {
-  [entity in TEntities]: {
-    [action: string]: {
-      path: string;
-      method?: string;
-    };
-  };
+  [E in TEntities]: Record<string, RouteConfig>;
 };

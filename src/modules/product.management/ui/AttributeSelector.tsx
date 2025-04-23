@@ -6,9 +6,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@radix-ui/react-menu";
-import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 import { TAttribute, TAttributeValue } from "@/modules/product.management";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 interface Props {
   attributes: TAttribute[];
@@ -45,13 +45,13 @@ export default function AttributeSelector({
                     </SelectTrigger>
                     <SelectContent />
                   </Select>
-                  <Button
+                  <ThemedButton
                     variant="ghost"
                     size="icon"
                     onClick={() => onRemove(attr.name, val)}
                   >
                     <Trash className="h-4 w-4 text-red-500" />
-                  </Button>
+                  </ThemedButton>
                 </div>
               ))}
               {availableOptions.length > 0 && (
@@ -71,9 +71,9 @@ export default function AttributeSelector({
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button variant="ghost" size="icon" disabled>
+                  <ThemedButton variant="ghost" size="icon" disabled>
                     <Plus className="h-4 w-4 text-gray-400" />
-                  </Button>
+                  </ThemedButton>
                 </div>
               )}
             </div>

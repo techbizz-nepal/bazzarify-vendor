@@ -36,7 +36,7 @@ export interface VariantData {
   stock?: string;
   price?: string;
   sku?: string;
-  images?: string[];
+  images?: File[];
   isValid?: boolean;
   available?: boolean;
 }
@@ -82,7 +82,7 @@ export interface VariantState {
     value: VariantData[K],
   ) => void;
   handleImageUpload: (combo: string[], files: FileList) => void;
-  handleImageRemove: (combo: string[], image: string) => void;
+  handleImageRemove: (combo: string[], image: File) => void;
   columns: string[];
   handleReorderColumns: (newOrder: string[]) => void;
 }

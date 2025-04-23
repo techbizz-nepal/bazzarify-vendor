@@ -1,6 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/drop-down";
 import { TCategory } from "@/modules/product.management";
 import { router } from "next/client";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 const categoryColumns: ColumnDef<TCategory>[] = [
   {
@@ -47,13 +47,13 @@ const categoryColumns: ColumnDef<TCategory>[] = [
     accessorKey: "position",
     header: ({ column }) => {
       return (
-        <Button
+        <ThemedButton
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Position
           <ArrowUpDown />
-        </Button>
+        </ThemedButton>
       );
     },
     cell: ({ row }) => (
@@ -69,10 +69,10 @@ const categoryColumns: ColumnDef<TCategory>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <ThemedButton variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal />
-            </Button>
+            </ThemedButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>

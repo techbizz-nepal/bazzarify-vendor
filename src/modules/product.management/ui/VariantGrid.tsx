@@ -1,6 +1,8 @@
 import { FaTrashCan } from "react-icons/fa6";
 import { VariantData } from "@/modules/product.management";
 import { Switch } from "@/components/ui/switch";
+import Image from "next/image";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 type Props = {
   selections: Record<string, string[]>;
@@ -12,7 +14,7 @@ type Props = {
     value: VariantData[K],
   ) => void;
   onUpload: (combo: string[], files: FileList) => void;
-  onImageRemove: (combo: string[], image: string) => void;
+  onImageRemove: (combo: string[], image: File) => void;
   columns: string[];
 };
 
@@ -121,23 +123,28 @@ export default function VariantGrid({
                     }}
                   />
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {(variant.images || []).map((img, i) => (
-                      <div key={i} className="relative">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={img}
-                          alt="variant"
-                          className="w-10 h-10 object-cover border"
-                        />
-                        <button
-                          type="button"
-                          className="absolute -top-1 -right-1 bg-white rounded-full border"
-                          onClick={() => onImageRemove(combo, img)}
-                        >
-                          <FaTrashCan className="h-3 w-3 text-red-600" />
-                        </button>
-                      </div>
-                    ))}
+                    {(variant.images || []).map((img, i) => {
+                      const previewUrl =
+                        img instanceof File ? URL.createObjectURL(img) : "";
+                      return (
+                        <div key={i} className="relative">
+                          <Image
+                            width={50}
+                            height={50}
+                            src={previewUrl}
+                            alt="variant"
+                            className="w-10 h-10 object-cover border"
+                          />
+                          <ThemedButton
+                            type="button"
+                            className="absolute -top-1 -right-1 bg-white rounded-full border"
+                            onClick={() => onImageRemove(combo, img)}
+                          >
+                            <FaTrashCan className="h-3 w-3 text-red-600" />
+                          </ThemedButton>
+                        </div>
+                      );
+                    })}
                   </div>
                 </td>
                 <td className="border px-2 py-1 text-center">

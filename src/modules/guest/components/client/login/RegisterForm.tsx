@@ -12,7 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -22,6 +21,7 @@ import {
   RegisterFormSchema,
   RegisterFormValues,
 } from "@/modules/guest/config/schemas/register.form";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 export default function RegisterForm() {
   const sessionCtx = use(SessionContext);
@@ -160,7 +160,7 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          <Button className="w-full text-md py-6">Register</Button>
+          <ThemedButton className="w-full text-md py-6">Register</ThemedButton>
         </form>
       </Form>
       <Link

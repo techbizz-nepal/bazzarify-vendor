@@ -12,7 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
   LoginFormSchema,
@@ -22,20 +21,22 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
+import { actionLogin } from "@/modules/guest/actions/login";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 export default function LoginForm() {
   const sessionCtx = use(SessionContext);
   if (!sessionCtx) {
     throw new Error("SessionProvider must be used in correct place.");
   }
-  const { session, toggleSession } = sessionCtx;
+  const { session } = sessionCtx;
   const router = useRouter();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      credential: "9851040576",
+      password: "12345678",
     },
   });
   useEffect(() => {
@@ -45,17 +46,18 @@ export default function LoginForm() {
   }, [router, session]);
 
   function handleSubmit(data: LoginFormValues) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="mt-2 w-full rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-    setTimeout(() => {
-      toggleSession();
-      router.replace("/");
-    }, 3000);
+    let t = toast("Signing In...");
+    actionLogin(data)
+      .then(() => {
+        toast.dismiss(t);
+      })
+      .catch(() => {
+        toast.dismiss(t);
+        t = toast.error("Cannot login");
+      })
+      .finally(() => {
+        toast.dismiss(t);
+      });
   }
 
   return (
@@ -75,9 +77,9 @@ export default function LoginForm() {
                 <FormLabel className="text-slate-500">Email/Phone</FormLabel>
                 <FormControl>
                   <Input
-                    autoComplete={""}
+                    autoComplete=""
                     className="border border-slate-300 placeholder:text-slate-400"
-                    type="email"
+                    type="text"
                     placeholder="Enter your email/phone"
                     {...field}
                   />
@@ -85,7 +87,7 @@ export default function LoginForm() {
                 <FormMessage />
               </FormItem>
             )}
-            name="email"
+            name="credential"
           />
           <FormField
             render={({ field }) => (
@@ -96,6 +98,7 @@ export default function LoginForm() {
                     className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
                     type="password"
                     placeholder="Enter password"
+                    autoComplete="current-password"
                     {...field}
                   />
                 </FormControl>
@@ -104,7 +107,7 @@ export default function LoginForm() {
             )}
             name="password"
           />
-          <Button className="w-full text-md py-6">Sign In</Button>
+          <ThemedButton className="w-full text-md py-6">Sign In</ThemedButton>
         </form>
       </Form>
       <Link

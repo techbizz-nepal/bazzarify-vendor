@@ -1,14 +1,12 @@
 "use client";
 
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import usePageAuthentication from "@/modules/core/hooks/usePageAuthentication";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 export default function IndexContainer() {
-  usePageAuthentication();
   const router = useRouter();
   const onFilterChangeAction = () => console.log("filter change");
   return (
@@ -23,9 +21,9 @@ export default function IndexContainer() {
             />
           </div>
           <div>
-            <Button onClick={() => router.push("/products/create")}>
+            <ThemedButton onClick={() => router.push("/products/create")}>
               Create Product
-            </Button>
+            </ThemedButton>
           </div>
         </CardHeader>
         <CardContent>N/A</CardContent>

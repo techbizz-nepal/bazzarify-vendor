@@ -1,6 +1,16 @@
 import { z } from "zod";
+import { phoneRegex } from "@/modules/core/lib/utils.index";
 export const LoginFormSchema = z.object({
-  email: z.string().email({ message: "Email is required" }),
+  credential: z
+    .string()
+    .min(1, "Required")
+    .refine(
+      (val) =>
+        z.string().email().safeParse(val).success || phoneRegex.test(val),
+      {
+        message: "Must be a valid email or phone number",
+      },
+    ),
   password: z.string().min(8).max(100),
 });
 export type LoginFormValues = z.infer<typeof LoginFormSchema>;

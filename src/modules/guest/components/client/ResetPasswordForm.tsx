@@ -12,7 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   ResetPasswordFormSchema,
   ResetPasswordFormValues,
@@ -23,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { Separator } from "@/components/ui/separator";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -111,14 +111,14 @@ export default function ResetPasswordForm() {
             )}
             name="phone"
           />
-          <Button
+          <ThemedButton
             className={cn(
               "w-full text-md py-6",
               form.formState.isSubmitting ? "animate-pulse" : undefined,
             )}
           >
             Reset Password
-          </Button>
+          </ThemedButton>
         </form>
       </Form>
       <Separator />

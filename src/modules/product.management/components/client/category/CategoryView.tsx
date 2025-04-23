@@ -1,13 +1,12 @@
 "use client";
 
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import {
   actionUpdateCategory,
   actionViewCategory,
 } from "@/modules/product.management/actions/category";
 import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
-import { Loader } from "lucide-react";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import {
   IPaginatedData,
   TAttribute,
@@ -18,6 +17,8 @@ import { actionGetAttributes } from "@/modules/product.management/actions/attrib
 import CategoryCard from "@/modules/product.management/components/client/category/ui/CategoryCard";
 import CategoryAttributesCard from "@/modules/product.management/components/client/category/ui/CategoryAttributesCard";
 import CategorySpecificationsCard from "@/modules/product.management/components/client/category/ui/CategorySpecificationsCard";
+import { toast } from "sonner";
+import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
 
 export default function CategoryView({ slug }: { slug: string }) {
   const [specificationPage, setSpecificationPage] = useState<number>(1);
@@ -26,11 +27,11 @@ export default function CategoryView({ slug }: { slug: string }) {
     { data: categoryResponse },
     { data: specificationsResponse },
     { data: attributesResponse },
-  ] = useSuspenseQueries({
+  ] = useQueries({
     queries: [
       {
         queryKey: ["category", slug],
-        queryFn: () => actionViewCategory(slug),
+        queryFn: async () => await actionViewCategory(slug),
       },
       {
         queryKey: ["specification", specificationPage, specificationPerPage],
@@ -45,18 +46,18 @@ export default function CategoryView({ slug }: { slug: string }) {
   });
   // declarations;
   const response = {
-    category: categoryResponse.data.payload.category as TCategory,
-    attributes: attributesResponse.data.payload.attributes as TAttribute[],
-    specifications: specificationsResponse.data.payload
+    category: categoryResponse?.data.payload.category as TCategory,
+    attributes: attributesResponse?.data.payload.attributes as TAttribute[],
+    specifications: specificationsResponse?.data.payload
       .specifications as IPaginatedData<TSpecification[]>,
   };
   // states
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>(
-    response.category.attributes || [],
+    response.category?.attributes || [],
   );
   const [selectedSpecifications, setSelectedSpecifications] = useState<
     string[]
-  >(response.category.specifications || []);
+  >(response.category?.specifications || []);
 
   const handleAttributeChange = (uuid: string) => {
     setSelectedAttributes((prevState) =>
@@ -88,25 +89,40 @@ export default function CategoryView({ slug }: { slug: string }) {
     if (entity === "specifications") {
       body = { specifications: selectedSpecifications };
     }
-    if (!body) alert("invalid request");
+    if (!body) {
+      return;
+    }
+    console.log(body);
     actionUpdateCategory(slug, JSON.stringify(body)).then((result) => {
-      console.log(result.data.message);
+      if (result.data.message == "success") {
+        toast.info("Category updated successfully");
+      } else {
+        toast.error("Something went wrong");
+      }
     });
   };
   return (
     <div className="flex-col space-y-4">
-      <Suspense fallback={<Loader />}>
+      {response.category ? (
         <CategoryCard category={response.category} />
-        {!response.category.children?.length && (
-          <>
+      ) : (
+        <ContentSkeleton />
+      )}
+      {!response.category?.children?.length && (
+        <>
+          {response.attributes ? (
             <CategoryAttributesCard
               attributes={response.attributes}
               selectedIds={selectedAttributes}
               onAttributeChange={handleAttributeChange}
               onUpdateAction={handleUpdateCategory}
             />
+          ) : (
+            <ContentSkeleton />
+          )}
+          {response.specifications ? (
             <CategorySpecificationsCard
-              specifications={response.specifications.data}
+              specifications={response.specifications?.data}
               onSpecificationChange={handleSpecificationChange}
               selectedIds={selectedSpecifications}
               onNextPage={handleSpecificationNextPage}
@@ -114,9 +130,11 @@ export default function CategoryView({ slug }: { slug: string }) {
               onPerPageChange={handleSpecificationPerPage}
               onUpdateAction={handleUpdateCategory}
             />
-          </>
-        )}
-      </Suspense>
+          ) : (
+            <ContentSkeleton />
+          )}
+        </>
+      )}
     </div>
   );
 }

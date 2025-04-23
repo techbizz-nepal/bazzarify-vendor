@@ -7,7 +7,7 @@ import {
   FaTwitter,
 } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 const NewsLetterBanner = () => {
   return (
@@ -32,9 +32,9 @@ const NewsLetterBanner = () => {
             placeholder="Email"
             className="bg-white rounded-r-none rounded-l-lg"
           />
-          <Button type="submit" className="rounded-l-none">
+          <ThemedButton type="submit" className="rounded-l-none">
             Subscribe
-          </Button>
+          </ThemedButton>
         </div>
         <div className="w-4/12 flex space-x-5 items-center justify-center">
           <div>

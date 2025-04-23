@@ -1,7 +1,6 @@
 "use client";
 
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import usePageAuthentication from "@/modules/core/hooks/usePageAuthentication";
 import useDataTable from "@/modules/core/hooks/useDataTable";
 import { TCategory } from "@/modules/product.management";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
@@ -9,7 +8,6 @@ import CategoryDataTable from "@/modules/product.management/components/client/ca
 import React from "react";
 
 export default function CategoryIndex() {
-  usePageAuthentication();
   const {
     page,
     rows,
@@ -24,7 +22,6 @@ export default function CategoryIndex() {
     actionGetCategories,
     "categories",
   );
-
   return (
     <PageContainer pageTitle="Manage Categories">
       <CategoryDataTable

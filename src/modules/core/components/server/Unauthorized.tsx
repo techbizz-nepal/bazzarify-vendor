@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 export default function Unauthorized() {
   return (
     <div className="w-screen h-screen flex items-center justify-center">
       <Link href="/login">
-        <Button>Go to Login</Button>
+        <ThemedButton>Go to Login</ThemedButton>
       </Link>
     </div>
   );

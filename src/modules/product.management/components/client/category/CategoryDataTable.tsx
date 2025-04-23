@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { FaAngleRight } from "react-icons/fa6";
 import { IDataTableProps, TCategory } from "@/modules/product.management";
 import { Input } from "@/components/ui/input";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 export default function CategoryDataTable({
   page,
@@ -38,12 +38,12 @@ export default function CategoryDataTable({
                   placeholder="filter by name"
                   className="w-44 focus-visible:ring-primary"
                 />
-                <Button
+                <ThemedButton
                   onClick={onOnlyLastChildrenAction}
                   className="hover:animate-pulse"
                 >
                   List Only Last Children
-                </Button>
+                </ThemedButton>
               </div>
             </div>
           </CardHeader>
@@ -71,18 +71,18 @@ export default function CategoryDataTable({
                           : "N/A"}
                       </TableCell>
                       <TableCell className="flex items-center space-x-2">
-                        <Button
+                        <ThemedButton
                           variant="secondary"
                           onClick={() => onEditAction(item.slug)}
                         >
                           Edit
-                        </Button>
-                        <Button
+                        </ThemedButton>
+                        <ThemedButton
                           variant="default"
                           onClick={() => onViewAction(item.slug)}
                         >
                           View
-                        </Button>
+                        </ThemedButton>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -93,12 +93,15 @@ export default function CategoryDataTable({
                     {data?.from} to {data?.to} records
                   </TableCell>
                   <TableCell className="flex space-x-8 justify-end">
-                    <Button onClick={onPreviousAction} disabled={page === 1}>
+                    <ThemedButton
+                      onClick={onPreviousAction}
+                      disabled={page === 1}
+                    >
                       Previous
-                    </Button>
-                    <Button onClick={onNextAction}>
+                    </ThemedButton>
+                    <ThemedButton onClick={onNextAction}>
                       Next <FaAngleRight />
-                    </Button>
+                    </ThemedButton>
                   </TableCell>
                 </TableRow>
               </TableFooter>

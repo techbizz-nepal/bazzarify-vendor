@@ -16,8 +16,6 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -39,6 +37,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 type CoreDataTableProps<TData> = {
   columns: ColumnDef<TData>[];
@@ -129,9 +128,9 @@ export default function CoreDataTable<TData>({
         )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <ThemedButton variant="outline" className="ml-auto">
               Columns <ChevronDown />
-            </Button>
+            </ThemedButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {table
@@ -207,22 +206,22 @@ export default function CoreDataTable<TData>({
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
           <div className="space-x-2">
-            <Button
+            <ThemedButton
               variant="outline"
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               Previous
-            </Button>
-            <Button
+            </ThemedButton>
+            <ThemedButton
               variant="outline"
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
               Next
-            </Button>
+            </ThemedButton>
           </div>
         </div>
       </CardFooter>

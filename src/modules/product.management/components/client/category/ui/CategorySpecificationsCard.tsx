@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -16,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 interface ICategorySpecificationsCard {
   specifications: TSpecification[];
@@ -42,12 +42,9 @@ const CategorySpecificationsCard = ({
         <div className="flex-col space-y-7">
           <div className="flex justify-between">
             <CardTitle className="text-lg">Specifications</CardTitle>
-            <Button
-              className="hover:animate-pulse"
-              onClick={() => onUpdateAction("specifications")}
-            >
+            <ThemedButton onClick={() => onUpdateAction("specifications")}>
               Update Specifications
-            </Button>
+            </ThemedButton>
           </div>
           <div className="flex space-x-8">
             {/*<Input*/}
@@ -91,8 +88,8 @@ const CategorySpecificationsCard = ({
         </div>
       </CardContent>
       <CardFooter className="flex  items-center justify-end space-x-8">
-        <Button onClick={onPreviousPage}>Previous</Button>
-        <Button onClick={onNextPage}>Next</Button>
+        <ThemedButton onClick={onPreviousPage}>Previous</ThemedButton>
+        <ThemedButton onClick={onNextPage}>Next</ThemedButton>
       </CardFooter>
     </Card>
   );

@@ -1,14 +1,15 @@
-export const AUTH_ROUTES = {
+import { IRoute } from "@/modules/core";
+
+const login: IRoute["login"] = {
   loginCredentials: {
-    name: "login.credentials",
-    path: "/auth/login/credentials",
+    path: "/auth/vendor/login/credentials",
   },
   passwordResetRequest: {
-    name: "password.reset.request",
     path: "/auth/password/reset/request",
   },
   passwordReset: {
-    name: "password.reset",
     path: "/auth/password/reset",
   },
 };
+
+export default login;

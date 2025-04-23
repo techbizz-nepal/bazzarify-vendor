@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import generateCombinations from "@/modules/product.management/utils/generateCombinations";
 import slugify from "slugify";
+import { actionStoreProducts } from "@/modules/product.management/actions/product";
 
 export default function useCreateProduct() {
   // -------------------- STATE --------------------
@@ -110,20 +111,22 @@ export default function useCreateProduct() {
 
   const handleImageUpload = (combo: string[], files: FileList) => {
     const key = combo.join("|");
-    const filePaths = Array.from(files).map((f) => URL.createObjectURL(f));
+    const fileList = Array.from(files).filter((file) => file instanceof File);
     setVariantData((prev) => {
-      const existing = prev[key]?.images || [];
+      const existing = (prev[key]?.images || []).filter(
+        (img) => img instanceof File,
+      );
       return {
         ...prev,
         [key]: {
           ...(prev[key] || {}),
-          images: [...existing, ...filePaths].slice(0, 8),
+          images: [...existing, ...fileList].slice(0, 8),
         },
       };
     });
   };
 
-  const handleImageRemove = (combo: string[], image: string) => {
+  const handleImageRemove = (combo: string[], image: File) => {
     const key = combo.join("|");
     setVariantData((prev) => {
       const images = prev[key]?.images?.filter((img) => img !== image) || [];
@@ -191,15 +194,55 @@ export default function useCreateProduct() {
       alert("Product name is required");
       return;
     }
+    if (!variants.length) {
+      alert("Select least one variant");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description || "");
+    formData.append("category", selectedCategories[2]?.name);
+    for (const key in specifications) {
+      formData.append(`specifications[${key}]`, specifications[key]);
+    }
+    variants.forEach((variant, variantIndex) => {
+      columns.forEach((attr) => {
+        const key = slugify(attr, { lower: true });
+        formData.append(
+          `variants[${variantIndex}][${key}]`,
+          (variant as never)[key] || "",
+        );
+      });
+      formData.append(`variants[${variantIndex}][stock]`, variant.stock);
+      formData.append(`variants[${variantIndex}][price]`, variant.price);
+      formData.append(`variants[${variantIndex}][sku]`, variant.sku);
+      formData.append(
+        `variants[${variantIndex}][available]`,
+        variant.available ? "1" : "0",
+      );
 
-    const payload = {
-      name,
-      description: description || "",
-      category: selectedCategories[2]?.name,
-      specifications,
-      variants,
-    };
-    console.log("Submitted payload", payload);
+      variant.images.forEach((image, imageIndex) => {
+        formData.append(
+          `variants[${variantIndex}][images][${imageIndex}]`,
+          image,
+        );
+      });
+    });
+
+    // const payload = {
+    //   name,
+    //   description: description || "",
+    //   category: selectedCategories[2]?.name,
+    //   specifications,
+    //   variants,
+    // };
+    actionStoreProducts(formData)
+      .then((res) => {
+        console.log("Submitted payload", [formData, res]);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return {
