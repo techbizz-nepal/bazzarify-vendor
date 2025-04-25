@@ -16,6 +16,7 @@ const CategoryAttributesCard = ({
   onAttributeChange,
   onUpdateAction,
 }: ICategoryAttributesCard) => {
+  console.log(selectedIds);
   return (
     <Card>
       <CardHeader>

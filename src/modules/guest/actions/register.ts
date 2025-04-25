@@ -12,7 +12,6 @@ export const actionRequestRegistration = async (
       AUTH_ROUTES.register.signup.path,
       data,
     );
-    console.log(response.data);
     return response.data;
   } catch (error: unknown) {
     return handleRemoteError(error);

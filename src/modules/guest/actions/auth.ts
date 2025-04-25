@@ -34,7 +34,6 @@ export const actionSetBusinessAndEmail = async (
       AUTH_ROUTES.register.verifySignup.path,
       data,
     );
-    console.log(response.data);
     return response.data;
   } catch (error: unknown) {
     return handleRemoteError(error);

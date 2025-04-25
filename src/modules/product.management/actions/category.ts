@@ -14,18 +14,11 @@ export const actionGetCategories = async (params?: TURLSearchParams) => {
   });
   return response.data;
 };
-export const actionViewCategory = async (
-  slug: string,
-  params?: TURLSearchParams,
-) => {
+export const actionViewCategory = async (slug: string) => {
   try {
     const response = await (
       await authAxiosInstance()
-    ).get(PRODUCT_MANAGEMENT_ROUTES.category.show.path.replace(":slug", slug), {
-      params: {
-        ...params,
-      },
-    });
+    ).get(PRODUCT_MANAGEMENT_ROUTES.category.show.path.replace(":slug", slug));
     return response.data;
   } catch (error) {
     console.error(error);
@@ -33,22 +26,13 @@ export const actionViewCategory = async (
   }
 };
 
-export const actionUpdateCategory = async (
-  slug: string,
-  body: string,
-  params?: TURLSearchParams,
-) => {
+export const actionUpdateCategory = async (slug: string, body: object) => {
   try {
     const response = await (
       await authAxiosInstance()
-    ).put(
+    ).patch(
       PRODUCT_MANAGEMENT_ROUTES.category.update.path.replace(":slug", slug),
       body,
-      {
-        params: {
-          ...params,
-        },
-      },
     );
     return response.data;
   } catch (error) {

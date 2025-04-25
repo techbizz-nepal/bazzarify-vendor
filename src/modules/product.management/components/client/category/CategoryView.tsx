@@ -6,7 +6,7 @@ import {
   actionViewCategory,
 } from "@/modules/product.management/actions/category";
 import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IPaginatedData,
   TAttribute,
@@ -31,7 +31,7 @@ export default function CategoryView({ slug }: { slug: string }) {
     queries: [
       {
         queryKey: ["category", slug],
-        queryFn: async () => await actionViewCategory(slug),
+        queryFn: () => actionViewCategory(slug),
       },
       {
         queryKey: ["specification", specificationPage, specificationPerPage],
@@ -52,12 +52,17 @@ export default function CategoryView({ slug }: { slug: string }) {
       .specifications as IPaginatedData<TSpecification[]>,
   };
   // states
-  const [selectedAttributes, setSelectedAttributes] = useState<string[]>(
-    response.category?.attributes || [],
-  );
+  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
   const [selectedSpecifications, setSelectedSpecifications] = useState<
     string[]
-  >(response.category?.specifications || []);
+  >([]);
+
+  useEffect(() => {
+    if (response.category) {
+      setSelectedAttributes(response.category.attributes);
+      setSelectedSpecifications(response.category.specifications);
+    }
+  }, [response.category]);
 
   const handleAttributeChange = (uuid: string) => {
     setSelectedAttributes((prevState) =>
@@ -92,8 +97,7 @@ export default function CategoryView({ slug }: { slug: string }) {
     if (!body) {
       return;
     }
-    console.log(body);
-    actionUpdateCategory(slug, JSON.stringify(body)).then((result) => {
+    actionUpdateCategory(slug, body).then((result) => {
       if (result.data.message == "success") {
         toast.info("Category updated successfully");
       } else {

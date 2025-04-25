@@ -40,7 +40,6 @@ export default function useDataTable<
           if (paginatedData) {
             setRows(paginatedData);
           }
-          console.log("category", paginatedData?.data);
         }
       })
       .catch((error) => console.error("Error fetching data:", error));
