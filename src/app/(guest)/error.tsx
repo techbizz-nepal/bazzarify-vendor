@@ -7,7 +7,7 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="bg-foreground w-full h-screen  flex flex-col justify-center items-center">
+    <div className="bg-foreground flex h-screen w-full flex-col items-center justify-center">
       <h1 className="text-background">
         {error.message === "403"
           ? error.message.concat(" | Forbidden")

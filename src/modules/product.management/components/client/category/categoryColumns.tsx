@@ -1,6 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +7,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/drop-down";
-import { TCategory } from "@/modules/product.management";
-import { router } from "next/client";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { TCategory } from "@/modules/product.management";
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { router } from "next/client";
 
 const categoryColumns: ColumnDef<TCategory>[] = [
   {

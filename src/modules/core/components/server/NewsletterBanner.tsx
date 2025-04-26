@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import {
   FaFacebookF,
   FaInstagram,
@@ -6,37 +8,35 @@ import {
   FaPinterest,
   FaTwitter,
 } from "react-icons/fa";
-import { Input } from "@/components/ui/input";
-import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 const NewsLetterBanner = () => {
   return (
-    <div className="w-full py-10 bg-sidebar-primary">
-      <div className="px-24 flex space-x-28 items-center h-full">
-        <div className="w-4/12 flex space-x-6 items-center justify-center">
+    <div className="bg-sidebar-primary w-full py-10">
+      <div className="flex h-full items-center space-x-28 px-24">
+        <div className="flex w-4/12 items-center justify-center space-x-6">
           <div>
             <FaPaperPlane size={52} className="text-primary" />
           </div>
           <div className="flex-col space-y-2">
-            <p className="text-primary-foreground font-semibold text-2xl">
+            <p className="text-primary-foreground text-2xl font-semibold">
               Signup for Newsletter
             </p>
-            <p className="text-primary-foreground font-normal text-sm">
+            <p className="text-primary-foreground text-sm font-normal">
               We’ll never share your email address with a third-party.
             </p>
           </div>
         </div>
-        <div className="w-4/12 flex items-center justify-center ">
+        <div className="flex w-4/12 items-center justify-center">
           <Input
             type="email"
             placeholder="Email"
-            className="bg-white rounded-r-none rounded-l-lg"
+            className="rounded-l-lg rounded-r-none bg-white"
           />
           <ThemedButton type="submit" className="rounded-l-none">
             Subscribe
           </ThemedButton>
         </div>
-        <div className="w-4/12 flex space-x-5 items-center justify-center">
+        <div className="flex w-4/12 items-center justify-center space-x-5">
           <div>
             <FaLinkedin className="text-primary-foreground" size={32} />
           </div>

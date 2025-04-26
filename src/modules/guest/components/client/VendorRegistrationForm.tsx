@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import useSession from "@/modules/core/hooks/useSession";
-import useVendorRegistration from "@/modules/guest/hooks/useVendorRegistration";
 import Banner from "@/modules/guest/components/client/registration/Banner";
-import SetBusinessAndEmailForm from "@/modules/guest/components/client/registration/SetBusinessAndEmailForm";
 import RegistrationRequest from "@/modules/guest/components/client/registration/RegistrationRequest";
 import RegistrationVerification from "@/modules/guest/components/client/registration/RegistrationVerification";
+import SetBusinessAndEmailForm from "@/modules/guest/components/client/registration/SetBusinessAndEmailForm";
+import useVendorRegistration from "@/modules/guest/hooks/useVendorRegistration";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function VendorRegistrationForm() {
   const router = useRouter();

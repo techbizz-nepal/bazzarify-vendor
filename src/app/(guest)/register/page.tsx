@@ -1,15 +1,15 @@
-import { Metadata } from "next";
+import NewsLetterBanner from "@/modules/core/components/server/NewsletterBanner";
+import { categoriesData, footerData } from "@/modules/core/data";
 import VendorRegistrationForm from "@/modules/guest/components/client/VendorRegistrationForm";
 import Header from "@/modules/guest/components/client/registration/Header";
 import WhySellOnBazzarify from "@/modules/guest/components/client/registration/WhySellOnBazzarify";
-import NewsLetterBanner from "@/modules/core/components/server/NewsletterBanner";
-import Image from "next/image";
-import { categoriesData, footerData } from "@/modules/core/data";
-import { PiDotOutlineBold, PiMapPinLineLight } from "react-icons/pi";
-import { LuHeadphones, LuMail } from "react-icons/lu";
-import { FaBusinessTime } from "react-icons/fa";
-import { Suspense } from "react";
 import { Loader } from "lucide-react";
+import { Metadata } from "next";
+import Image from "next/image";
+import { Suspense } from "react";
+import { FaBusinessTime } from "react-icons/fa";
+import { LuHeadphones, LuMail } from "react-icons/lu";
+import { PiDotOutlineBold, PiMapPinLineLight } from "react-icons/pi";
 
 export const metadata: Metadata = {
   title: "Register",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <Suspense fallback={<Loader />}>
-      <main className="w-full flex-col py-2 ">
+      <main className="w-full flex-col py-2">
         <Header />
         <VendorRegistrationForm />
         <div className="py-8">
@@ -33,7 +33,7 @@ export default function Page() {
 }
 
 const Footer = () => (
-  <footer className="flex flex-col space-y-7 ">
+  <footer className="flex flex-col space-y-7">
     <div className="px-24">
       <div className="grid grid-cols-5 gap-4">
         <div className="flex flex-col space-y-5">
@@ -43,23 +43,23 @@ const Footer = () => (
               alt="logo"
               width={150}
               height={20}
-              className="hidden md:block w-auto h-auto"
+              className="hidden h-auto w-auto md:block"
               priority={true}
             />
           </div>
-          <div className="flex gap-x-4 items-center">
+          <div className="flex items-center gap-x-4">
             <PiMapPinLineLight size={16} />
             {footerData.contactDetails.address}
           </div>
-          <div className="flex gap-x-4 items-center">
+          <div className="flex items-center gap-x-4">
             <LuHeadphones size={16} />
             {footerData.contactDetails.contact}
           </div>
-          <div className="flex gap-x-4 items-center">
+          <div className="flex items-center gap-x-4">
             <LuMail size={16} />
             {footerData.contactDetails.email}
           </div>
-          <div className="flex gap-x-4 items-center">
+          <div className="flex items-center gap-x-4">
             <FaBusinessTime size={16} />
             {footerData.contactDetails.openingTime}
           </div>
@@ -72,7 +72,7 @@ const Footer = () => (
             {footerData.menu.Information.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-row space-x-1 items-center"
+                className="flex flex-row items-center space-x-1"
               >
                 <PiDotOutlineBold size={32} />
                 {item.label}
@@ -88,7 +88,7 @@ const Footer = () => (
             {footerData.menu.Account.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-row space-x-1 items-center"
+                className="flex flex-row items-center space-x-1"
               >
                 <PiDotOutlineBold size={32} />
                 {item.label}
@@ -104,7 +104,7 @@ const Footer = () => (
             {footerData.menu.Services.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-row space-x-1 items-center"
+                className="flex flex-row items-center space-x-1"
               >
                 <PiDotOutlineBold size={32} />
                 {item.label}
@@ -134,10 +134,10 @@ const Footer = () => (
           </div>
         </div>
       </div>
-      <div className="w-full flex flex-row space-x-8 flex-wrap items-center justify-center px-64 py-8">
+      <div className="flex w-full flex-row flex-wrap items-center justify-center space-x-8 px-64 py-8">
         {categoriesData.map((item) => (
           <div
-            className="flex-row flex text-lg font-semibold cursor-pointer"
+            className="flex cursor-pointer flex-row text-lg font-semibold"
             key={item}
           >
             <p className="leading-8">{item}</p>
@@ -145,7 +145,7 @@ const Footer = () => (
         ))}
       </div>
     </div>
-    <div className="w-full ">
+    <div className="w-full">
       <Image
         src="/payment-banner.png"
         alt="payment-banner"
@@ -153,8 +153,8 @@ const Footer = () => (
         height={50}
       />
     </div>
-    <div className="flex flex-row bg-sidebar-primary h-14 items-center px-24">
-      <div className="text-primary-foreground ">
+    <div className="bg-sidebar-primary flex h-14 flex-row items-center px-24">
+      <div className="text-primary-foreground">
         <p>
           &copy; {new Date().getFullYear()} bazzarify.com, All right reversed.
         </p>

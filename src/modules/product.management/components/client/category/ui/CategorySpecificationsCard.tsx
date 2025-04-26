@@ -1,4 +1,3 @@
-import { TAttribute, TSpecification } from "@/modules/product.management";
 import {
   Card,
   CardContent,
@@ -16,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { TAttribute, TSpecification } from "@/modules/product.management";
 
 interface ICategorySpecificationsCard {
   specifications: TSpecification[];
@@ -72,7 +72,7 @@ const CategorySpecificationsCard = ({
           {specifications.length > 0
             ? specifications.map((item) => (
                 <div
-                  className="uppercase flex space-x-2 items-center"
+                  className="flex items-center space-x-2 uppercase"
                   key={item.uuid}
                 >
                   <div>
@@ -87,7 +87,7 @@ const CategorySpecificationsCard = ({
             : "N/A"}
         </div>
       </CardContent>
-      <CardFooter className="flex  items-center justify-end space-x-8">
+      <CardFooter className="flex items-center justify-end space-x-8">
         <ThemedButton onClick={onPreviousPage}>Previous</ThemedButton>
         <ThemedButton onClick={onNextPage}>Next</ThemedButton>
       </CardFooter>

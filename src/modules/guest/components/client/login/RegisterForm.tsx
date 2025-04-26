@@ -1,8 +1,5 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -12,16 +9,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { use, useEffect } from "react";
+import FormTitle from "@/modules/core/components/server/FormTitle";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import {
   RegisterFormSchema,
   RegisterFormValues,
 } from "@/modules/guest/config/schemas/register.form";
-import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
   const sessionCtx = use(SessionContext);
@@ -113,7 +113,7 @@ export default function RegisterForm() {
                 <FormLabel className="text-slate-500">Phone</FormLabel>
                 <FormControl>
                   <Input
-                    className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="number"
                     placeholder="Enter phone"
                     {...field}
@@ -131,7 +131,7 @@ export default function RegisterForm() {
                 <FormLabel className="text-slate-500">Password</FormLabel>
                 <FormControl>
                   <Input
-                    className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="password"
                     placeholder="Enter password"
                     {...field}
@@ -151,7 +151,7 @@ export default function RegisterForm() {
                 </FormLabel>
                 <FormControl>
                   <Input
-                    className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="password"
                     placeholder="Enter confirm password"
                     {...field}
@@ -160,12 +160,12 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          <ThemedButton className="w-full text-md py-6">Register</ThemedButton>
+          <ThemedButton className="text-md w-full py-6">Register</ThemedButton>
         </form>
       </Form>
       <Link
         href="/login"
-        className="flex items-center justify-center text-secondary-foreground"
+        className="text-secondary-foreground flex items-center justify-center"
       >
         <p>Already have an account ?</p>
       </Link>

@@ -1,4 +1,5 @@
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -8,10 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FaAngleRight } from "react-icons/fa6";
-import { IDataTableProps, TCategory } from "@/modules/product.management";
-import { Input } from "@/components/ui/input";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { IDataTableProps, TCategory } from "@/modules/product.management";
+import { FaAngleRight } from "react-icons/fa6";
 
 export default function CategoryDataTable({
   page,
@@ -25,7 +25,7 @@ export default function CategoryDataTable({
   onOnlyLastChildrenAction,
 }: IDataTableProps<TCategory>) {
   return (
-    <Card className="px-4 " id="stats">
+    <Card className="px-4" id="stats">
       {rowsCount > 0 ? (
         <>
           <CardHeader>
@@ -36,7 +36,7 @@ export default function CategoryDataTable({
                   name="name"
                   onChange={onFilterChangeAction}
                   placeholder="filter by name"
-                  className="w-44 focus-visible:ring-primary"
+                  className="focus-visible:ring-primary w-44"
                 />
                 <ThemedButton
                   onClick={onOnlyLastChildrenAction}
@@ -65,7 +65,7 @@ export default function CategoryDataTable({
                       <TableCell className="font-medium">
                         {item.parent ? item.parent.name : "N/A"}
                       </TableCell>
-                      <TableCell className="font-medium max-w-3xl truncate">
+                      <TableCell className="max-w-3xl truncate font-medium">
                         {item.children?.length
                           ? item.children.map((child) => child.name).join(", ")
                           : "N/A"}
@@ -92,7 +92,7 @@ export default function CategoryDataTable({
                   <TableCell className="text-left" colSpan={3}>
                     {data?.from} to {data?.to} records
                   </TableCell>
-                  <TableCell className="flex space-x-8 justify-end">
+                  <TableCell className="flex justify-end space-x-8">
                     <ThemedButton
                       onClick={onPreviousAction}
                       disabled={page === 1}
@@ -109,7 +109,7 @@ export default function CategoryDataTable({
           </CardDescription>
         </>
       ) : (
-        <div className="flex-row justify-items-center items-center">
+        <div className="flex-row items-center justify-items-center">
           <h1>No Records Available</h1>
         </div>
       )}

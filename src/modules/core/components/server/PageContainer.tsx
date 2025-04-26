@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
 import Breadcrumb from "@/modules/core/components/server/Breadcrumb";
 import PageTitle from "@/modules/core/components/server/PageTitle";
+import { ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -11,10 +11,10 @@ const PageContainer = ({ children, pageTitle }: Props) => {
   return (
     <>
       <Breadcrumb />
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <PageTitle
           title={pageTitle}
-          className="text-lg font-semibold text-primary uppercase"
+          className="text-primary text-lg font-semibold uppercase"
         />
       </div>
       {children}

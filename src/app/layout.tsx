@@ -1,10 +1,10 @@
+import { SessionProvider } from "@/modules/core/contexts/SessionContextProvider";
+import QueryProvider from "@/modules/core/providers/queryProvider";
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "sonner";
-import { SessionProvider } from "@/modules/core/contexts/SessionContextProvider";
 import React from "react";
-import QueryProvider from "@/modules/core/providers/queryProvider";
+import { Toaster } from "sonner";
+import "./globals.css";
 
 const sora = Sora({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800"],

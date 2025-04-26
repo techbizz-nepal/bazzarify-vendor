@@ -1,6 +1,6 @@
-import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { use, useEffect } from "react";
 
 export default function useSession(router: AppRouterInstance) {
   const sessionCtx = use(SessionContext);

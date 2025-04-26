@@ -3,10 +3,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/drop-down";
-import { cn } from "@/lib/utils";
-import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { TCategory } from "@/modules/product.management";
+import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
 interface ICategoryDropdown {
   open: boolean;
@@ -40,7 +40,7 @@ export default function CategoryDropdown({
     filterKey: "root" | "sub" | "subchild",
     selectedCategory: TCategory | { uuid: string },
   ) => (
-    <div className="flex-col space-y-3 overflow-y-scroll h-96 px-2">
+    <div className="h-96 flex-col space-y-3 overflow-y-scroll px-2">
       <div className="pr-2">
         <Input
           placeholder="Filter"
@@ -63,8 +63,8 @@ export default function CategoryDropdown({
       <DropdownMenuTrigger asChild>
         <div
           className={cn(
-            "items-center justify-between flex h-8 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs",
-            open ? "border-2 border-primary" : undefined,
+            "flex h-8 w-full min-w-0 items-center justify-between rounded-md border bg-transparent px-3 py-1 text-base shadow-xs",
+            open ? "border-primary border-2" : undefined,
           )}
         >
           <p className="text-gray-500">
@@ -75,7 +75,7 @@ export default function CategoryDropdown({
           <div>{open ? <FaAngleUp /> : <FaAngleDown />}</div>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="flex-col border border-gray-400 space-y-2 p-2 w-lg md:w-2xl xl:w-5xl">
+      <DropdownMenuContent className="w-lg flex-col space-y-2 border border-gray-400 p-2 md:w-2xl xl:w-5xl">
         <div className="grid grid-cols-3 gap-2">
           {renderColumn(
             "Root",
@@ -131,7 +131,7 @@ const ClickableCategory = ({
 }) => (
   <p
     className={cn(
-      `cursor-pointer hover:bg-slate-200 p-1 rounded text-sm`,
+      `cursor-pointer rounded p-1 text-sm hover:bg-slate-200`,
       selected ? `bg-slate-200` : undefined,
     )}
     onClick={onClick}

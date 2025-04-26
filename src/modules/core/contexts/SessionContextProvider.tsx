@@ -21,4 +21,4 @@ const SessionProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export { SessionProvider, SessionContext };
+export { SessionContext, SessionProvider };

@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import React from "react";
 import { IProductCard } from "@/modules/product.management";
 
 const ProductCard = ({ title, children }: IProductCard) => (

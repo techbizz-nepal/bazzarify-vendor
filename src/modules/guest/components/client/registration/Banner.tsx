@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 const Banner = ({ children }: { children: ReactNode }) => {
   const bannerLastLineRef = useRef<HTMLParagraphElement | null>(null);
@@ -21,10 +21,10 @@ const Banner = ({ children }: { children: ReactNode }) => {
   }, []);
   return (
     <div className="bg-primary">
-      <div className="flex flex-row md:justify-between px-3 py-2 md:px-24 md:py-10 items-center">
-        <div className="hidden md:block w-1/2 md:w-7/12">
+      <div className="flex flex-row items-center px-3 py-2 md:justify-between md:px-24 md:py-10">
+        <div className="hidden w-1/2 md:block md:w-7/12">
           <div
-            className="font-normal text-white leading-tight"
+            className="leading-tight font-normal text-white"
             style={{ fontSize: "2.3rem" }}
           >
             <p>Grow your business online, reach more</p>
@@ -54,7 +54,7 @@ const Banner = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
         <div
-          className="w-full md:w-5/12 bg-white p-4 rounded-lg flex flex-col space-y-5 z-10"
+          className="z-10 flex w-full flex-col space-y-5 rounded-lg bg-white p-4 md:w-5/12"
           id="registrationForm"
         >
           {children}

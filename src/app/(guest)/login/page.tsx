@@ -1,7 +1,5 @@
-import { Metadata } from "next";
 import LoginForm from "@/modules/guest/components/client/login/LoginForm";
-import { getSessionPayload } from "@/modules/core/lib/utils.session";
-import { redirect } from "next/navigation";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -10,7 +8,7 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   return (
-    <main className="w-full h-screen bg-slate-200 flex flex-col justify-center items-center">
+    <main className="flex h-screen w-full flex-col items-center justify-center bg-slate-200">
       <LoginForm />
     </main>
   );

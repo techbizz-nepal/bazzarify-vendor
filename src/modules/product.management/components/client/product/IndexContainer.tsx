@@ -1,10 +1,10 @@
 "use client";
 
-import PageContainer from "@/modules/core/components/server/PageContainer";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import PageContainer from "@/modules/core/components/server/PageContainer";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { useRouter } from "next/navigation";
 
 export default function IndexContainer() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function IndexContainer() {
             <Input
               onChange={onFilterChangeAction}
               placeholder="filter by name"
-              className="w-44 focus-visible:ring-primary"
+              className="focus-visible:ring-primary w-44"
             />
           </div>
           <div>

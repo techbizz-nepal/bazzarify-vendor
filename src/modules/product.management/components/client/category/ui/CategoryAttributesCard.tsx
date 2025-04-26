@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TAttribute } from "@/modules/product.management";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { TAttribute } from "@/modules/product.management";
 
 interface ICategoryAttributesCard {
   attributes: TAttribute[];
@@ -31,7 +31,7 @@ const CategoryAttributesCard = ({
           {attributes.length > 0
             ? attributes.map((item) => (
                 <div
-                  className="uppercase flex space-x-2 items-center"
+                  className="flex items-center space-x-2 uppercase"
                   key={item.uuid}
                 >
                   <div>

@@ -1,7 +1,7 @@
-import { ChangeEvent, useEffect, useState } from "react";
 import { IApiResponse, TURLSearchParams } from "@/modules/core";
 import { IPaginatedData } from "@/modules/product.management";
 import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useState } from "react";
 
 export default function useDataTable<
   IEntity,

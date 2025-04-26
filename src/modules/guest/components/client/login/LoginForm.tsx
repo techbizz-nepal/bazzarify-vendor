@@ -1,8 +1,5 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -12,17 +9,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import FormTitle from "@/modules/core/components/server/FormTitle";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
+import { actionLogin } from "@/modules/guest/actions/login";
 import {
   LoginFormSchema,
   LoginFormValues,
 } from "@/modules/guest/config/schemas/login.form";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
-import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
-import { actionLogin } from "@/modules/guest/actions/login";
-import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   const sessionCtx = use(SessionContext);
@@ -95,7 +95,7 @@ export default function LoginForm() {
                 <FormLabel className="text-slate-500">Password</FormLabel>
                 <FormControl>
                   <Input
-                    className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="password"
                     placeholder="Enter password"
                     autoComplete="current-password"
@@ -107,18 +107,18 @@ export default function LoginForm() {
             )}
             name="password"
           />
-          <ThemedButton className="w-full text-md py-6">Sign In</ThemedButton>
+          <ThemedButton className="text-md w-full py-6">Sign In</ThemedButton>
         </form>
       </Form>
       <Link
         href="/register"
-        className="flex items-center justify-center text-secondary-foreground"
+        className="text-secondary-foreground flex items-center justify-center"
       >
         <p>Doesn&apos;t have an account ?</p>
       </Link>
       <Link
         href="/reset-password"
-        className="flex items-center justify-center text-secondary-foreground"
+        className="text-secondary-foreground flex items-center justify-center"
       >
         <p>Forgot Password ?</p>
       </Link>

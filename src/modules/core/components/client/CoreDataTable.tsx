@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -15,7 +14,20 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
+import * as React from "react";
 
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/drop-down";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -25,18 +37,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/drop-down";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 type CoreDataTableProps<TData> = {
@@ -200,8 +200,8 @@ export default function CoreDataTable<TData>({
         </Table>
       </CardContent>
       <CardFooter>
-        <div className="flex justify-between items-center w-full">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex w-full items-center justify-between">
+          <div className="text-muted-foreground text-sm">
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>

@@ -1,5 +1,5 @@
-import { TCategory } from "@/modules/product.management";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TCategory } from "@/modules/product.management";
 import { CategoryDetailField } from "@/modules/product.management/components/client/category/ui/CategoryDetailField";
 
 const CategoryCard = ({ category }: { category: TCategory }) => {

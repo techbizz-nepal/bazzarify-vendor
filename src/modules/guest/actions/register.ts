@@ -1,8 +1,8 @@
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
+import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import { AUTH_ROUTES } from "@/modules/guest/config/routes";
 import { RegistrationRequestFormValues } from "@/modules/guest/config/schemas/registrationRequestForm";
 import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
-import { handleRemoteError } from "@/modules/core/lib/utils.index";
 
 export const actionRequestRegistration = async (
   data: RegistrationRequestFormValues,

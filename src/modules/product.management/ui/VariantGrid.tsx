@@ -1,8 +1,9 @@
-import { FaTrashCan, FaX } from "react-icons/fa6";
-import { VariantData } from "@/modules/product.management";
 import { Switch } from "@/components/ui/switch";
-import Image from "next/image";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { VariantData } from "@/modules/product.management";
+import Image from "next/image";
+import { FaX } from "react-icons/fa6";
+import { toast } from "sonner";
 
 type Props = {
   selections: Record<string, string[]>;
@@ -29,7 +30,7 @@ export default function VariantGrid({
 }: Props) {
   if (combinations.length === 0) return null;
   return (
-    <div className="overflow-auto border rounded">
+    <div className="overflow-auto rounded border">
       <table className="min-w-full table-auto border-collapse text-sm">
         <thead className="bg-gray-100">
           <tr>
@@ -83,7 +84,7 @@ export default function VariantGrid({
                     type="number"
                     min="0"
                     max="9999"
-                    className="w-20 border px-2 py-1 rounded"
+                    className="w-20 rounded border px-2 py-1"
                     value={variant.stock || ""}
                     onChange={(e) => onChange(combo, "stock", e.target.value)}
                   />
@@ -93,7 +94,7 @@ export default function VariantGrid({
                     type="number"
                     min="0"
                     max="1000000"
-                    className="w-20 border px-2 py-1 rounded"
+                    className="w-20 rounded border px-2 py-1"
                     value={variant.price || ""}
                     onChange={(e) => onChange(combo, "price", e.target.value)}
                   />
@@ -101,7 +102,7 @@ export default function VariantGrid({
                 <td className="border px-2 py-1">
                   <input
                     type="text"
-                    className="w-28 border px-2 py-1 rounded"
+                    className="w-28 rounded border px-2 py-1"
                     value={variant.sku || ""}
                     onChange={(e) => onChange(combo, "sku", e.target.value)}
                   />
@@ -115,14 +116,14 @@ export default function VariantGrid({
                       if (!e.target.files) return;
                       const fileCount =
                         (variant.images?.length || 0) + e.target.files.length;
-                      if (fileCount > 8) {
-                        alert("Maximum 8 images allowed per variant.");
+                      if (fileCount > 3) {
+                        toast.error("Maximum 3 images allowed per variant.");
                         return;
                       }
                       onUpload(combo, e.target.files);
                     }}
                   />
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="mt-1 flex flex-wrap gap-1">
                     {(variant.images || []).map((img, i) => {
                       const previewUrl =
                         img instanceof File ? URL.createObjectURL(img) : "";
@@ -133,11 +134,11 @@ export default function VariantGrid({
                             height={150}
                             src={previewUrl}
                             alt="variant"
-                            className="w-14 h-14 object-cover border"
+                            className="h-14 w-14 border object-cover"
                           />
                           <ThemedButton
                             type="button"
-                            className="absolute -top-1 -right-1 bg-white rounded-full border w-1 h-1"
+                            className="absolute -top-1 -right-1 h-1 w-1 rounded-full border bg-white"
                             onClick={() => onImageRemove(combo, img)}
                           >
                             <FaX className="text-red-600" />

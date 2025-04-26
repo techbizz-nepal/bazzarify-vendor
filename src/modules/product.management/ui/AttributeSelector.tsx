@@ -5,10 +5,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { TAttribute, TAttributeValue } from "@/modules/product.management";
 import { Label } from "@radix-ui/react-menu";
 import { Plus, Trash } from "lucide-react";
-import { TAttribute, TAttributeValue } from "@/modules/product.management";
-import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 
 interface Props {
   attributes: TAttribute[];
@@ -32,7 +32,7 @@ export default function AttributeSelector({
         );
 
         return (
-          <div key={attr.uuid} className="p-4 border rounded-lg space-y-3">
+          <div key={attr.uuid} className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center gap-2">
               <Label className="text-base font-medium">{attr.name}</Label>
             </div>

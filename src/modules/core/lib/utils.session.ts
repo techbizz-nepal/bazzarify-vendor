@@ -1,6 +1,6 @@
-import "server-only";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+import "server-only";
 
 type SessionPayload = {
   token: string;

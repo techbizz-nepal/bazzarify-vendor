@@ -1,12 +1,6 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
-import {
-  actionUpdateCategory,
-  actionViewCategory,
-} from "@/modules/product.management/actions/category";
-import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
-import { useEffect, useState } from "react";
+import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
 import {
   IPaginatedData,
   TAttribute,
@@ -14,11 +8,17 @@ import {
   TSpecification,
 } from "@/modules/product.management";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
-import CategoryCard from "@/modules/product.management/components/client/category/ui/CategoryCard";
+import {
+  actionUpdateCategory,
+  actionViewCategory,
+} from "@/modules/product.management/actions/category";
+import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
 import CategoryAttributesCard from "@/modules/product.management/components/client/category/ui/CategoryAttributesCard";
+import CategoryCard from "@/modules/product.management/components/client/category/ui/CategoryCard";
 import CategorySpecificationsCard from "@/modules/product.management/components/client/category/ui/CategorySpecificationsCard";
+import { useQueries } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
 
 export default function CategoryView({ slug }: { slug: string }) {
   const [specificationPage, setSpecificationPage] = useState<number>(1);

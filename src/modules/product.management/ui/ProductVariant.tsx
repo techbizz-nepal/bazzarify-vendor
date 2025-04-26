@@ -1,8 +1,8 @@
 "use client";
 
 import { TAttribute, VariantState } from "@/modules/product.management";
-import VariantGrid from "@/modules/product.management/ui/VariantGrid";
 import AttributeSelector from "@/modules/product.management/ui/AttributeSelector";
+import VariantGrid from "@/modules/product.management/ui/VariantGrid";
 
 interface IProductVariant {
   variantState: VariantState;

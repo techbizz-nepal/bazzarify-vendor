@@ -1,25 +1,25 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { BaseSyntheticEvent } from "react";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import {
-  RegistrationVerificationFormSchema,
-  RegistrationVerificationFormValues,
-} from "@/modules/guest/config/schemas/registrationVerificationForm";
 import { actionSetBusinessAndEmail } from "@/modules/guest/actions/auth";
 import {
-  BusinessAndEmailFormValues,
-  SetBusinessAndEmailSchema,
-} from "@/modules/guest/config/schemas/set.business.email.form";
+  actionRequestRegistration,
+  actionVerifyRegistration,
+} from "@/modules/guest/actions/register";
 import {
   RegistrationRequestFormSchema,
   RegistrationRequestFormValues,
 } from "@/modules/guest/config/schemas/registrationRequestForm";
 import {
-  actionRequestRegistration,
-  actionVerifyRegistration,
-} from "@/modules/guest/actions/register";
+  RegistrationVerificationFormSchema,
+  RegistrationVerificationFormValues,
+} from "@/modules/guest/config/schemas/registrationVerificationForm";
+import {
+  BusinessAndEmailFormValues,
+  SetBusinessAndEmailSchema,
+} from "@/modules/guest/config/schemas/set.business.email.form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams } from "next/navigation";
+import { BaseSyntheticEvent } from "react";
+import { useForm } from "react-hook-form";
 
 export default function useVendorRegistration(
   router: AppRouterInstance,

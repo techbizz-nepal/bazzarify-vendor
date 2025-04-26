@@ -1,6 +1,3 @@
-import { UseFormReturn } from "react-hook-form";
-import { RegistrationRequestFormValues } from "@/modules/guest/config/schemas/registrationRequestForm";
-import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -10,10 +7,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { OTPChannel } from "@/modules/guest/data/OTPChannel";
 import { cn } from "@/lib/utils";
-import React, { BaseSyntheticEvent } from "react";
+import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { RegistrationRequestFormValues } from "@/modules/guest/config/schemas/registrationRequestForm";
+import { OTPChannel } from "@/modules/guest/data/OTPChannel";
+import { BaseSyntheticEvent } from "react";
+import { UseFormReturn } from "react-hook-form";
 
 interface IRegistrationRequest {
   form: UseFormReturn<{
@@ -44,7 +44,7 @@ const RegistrationRequest = ({ form, onSubmit }: IRegistrationRequest) => (
               <FormControl>
                 <Input
                   autoComplete="mobile tel"
-                  className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                  className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                   type="number"
                   placeholder="Enter phone"
                   {...field}
@@ -58,14 +58,14 @@ const RegistrationRequest = ({ form, onSubmit }: IRegistrationRequest) => (
         <ThemedButton
           value={OTPChannel.whatsapp.value}
           name="channel"
-          className={cn(`w-full text-md py-6 cursor-pointer`)}
+          className={cn(`text-md w-full cursor-pointer py-6`)}
         >
           Send OTP via Whatsapp
         </ThemedButton>
         <ThemedButton
           name="channel"
           value={OTPChannel.sms.value}
-          className="w-full text-md py-6 bg-transparent border border-primary text-primary hover:text-white cursor-pointer"
+          className="text-md border-primary text-primary w-full cursor-pointer border bg-transparent py-6 hover:text-white"
         >
           Verify with SMS
         </ThemedButton>

@@ -1,19 +1,19 @@
-import { useMemo, useRef, useState } from "react";
 import {
   TAttribute,
   TCategory,
   TSpecification,
   VariantData,
 } from "@/modules/product.management";
-import { useQuery } from "@tanstack/react-query";
-import { actionGetCategories } from "@/modules/product.management/actions/category";
-import generateCombinations from "@/modules/product.management/utils/generateCombinations";
-import slugify from "slugify";
-import { actionStoreProducts } from "@/modules/product.management/actions/product";
-import { toast } from "sonner";
-import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
+import { actionGetCategories } from "@/modules/product.management/actions/category";
+import { actionStoreProducts } from "@/modules/product.management/actions/product";
+import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
+import generateCombinations from "@/modules/product.management/utils/generateCombinations";
+import { useQuery } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
+import { useMemo, useRef, useState } from "react";
+import slugify from "slugify";
+import { toast } from "sonner";
 
 export default function useCreateProduct() {
   // -------------------- STATE --------------------
@@ -172,7 +172,7 @@ export default function useCreateProduct() {
         ...prev,
         [key]: {
           ...(prev[key] || {}),
-          images: [...existing, ...fileList].slice(0, 8),
+          images: [...existing, ...fileList].slice(0, 3),
         },
       };
     });

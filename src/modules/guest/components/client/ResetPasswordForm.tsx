@@ -1,8 +1,5 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -12,17 +9,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import FormTitle from "@/modules/core/components/server/FormTitle";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import {
   ResetPasswordFormSchema,
   ResetPasswordFormValues,
 } from "@/modules/guest/config/schemas/reset.password.form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
-import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
-import { Separator } from "@/components/ui/separator";
-import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { useForm } from "react-hook-form";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -100,7 +100,7 @@ export default function ResetPasswordForm() {
                 <FormLabel className="text-slate-500">Phone</FormLabel>
                 <FormControl>
                   <Input
-                    className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="number"
                     placeholder="Enter phone"
                     {...field}
@@ -113,7 +113,7 @@ export default function ResetPasswordForm() {
           />
           <ThemedButton
             className={cn(
-              "w-full text-md py-6",
+              "text-md w-full py-6",
               form.formState.isSubmitting ? "animate-pulse" : undefined,
             )}
           >
@@ -124,7 +124,7 @@ export default function ResetPasswordForm() {
       <Separator />
       <Link
         href="/login"
-        className="w-full text-md py-3 border border-muted flex items-center justify-center"
+        className="text-md border-muted flex w-full items-center justify-center border py-3"
       >
         Back to Sign in
       </Link>

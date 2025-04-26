@@ -1,6 +1,6 @@
-import { use, useEffect } from "react";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
 
 export default function usePageAuthentication() {
   const sessionCtx = use(SessionContext);

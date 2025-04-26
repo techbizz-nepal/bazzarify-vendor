@@ -5,7 +5,6 @@ import useDataTable from "@/modules/core/hooks/useDataTable";
 import { TCategory } from "@/modules/product.management";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import CategoryDataTable from "@/modules/product.management/components/client/category/CategoryDataTable";
-import React from "react";
 
 export default function CategoryIndex() {
   const {

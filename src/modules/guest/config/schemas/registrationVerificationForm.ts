@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { phoneRegex } from "@/modules/core/lib/utils.index";
+import { z } from "zod";
 
 export const RegistrationVerificationFormSchema = z
   .object({

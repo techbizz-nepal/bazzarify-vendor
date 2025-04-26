@@ -1,5 +1,3 @@
-import { UseFormReturn } from "react-hook-form";
-import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -9,9 +7,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import React, { BaseSyntheticEvent } from "react";
-import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
+import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
+import { BaseSyntheticEvent } from "react";
+import { UseFormReturn } from "react-hook-form";
 
 interface ISetBusinessAndEmailForm {
   form: UseFormReturn<{
@@ -42,7 +42,7 @@ const SetBusinessAndEmail = ({ form, onSubmit }: ISetBusinessAndEmailForm) => (
               <FormControl>
                 <Input
                   autoComplete="given-name"
-                  className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                  className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                   placeholder="Store Name"
                   {...field}
                 />
@@ -59,7 +59,7 @@ const SetBusinessAndEmail = ({ form, onSubmit }: ISetBusinessAndEmailForm) => (
                 <Input
                   type="email"
                   autoComplete="email"
-                  className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                  className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                   placeholder="Enter your business email"
                   {...field}
                 />
@@ -68,7 +68,7 @@ const SetBusinessAndEmail = ({ form, onSubmit }: ISetBusinessAndEmailForm) => (
             </FormItem>
           )}
         />
-        <ThemedButton className={cn(`w-full text-md py-6 cursor-pointer`)}>
+        <ThemedButton className={cn(`text-md w-full cursor-pointer py-6`)}>
           Submit
         </ThemedButton>
       </form>

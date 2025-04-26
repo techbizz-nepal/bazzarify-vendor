@@ -7,14 +7,14 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Settings } from "lucide-react";
-import { FaFirstOrder, FaProductHunt, FaUsers } from "react-icons/fa6";
-import { AiFillProduct } from "react-icons/ai";
-import { TbCategory } from "react-icons/tb";
 import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
 import { TMenuItem } from "@/modules/core/data";
-import { FaHome } from "react-icons/fa";
+import { Settings } from "lucide-react";
 import Image from "next/image";
+import { AiFillProduct } from "react-icons/ai";
+import { FaHome } from "react-icons/fa";
+import { FaFirstOrder, FaProductHunt, FaUsers } from "react-icons/fa6";
+import { TbCategory } from "react-icons/tb";
 
 const items: TMenuItem[] = [
   {

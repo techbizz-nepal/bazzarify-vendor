@@ -1,10 +1,10 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FaHome } from "react-icons/fa";
 import { FaAngleRight } from "react-icons/fa6";
-import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
 
 export const Breadcrumb = () => {
   const pathname = usePathname();
@@ -14,17 +14,17 @@ export const Breadcrumb = () => {
 
   return (
     <div
-      className={cn("flex items-center text-primary space-x-2")}
+      className={cn("text-primary flex items-center space-x-2")}
       id="breadcrumbs"
     >
-      <Link href="/" className="flex items-center space-x-2 text-md">
+      <Link href="/" className="text-md flex items-center space-x-2">
         <FaHome size={20} />
       </Link>
 
       {paths.map((path, index) => {
         const isLast = index === paths.length - 1;
         return (
-          <div className="flex items-center space-x-2 text-md" key={index}>
+          <div className="text-md flex items-center space-x-2" key={index}>
             <FaAngleRight size={14} />
             {isLast ? (
               <span>{path}</span>

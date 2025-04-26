@@ -1,9 +1,9 @@
 "use client";
 
-import { ReactNode } from "react";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
 import { TMenuItem } from "@/modules/core/data";
+import { usePathname } from "next/navigation";
+import { ReactNode } from "react";
 
 export default function SidebarMenuButtonComponent({
   children,

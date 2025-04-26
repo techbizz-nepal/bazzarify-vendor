@@ -1,12 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
 import { LoaderPinwheel } from "lucide-react";
+import { Suspense } from "react";
 
 export default function Page() {
   return (
     <Suspense fallback={<LoaderPinwheel />}>
-      <div className="w-full h-screen bg-slate-200 flex flex-col justify-center items-center"></div>
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-200"></div>
     </Suspense>
   );
 }

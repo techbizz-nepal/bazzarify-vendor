@@ -1,7 +1,5 @@
 "use client";
 
-import { UseFormReturn } from "react-hook-form";
-import FormTitle from "@/modules/core/components/server/FormTitle";
 import {
   Form,
   FormControl,
@@ -10,21 +8,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { use, useEffect, useState } from "react";
-import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
-import Link from "next/link";
-import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
-import { phoneRegex } from "@/modules/core/lib/utils.index";
+import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
+import { phoneRegex } from "@/modules/core/lib/utils.index";
+import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { use, useEffect, useState } from "react";
+import { UseFormReturn } from "react-hook-form";
 
 interface IRegistrationRequestVerification {
   className?: string;
@@ -93,15 +93,15 @@ export default function RegistrationVerification({
                     {...field}
                   >
                     <InputOTPGroup>
-                      <InputOTPSlot className="w-14 h-12" index={0} />
-                      <InputOTPSlot className="w-14 h-12" index={1} />
-                      <InputOTPSlot className="w-14 h-12" index={2} />
+                      <InputOTPSlot className="h-12 w-14" index={0} />
+                      <InputOTPSlot className="h-12 w-14" index={1} />
+                      <InputOTPSlot className="h-12 w-14" index={2} />
                     </InputOTPGroup>
                     <InputOTPSeparator />
                     <InputOTPGroup>
-                      <InputOTPSlot className="w-14 h-12" index={3} />
-                      <InputOTPSlot className="w-14 h-12" index={4} />
-                      <InputOTPSlot className="w-14 h-12" index={5} />
+                      <InputOTPSlot className="h-12 w-14" index={3} />
+                      <InputOTPSlot className="h-12 w-14" index={4} />
+                      <InputOTPSlot className="h-12 w-14" index={5} />
                     </InputOTPGroup>
                   </InputOTP>
                 </FormControl>
@@ -117,7 +117,7 @@ export default function RegistrationVerification({
                 <FormControl>
                   <Input
                     autoComplete="new-password"
-                    className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="password"
                     placeholder="Enter password"
                     {...field}
@@ -137,7 +137,7 @@ export default function RegistrationVerification({
                 <FormControl>
                   <Input
                     autoComplete="new-password"
-                    className="border border-slate-300 placeholder:text-slate-400 accent-orange-600"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="password"
                     placeholder="Confirm password"
                     {...field}
@@ -149,13 +149,13 @@ export default function RegistrationVerification({
             name="password_confirmation"
           />
           <ThemedButton
-            className="w-full text-md py-6 cursor-pointer"
+            className="text-md w-full cursor-pointer py-6"
             type="submit"
           >
             {buttonLabel}
           </ThemedButton>
           <Link
-            className="w-full text-md py-3 cursor-pointer bg-foreground text-primary-foreground rounded-md flex items-center justify-center"
+            className="text-md bg-foreground text-primary-foreground flex w-full cursor-pointer items-center justify-center rounded-md py-3"
             href="/register"
           >
             Back

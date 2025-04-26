@@ -1,18 +1,18 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import PageContainer from "@/modules/core/components/server/PageContainer";
-import React, { Suspense } from "react";
-import { Loader } from "lucide-react";
-import CategoryDropdown from "@/modules/product.management/ui/CategoryDropdown";
-import useCreateProduct from "@/modules/product.management/hooks/useCreateProduct";
-import { TCategory } from "@/modules/product.management";
-import ProductVariant from "@/modules/product.management/ui/ProductVariant";
-import ProductCard from "@/modules/product.management/ui/ProductCard";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
+import PageContainer from "@/modules/core/components/server/PageContainer";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { TCategory } from "@/modules/product.management";
+import useCreateProduct from "@/modules/product.management/hooks/useCreateProduct";
+import CategoryDropdown from "@/modules/product.management/ui/CategoryDropdown";
+import ProductCard from "@/modules/product.management/ui/ProductCard";
+import ProductVariant from "@/modules/product.management/ui/ProductVariant";
+import { Loader } from "lucide-react";
+import { Suspense } from "react";
 
 export default function CreateContainer() {
   const {
@@ -46,7 +46,7 @@ export default function CreateContainer() {
   return (
     <PageContainer pageTitle="Create Products">
       <ProductCard title="Basic Information">
-        <div className="flex-col w-full max-w-6xl items-center space-y-3">
+        <div className="w-full max-w-6xl flex-col items-center space-y-3">
           <Label htmlFor="product-name">Product Name</Label>
           <Input
             ref={nameRef}
@@ -57,7 +57,7 @@ export default function CreateContainer() {
           />
         </div>
         <Suspense fallback={<Loader />}>
-          <div className="flex-col w-full max-w-6xl items-center space-y-3">
+          <div className="w-full max-w-6xl flex-col items-center space-y-3">
             <Label>Category</Label>
             <CategoryDropdown
               selectedCategories={selectedCategories}
@@ -142,7 +142,7 @@ export default function CreateContainer() {
               name="description"
               rows={4}
               placeholder="Write a short product description here..."
-              className="w-full border rounded-md px-3 py-2"
+              className="w-full rounded-md border px-3 py-2"
             />
           </ProductCard>
           <div className="pb-10">

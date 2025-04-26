@@ -1,5 +1,5 @@
-import CategoryEdit from "@/modules/product.management/components/client/category/CategoryEdit";
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import CategoryEdit from "@/modules/product.management/components/client/category/CategoryEdit";
 
 export default async function Page({
   params,

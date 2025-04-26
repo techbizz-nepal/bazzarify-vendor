@@ -10,7 +10,7 @@ export default function DashboardContainer() {
 }
 
 const Statistics = () => (
-  <Card className="px-4 items-center justify-center" id="stats">
+  <Card className="items-center justify-center px-4" id="stats">
     <p>Welcome to dashboard.</p>
   </Card>
 );

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 export default function Page() {
   return (
-    <div className="w-full h-screen bg-slate-200 flex flex-col justify-center items-center">
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-200">
       <ResetPasswordForm />
     </div>
   );
