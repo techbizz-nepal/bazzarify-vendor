@@ -41,13 +41,17 @@ export default function CategoryView({ slug }: { slug: string }) {
             perPage: specificationPerPage,
           }),
       },
-      { queryKey: ["attribute"], queryFn: actionGetAttributes },
+      {
+        queryKey: ["attribute"],
+        queryFn: () => actionGetAttributes(),
+      },
     ],
   });
-  // declarations;
   const response = {
     category: categoryResponse?.data.payload.category as TCategory,
-    attributes: attributesResponse?.data.payload.attributes as TAttribute[],
+    attributes: attributesResponse?.data.payload.attributes as IPaginatedData<
+      TAttribute[]
+    >,
     specifications: specificationsResponse?.data.payload
       .specifications as IPaginatedData<TSpecification[]>,
   };
@@ -58,18 +62,23 @@ export default function CategoryView({ slug }: { slug: string }) {
   >([]);
 
   useEffect(() => {
-    if (response.category) {
+    if (response.category?.attributes) {
       setSelectedAttributes(response.category.attributes);
+    }
+    if (response.category?.specifications) {
       setSelectedSpecifications(response.category.specifications);
     }
   }, [response.category]);
 
   const handleAttributeChange = (uuid: string) => {
-    setSelectedAttributes((prevState) =>
-      prevState.includes(uuid)
-        ? prevState.filter((id) => id !== uuid)
-        : [...prevState, uuid],
-    );
+    setSelectedAttributes((prevState) => {
+      if (prevState) {
+        return prevState?.includes(uuid)
+          ? prevState.filter((id) => id !== uuid)
+          : [...prevState, uuid];
+      }
+      return [];
+    });
   };
   const handleSpecificationChange = (specId: string) => {
     setSelectedSpecifications((prevState) =>
@@ -116,7 +125,7 @@ export default function CategoryView({ slug }: { slug: string }) {
         <>
           {response.attributes ? (
             <CategoryAttributesCard
-              attributes={response.attributes}
+              attributes={response.attributes?.data}
               selectedIds={selectedAttributes}
               onAttributeChange={handleAttributeChange}
               onUpdateAction={handleUpdateCategory}

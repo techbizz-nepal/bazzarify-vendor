@@ -45,6 +45,7 @@ export type TURLSearchParams = {
   rootOnly?: boolean;
   sort?: string;
   include?: string;
+  uuids?: string;
 };
 export type TEntities =
   | "category"

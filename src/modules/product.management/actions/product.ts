@@ -1,3 +1,5 @@
+"use server";
+
 import { TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";

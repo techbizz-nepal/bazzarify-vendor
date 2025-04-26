@@ -37,10 +37,7 @@ export const authAxiosInstance = async () => {
     headers: { Authorization: `Bearer ${token}` },
   });
   instance.interceptors.response.use((response) => {
-    if (
-      "metaData" in response.data &&
-      response.data.metaData.errorCode === 401
-    ) {
+    if (response.data?.metaData?.errorCode === 401) {
       deleteSession();
       redirect("/login");
     }

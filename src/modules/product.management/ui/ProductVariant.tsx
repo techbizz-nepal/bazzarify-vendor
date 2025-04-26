@@ -1,24 +1,18 @@
 "use client";
 
-import {
-  TAttribute,
-  TCategory,
-  VariantState,
-} from "@/modules/product.management";
+import { TAttribute, VariantState } from "@/modules/product.management";
 import VariantGrid from "@/modules/product.management/ui/VariantGrid";
 import AttributeSelector from "@/modules/product.management/ui/AttributeSelector";
 
 interface IProductVariant {
   variantState: VariantState;
-  category: TCategory;
+  attributes: TAttribute[];
 }
 
 export default function ProductVariant({
   variantState,
-  category,
+  attributes,
 }: IProductVariant) {
-  const attributes = category.attributes_with_model as TAttribute[];
-
   const {
     selections,
     columns,

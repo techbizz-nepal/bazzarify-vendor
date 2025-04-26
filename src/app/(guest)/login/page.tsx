@@ -9,9 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  if (await getSessionPayload()) {
-    redirect("/");
-  }
   return (
     <main className="w-full h-screen bg-slate-200 flex flex-col justify-center items-center">
       <LoginForm />

@@ -1,4 +1,4 @@
-import { FaTrashCan } from "react-icons/fa6";
+import { FaTrashCan, FaX } from "react-icons/fa6";
 import { VariantData } from "@/modules/product.management";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
@@ -129,18 +129,18 @@ export default function VariantGrid({
                       return (
                         <div key={i} className="relative">
                           <Image
-                            width={50}
-                            height={50}
+                            width={150}
+                            height={150}
                             src={previewUrl}
                             alt="variant"
-                            className="w-10 h-10 object-cover border"
+                            className="w-14 h-14 object-cover border"
                           />
                           <ThemedButton
                             type="button"
-                            className="absolute -top-1 -right-1 bg-white rounded-full border"
+                            className="absolute -top-1 -right-1 bg-white rounded-full border w-1 h-1"
                             onClick={() => onImageRemove(combo, img)}
                           >
-                            <FaTrashCan className="h-3 w-3 text-red-600" />
+                            <FaX className="text-red-600" />
                           </ThemedButton>
                         </div>
                       );

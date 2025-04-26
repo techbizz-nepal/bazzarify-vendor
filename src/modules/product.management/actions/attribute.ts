@@ -2,12 +2,13 @@
 
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";
+import { TURLSearchParams } from "@/modules/core";
 
-export const actionGetAttributes = async () => {
+export const actionGetAttributes = async (params?: TURLSearchParams) => {
   try {
     const response = await (
       await authAxiosInstance()
-    ).get(PRODUCT_MANAGEMENT_ROUTES.attribute.index.path);
+    ).get(PRODUCT_MANAGEMENT_ROUTES.attribute.index.path, { params });
     return response.data;
   } catch (error) {
     console.error(error);

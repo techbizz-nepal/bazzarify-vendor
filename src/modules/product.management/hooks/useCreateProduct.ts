@@ -1,10 +1,19 @@
 import { useMemo, useRef, useState } from "react";
-import { TCategory, VariantData } from "@/modules/product.management";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  TAttribute,
+  TCategory,
+  TSpecification,
+  VariantData,
+} from "@/modules/product.management";
+import { useQuery } from "@tanstack/react-query";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import generateCombinations from "@/modules/product.management/utils/generateCombinations";
 import slugify from "slugify";
 import { actionStoreProducts } from "@/modules/product.management/actions/product";
+import { toast } from "sonner";
+import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
+import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
+import { redirect } from "next/navigation";
 
 export default function useCreateProduct() {
   // -------------------- STATE --------------------
@@ -19,14 +28,18 @@ export default function useCreateProduct() {
   const [specifications, setSpecifications] = useState<Record<string, string>>(
     {},
   );
+  const [categorySpecifications, setCategorySpecifications] = useState<
+    TSpecification[]
+  >([]);
+  const [categoryAttributes, setCategoryAttributes] = useState<TAttribute[]>(
+    [],
+  );
   const [columns, setColumns] = useState<string[]>([]);
   const [variantData, setVariantData] = useState<Record<string, VariantData>>(
     {},
   );
 
-  const {
-    data: { data, metaData },
-  } = useSuspenseQuery({
+  const { data } = useQuery({
     queryKey: ["allCategories"],
     queryFn: () => actionGetCategories({ rootOnly: true, sort: "name" }),
   });
@@ -47,9 +60,48 @@ export default function useCreateProduct() {
     setSelectedCategories((prev) => [prev[0], category]);
   };
 
-  const handleClickSubChild = (category: TCategory) => {
+  const handleClickSubChild = async (category: TCategory) => {
     setSelectedCategories((prev) => [prev[0], prev[1], category]);
-    setShowDropdown(!showDropdown);
+    try {
+      const promises = await Promise.all([
+        actionGetSpecifications({
+          uuids: category.specifications.join(","),
+        }),
+        actionGetAttributes({
+          uuids: category.attributes.join(","),
+        }),
+      ]);
+
+      // You can now destructure the responses from the promises array
+      const [specificationsResponse, attributesResponse] = promises;
+
+      if (
+        specificationsResponse.metaData.error ||
+        attributesResponse.metaData.error
+      ) {
+        toast.error("Oops, something went wrong while fetching data!");
+        return;
+      }
+
+      const specificationsData = specificationsResponse.data.payload
+        .specifications?.data as TSpecification[];
+      if (specificationsData) {
+        setCategorySpecifications(specificationsData);
+        setSpecifications({});
+      }
+
+      const attributesData = attributesResponse.data.payload.attributes
+        ?.data as TAttribute[];
+      if (attributesData) {
+        setCategoryAttributes(attributesData);
+        setSelections({});
+      }
+    } catch (error: unknown) {
+      console.error("Error fetching specifications and attributes:", error);
+      toast.error("Oops, an error occurred while fetching data!");
+    } finally {
+      setShowDropdown(!showDropdown);
+    }
   };
 
   const updateFilter = (level: "root" | "sub" | "subchild", value: string) => {
@@ -150,20 +202,25 @@ export default function useCreateProduct() {
 
   const handleSubmit = async () => {
     const newVariantData = { ...variantData };
-    let allValid = true;
+    let validStock = true;
 
     combinations.forEach((combo) => {
       const key = combo.join("|");
       const variant = variantData[key] || {};
-      const isValid = !!(variant.stock && variant.price && variant.sku);
+      const isValid = !!(
+        variant.stock &&
+        variant.price &&
+        variant.sku &&
+        variant.images
+      );
       newVariantData[key] = { ...variant, isValid };
-      if (!isValid) allValid = false;
+      if (!isValid) validStock = false;
     });
 
     setVariantData(newVariantData);
 
-    if (!allValid) {
-      alert("Please fill stock, price, and SKU for all variants.");
+    if (!validStock) {
+      toast.error("Please fill stock, price, SKU, images for variants.");
       return;
     }
 
@@ -177,8 +234,10 @@ export default function useCreateProduct() {
 
       const variantKey = combo.join("|");
       const variant = variantData[variantKey] || {};
+
       return {
         ...data,
+        name: variantKey.toLowerCase(),
         stock: variant.stock || "0",
         price: variant.price || "",
         sku: variant.sku || "",
@@ -186,33 +245,54 @@ export default function useCreateProduct() {
         available: variant.available ?? true,
       };
     });
-
     const name = nameRef.current?.value?.trim();
     const description = descriptionRef.current?.value?.trim();
 
     if (!name) {
-      alert("Product name is required");
+      toast.error("Product name is required");
+      return;
+    }
+    if (!description) {
+      toast.error("Product description is required");
       return;
     }
     if (!variants.length) {
-      alert("Select least one variant");
+      toast.error("Select least one variant");
       return;
     }
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description || "");
-    formData.append("category", selectedCategories[2]?.name);
+    formData.append("category", selectedCategories[2]?.uuid);
     for (const key in specifications) {
       formData.append(`specifications[${key}]`, specifications[key]);
+    }
+    if (Object.keys(specifications).length === 0) {
+      toast.error("Please fill specifications");
+      return;
     }
     variants.forEach((variant, variantIndex) => {
       columns.forEach((attr) => {
         const key = slugify(attr, { lower: true });
+        const attributeValue = categoryAttributes
+          .filter((attr) => attr.name === key)[0]
+          .attribute_value.filter(
+            (values) => values.label === (variant as never)[key],
+          )[0];
         formData.append(
-          `variants[${variantIndex}][${key}]`,
-          (variant as never)[key] || "",
+          `variants[${variantIndex}][attribute][${key}|${(variant as never)[key]}][attributeUuid]`,
+          attributeValue.attribute_uuid,
         );
+        formData.append(
+          `variants[${variantIndex}][attribute][${key}|${(variant as never)[key]}][attributeValueUuid]`,
+          attributeValue.uuid,
+        );
+        // formData.append(
+        //   `variants[${variantIndex}][${key}]`,
+        //   (variant as never)[key] || "",
+        // );
       });
+      formData.append(`variants[${variantIndex}][name]`, variant.name);
       formData.append(`variants[${variantIndex}][stock]`, variant.stock);
       formData.append(`variants[${variantIndex}][price]`, variant.price);
       formData.append(`variants[${variantIndex}][sku]`, variant.sku);
@@ -229,19 +309,16 @@ export default function useCreateProduct() {
       });
     });
 
-    // const payload = {
-    //   name,
-    //   description: description || "",
-    //   category: selectedCategories[2]?.name,
-    //   specifications,
-    //   variants,
-    // };
     actionStoreProducts(formData)
       .then((res) => {
-        console.log("Submitted payload", [formData, res]);
+        if (res.data.metaData.error) {
+          toast.error(res.data.metaData);
+          return;
+        }
+        redirect("/products");
       })
       .catch((err) => {
-        console.error(err);
+        toast.error("Error Submitted payload", err);
       });
   };
 
@@ -251,22 +328,21 @@ export default function useCreateProduct() {
     subCategories,
     subChildCategories,
     specifications,
+    categorySpecifications,
+    categoryAttributes,
     filters,
-    data,
-    metaData,
+    responseData: data,
     nameRef,
     descriptionRef,
-    handleSpecificationChange,
     handleShowDropdownChange,
     handleClickRoot,
     handleClickSub,
     handleClickSubChild,
     updateFilter,
     handleSubmit,
+    setSpecifications,
+    handleSpecificationChange,
     variantState: {
-      specifications,
-      setSpecifications,
-      handleSpecificationChange,
       selections,
       setSelections,
       toggleValue,

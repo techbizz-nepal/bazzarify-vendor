@@ -10,9 +10,9 @@ import useCreateProduct from "@/modules/product.management/hooks/useCreateProduc
 import { TCategory } from "@/modules/product.management";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
-import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
 
 export default function CreateContainer() {
   const {
@@ -24,9 +24,10 @@ export default function CreateContainer() {
     subCategories,
     filters,
     specifications,
+    categorySpecifications,
+    categoryAttributes,
     handleSpecificationChange,
-    data,
-    metaData,
+    responseData,
     variantState,
     handleClickRoot,
     handleShowDropdownChange,
@@ -35,13 +36,12 @@ export default function CreateContainer() {
     updateFilter,
     handleSubmit,
   } = useCreateProduct();
-
+  if (!responseData) return <ContentSkeleton />;
+  const { data, metaData } = responseData;
   const rootCategories = (data.payload.categories?.data as TCategory[]) || [];
   if (metaData.error) {
-    return <h1>Error: {data.metaData.error}</h1>;
+    return <h1>Error: {metaData?.error}</h1>;
   }
-
-  const selectedCategory = selectedCategories[2];
 
   return (
     <PageContainer pageTitle="Create Products">
@@ -83,45 +83,39 @@ export default function CreateContainer() {
       {selectedCategories?.length === 3 && (
         <>
           <ProductCard title="Media" />
-          {selectedCategories[2].specifications?.length > 0 && (
+          {categorySpecifications.length > 0 && (
             <ProductCard title="Product Specifications">
               <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-                {selectedCategories[2].specifications_with_model.map(
-                  (specification) => (
-                    <div
-                      className="flex-col space-y-3"
-                      key={specification.uuid}
+                {categorySpecifications.map((specification) => (
+                  <div className="flex-col space-y-3" key={specification.uuid}>
+                    <Label
+                      htmlFor={`specification-value-`.concat(specification.key)}
                     >
-                      <Label
-                        htmlFor={`specification-value-`.concat(
-                          specification.key,
-                        )}
-                      >
-                        {specification.key.replaceAll("-", " ")}
-                      </Label>
-                      {specification.type === "text" && (
-                        <Input
-                          name={`specifications[${specification.key}]`}
-                          id={`specification-value-`.concat(specification.key)}
-                          type={specification.type}
-                          className="focus-visible:ring-primary"
-                          value={specifications[specification.key] || ""}
-                          onChange={(e) =>
-                            handleSpecificationChange(
-                              specification.key,
-                              e.target.value,
-                            )
-                          }
-                        />
-                      )}
-                    </div>
-                  ),
-                )}
+                      {specification.key.replaceAll("-", " ")}
+                    </Label>
+                    {specification.type === "text" && (
+                      <Input
+                        name={`specifications[${specification.key}]`}
+                        id={`specification-value-`.concat(specification.key)}
+                        type={specification.type}
+                        required={true}
+                        className="focus-visible:ring-primary"
+                        defaultValue={specifications[specification.key] || ""}
+                        onChange={(e) =>
+                          handleSpecificationChange(
+                            specification.key,
+                            e.target.value,
+                          )
+                        }
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
             </ProductCard>
           )}
 
-          {selectedCategory.attributes?.length > 0 && (
+          {categoryAttributes?.length > 0 && (
             <ProductCard title="Product Variants">
               <ProductVariant
                 variantState={{
@@ -137,7 +131,7 @@ export default function CreateContainer() {
                   columns: variantState.columns,
                   handleReorderColumns: variantState.handleReorderColumns,
                 }}
-                category={selectedCategory}
+                attributes={categoryAttributes}
               />
             </ProductCard>
           )}
@@ -151,9 +145,11 @@ export default function CreateContainer() {
               className="w-full border rounded-md px-3 py-2"
             />
           </ProductCard>
-          <Card>
-            <ThemedButton onClick={handleSubmit}>Submit</ThemedButton>
-          </Card>
+          <div className="pb-10">
+            <ThemedButton onClick={handleSubmit} className="w-full">
+              Submit
+            </ThemedButton>
+          </div>
         </>
       )}
     </PageContainer>
