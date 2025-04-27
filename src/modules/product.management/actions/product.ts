@@ -1,22 +1,24 @@
 "use server";
 
-import { TURLSearchParams } from "@/modules/core";
+import { ApiResponse, Entity, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";
 
-export const actionGetProducts = async (params: TURLSearchParams) => {
+export const actionGetProducts = async (
+  params?: TURLSearchParams,
+): Promise<ApiResponse<{ data: Entity[] }>> => {
   try {
-    const response = await (
-      await authAxiosInstance()
-    ).get(PRODUCT_MANAGEMENT_ROUTES.product.index.path, {
-      params: {
-        ...params,
+    const axios = await authAxiosInstance();
+    const response = await axios.get(
+      PRODUCT_MANAGEMENT_ROUTES.product.index.path,
+      {
+        params,
       },
-    });
+    );
     return response.data;
   } catch (error) {
-    console.error(error);
-    return null;
+    console.error("Failed to fetch products", error);
+    throw error;
   }
 };
 export const actionStoreProducts = async (payload: FormData) => {

@@ -1,39 +1,29 @@
-"use client";
-
+import { Card, CardContent } from "@/components/ui/card";
+import DataTable from "@/modules/core/components/client/DataTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import useDataTable from "@/modules/core/hooks/useDataTable";
-import { TCategory } from "@/modules/product.management";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
-import CategoryDataTable from "@/modules/product.management/components/client/category/CategoryDataTable";
 
 export default function CategoryIndex() {
-  const {
-    page,
-    rows,
-    handlePreviousPage,
-    handleNextPage,
-    rowsCount,
-    handleFilterChange,
-    handleOnlyLastChildrenFilter,
-    handleViewAction,
-    handleEditAction,
-  } = useDataTable<TCategory, { categories: TCategory[] }>(
-    actionGetCategories,
-    "categories",
-  );
   return (
     <PageContainer pageTitle="Manage Categories">
-      <CategoryDataTable
-        page={page}
-        rowsCount={rowsCount}
-        data={rows}
-        onPreviousAction={handlePreviousPage}
-        onNextAction={handleNextPage}
-        onEditAction={handleEditAction}
-        onViewAction={handleViewAction}
-        onFilterChangeAction={handleFilterChange}
-        onOnlyLastChildrenAction={handleOnlyLastChildrenFilter}
-      />
+      <Card>
+        <CardContent>
+          <DataTable
+            entityKey="categories"
+            columns={[
+              { label: "Name", accessor: "name" },
+              { label: "Slug", accessor: "slug" },
+              { label: "Created At", accessor: "created_at" },
+            ]}
+            fetchAction={actionGetCategories}
+            filterOptions={[
+              { label: "Root Only", value: "rootOnly" },
+              { label: "Leaf Only", value: "leafOnly" },
+            ]}
+            defaultFilter="rootOnly"
+          />
+        </CardContent>
+      </Card>
     </PageContainer>
   );
 }
