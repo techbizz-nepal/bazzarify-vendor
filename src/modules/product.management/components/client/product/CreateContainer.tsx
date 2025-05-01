@@ -9,10 +9,9 @@ import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { TCategory } from "@/modules/product.management";
 import useCreateProduct from "@/modules/product.management/hooks/useCreateProduct";
 import CategoryDropdown from "@/modules/product.management/ui/CategoryDropdown";
+import ImageUploader from "@/modules/product.management/ui/ImageUploader";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
-import { Loader } from "lucide-react";
-import { Suspense } from "react";
 
 export default function CreateContainer() {
   const {
@@ -35,6 +34,7 @@ export default function CreateContainer() {
     handleClickSub,
     updateFilter,
     handleSubmit,
+    handleProductImageUpload,
   } = useCreateProduct();
   if (!responseData) return <ContentSkeleton />;
   const { data, metaData } = responseData;
@@ -45,6 +45,24 @@ export default function CreateContainer() {
 
   return (
     <PageContainer pageTitle="Create Products">
+      <ProductCard
+        title="Product Images"
+        tooltip={{
+          trigger: { type: "icon" },
+          texts: [
+            "This is the main image of your product page. Maximum 8 images can be uploaded.",
+            "Image size between 330x330 and 5000x5000 px. Max file size: 3 MB.",
+            "Obscene image is strictly prohibited.",
+          ],
+        }}
+      >
+        <ImageUploader
+          onImageSelect={handleProductImageUpload}
+          initialImages={[
+            "https://gw.alicdn.com/imgextra/i3/O1CN01x7m2GQ1LsdRDBgVMZ_!!6000000001355-2-tps-104-108.png",
+          ]}
+        />
+      </ProductCard>
       <ProductCard title="Basic Information">
         <div className="w-full max-w-6xl flex-col items-center space-y-3">
           <Label htmlFor="product-name">Product Name</Label>
@@ -56,33 +74,33 @@ export default function CreateContainer() {
             placeholder="Ex. Nikon Coolpix A300 Digital Camera"
           />
         </div>
-        <Suspense fallback={<Loader />}>
-          <div className="w-full max-w-6xl flex-col items-center space-y-3">
-            <Label>Category</Label>
-            <CategoryDropdown
-              selectedCategories={selectedCategories}
-              open={showDropdown}
-              onOpenChangeAction={handleShowDropdownChange}
-              rootCategories={rootCategories.filter((cat) =>
-                cat.name.toLowerCase().includes(filters.root.toLowerCase()),
-              )}
-              subCategories={subCategories.filter((cat) =>
-                cat.name.toLowerCase().includes(filters.sub.toLowerCase()),
-              )}
-              subChildCategories={subChildCategories.filter((cat) =>
-                cat.name.toLowerCase().includes(filters.subchild.toLowerCase()),
-              )}
-              onClickRoot={handleClickRoot}
-              onClickSub={handleClickSub}
-              onClickSubChild={handleClickSubChild}
-              onFilterChange={updateFilter}
-            />
-          </div>
-        </Suspense>
+        <div
+          id="categories"
+          className="w-full max-w-6xl flex-col items-center space-y-3"
+        >
+          <Label>Category</Label>
+          <CategoryDropdown
+            selectedCategories={selectedCategories}
+            open={showDropdown}
+            onOpenChangeAction={handleShowDropdownChange}
+            rootCategories={rootCategories.filter((cat) =>
+              cat.name.toLowerCase().includes(filters.root.toLowerCase()),
+            )}
+            subCategories={subCategories.filter((cat) =>
+              cat.name.toLowerCase().includes(filters.sub.toLowerCase()),
+            )}
+            subChildCategories={subChildCategories.filter((cat) =>
+              cat.name.toLowerCase().includes(filters.subchild.toLowerCase()),
+            )}
+            onClickRoot={handleClickRoot}
+            onClickSub={handleClickSub}
+            onClickSubChild={handleClickSubChild}
+            onFilterChange={updateFilter}
+          />
+        </div>
       </ProductCard>
       {selectedCategories?.length === 3 && (
         <>
-          <ProductCard title="Media" />
           {categorySpecifications.length > 0 && (
             <ProductCard title="Product Specifications">
               <div className="grid grid-cols-2 gap-x-8 gap-y-5">

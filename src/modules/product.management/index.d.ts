@@ -90,4 +90,11 @@ export interface VariantState {
 export interface IProductCard {
   title: string;
   children?: ReactNode;
+  tooltip?: TooltipConfig;
 }
+export type TooltipTrigger = { type: "icon" } | { type: "text"; label: string };
+
+export type TooltipConfig = {
+  trigger: TooltipTrigger;
+  texts: string[];
+};

@@ -199,7 +199,9 @@ export default function useCreateProduct() {
   const handleSpecificationChange = (key: string, value: string) => {
     setSpecifications((prev) => ({ ...prev, [key]: value }));
   };
-
+  const handleProductImageUpload = (files: File[]) => {
+    console.log("handleProductImageUpload", files);
+  };
   const handleSubmit = async () => {
     const newVariantData = { ...variantData };
     let validStock = true;
@@ -331,6 +333,7 @@ export default function useCreateProduct() {
     categorySpecifications,
     categoryAttributes,
     filters,
+    handleProductImageUpload,
     responseData: data,
     nameRef,
     descriptionRef,

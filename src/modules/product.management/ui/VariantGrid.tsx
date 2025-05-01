@@ -1,7 +1,9 @@
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { VariantData } from "@/modules/product.management";
+import { CirclePlus } from "lucide-react";
 import Image from "next/image";
+import { useRef } from "react";
 import { FaX } from "react-icons/fa6";
 import { toast } from "sonner";
 
@@ -28,7 +30,11 @@ export default function VariantGrid({
   onImageRemove,
   columns,
 }: Props) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
   if (combinations.length === 0) return null;
+  const handleIconClick = () => {
+    imageInputRef.current?.click();
+  };
   return (
     <div className="overflow-auto rounded border">
       <table className="min-w-full table-auto border-collapse text-sm">
@@ -110,7 +116,9 @@ export default function VariantGrid({
                 <td className="border px-2 py-1">
                   <input
                     type="file"
+                    ref={imageInputRef}
                     multiple
+                    className="hidden"
                     accept="image/*"
                     onChange={(e) => {
                       if (!e.target.files) return;
@@ -146,6 +154,10 @@ export default function VariantGrid({
                         </div>
                       );
                     })}
+
+                    <div onClick={handleIconClick}>
+                      <CirclePlus width={50} height={50} />
+                    </div>
                   </div>
                 </td>
                 <td className="border px-2 py-1 text-center">
