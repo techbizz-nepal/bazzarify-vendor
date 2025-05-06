@@ -37,7 +37,7 @@ export interface ApiResponse<T> {
 }
 
 export interface FetchAction {
-  (params?: Record<string, T>): Promise<ApiResponse<T>>;
+  (params?: Record<string, T>): Promise<ApiResponse<T> | null>;
 }
 
 export interface UseDataTableControllerOptions {
@@ -58,7 +58,7 @@ type TCustomURLSearchParams = TURLSearchParams &
 interface DataTableProps {
   entityKey: string;
   columns: { label: string; accessor: string }[];
-  fetchAction: (params?: TURLSearchParams) => Promise<ApiResponse<T>>;
+  fetchAction: (params?: TURLSearchParams) => Promise<ApiResponse<T> | null>;
   filterOptions?: { label: string; value: string; key: string }[];
   defaultFilter?: string;
 }
