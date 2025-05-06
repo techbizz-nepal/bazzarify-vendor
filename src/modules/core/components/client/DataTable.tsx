@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { DataTableProps } from "@/modules/core";
 import { ConfirmDialog } from "@/modules/core/components/client/ConfirmDialog";
+import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { useDataTableController } from "@/modules/core/hooks/useDataTableController";
 
 export default function DataTable({
@@ -30,12 +31,12 @@ export default function DataTable({
 }: DataTableProps) {
   const {
     data,
-    search,
     page,
     meta,
     loading,
-    activeFilter,
     openDialog,
+    filters,
+    searchInputRef,
     onSearchChange,
     onPageChange,
     onFilterChange,
@@ -44,50 +45,59 @@ export default function DataTable({
     handleOpenDialog,
     handleSelectItem,
     handleConfirmDelete,
+    getNestedValue,
+    onFilterClear,
   } = useDataTableController({ entityKey, fetchAction });
 
   return (
     <Card className="p-4 shadow-md">
-      <div className="flex justify-between mb-4 items-center gap-4">
-        <Input
-          placeholder="Search by name..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="max-w-xs"
-        />
-        {filterOptions.length > 0 && (
-          <Select
-            value={activeFilter}
-            onValueChange={(value) => onFilterChange(value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {filterOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+      <div className="flex flex-col md:flex-row  justify-between mb-4 items-center gap-4">
+        <div className="flex-col space-y-7 items-center">
+          <div className="flex items-center space-x-2">
+            <Input
+              ref={searchInputRef}
+              placeholder="Search by name..."
+              className="max-w-xs"
+            />
+            <ThemedButton onClick={onSearchChange}>Search</ThemedButton>
+          </div>
+          <div className="flex items-center space-x-2">
+            {filterOptions.map((option) => (
+              <div key={option.key} className="flex  items-center space-x-2">
+                <Select
+                  key={option.key}
+                  value={filters[option.key] || ""}
+                  onValueChange={(value) => onFilterChange(option.key, value)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={`Filter by ${option.label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={option.value}>{option.label}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <ThemedButton onClick={() => onFilterClear(option.key)}>
+                  Clear
+                </ThemedButton>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="flex items-center gap-4">
           <div className="text-sm">Page {page}</div>
           <div className="flex gap-2">
-            <Button
+            <ThemedButton
               onClick={() => onPageChange("prev")}
               disabled={loading || (meta ? !meta.prev_page_url : true)}
             >
               Previous
-            </Button>
-            <Button
+            </ThemedButton>
+            <ThemedButton
               onClick={() => onPageChange("next")}
               disabled={loading || (meta ? !meta.next_page_url : true)}
             >
               Next
-            </Button>
+            </ThemedButton>
           </div>
         </div>
       </div>
@@ -103,10 +113,17 @@ export default function DataTable({
         <TableBody>
           {data.length > 0 ? (
             data.map((item) => (
-              <TableRow key={item.uuid}>
-                {columns.map((col) => (
-                  <TableCell key={col.accessor}>{item[col.accessor]}</TableCell>
-                ))}
+              <TableRow key={item?.uuid}>
+                {columns.map((col) => {
+                  const cellData = getNestedValue(item, col.accessor);
+                  return (
+                    <TableCell className="truncate" key={col.accessor}>
+                      {cellData.length <= 25
+                        ? cellData
+                        : cellData.slice(0, 25).concat("...")}
+                    </TableCell>
+                  );
+                })}
                 <TableCell>
                   <div className="flex gap-2">
                     <Button

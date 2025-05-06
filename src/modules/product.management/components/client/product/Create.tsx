@@ -2,7 +2,6 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
@@ -11,13 +10,18 @@ import useCreateProduct from "@/modules/product.management/hooks/useCreateProduc
 import CategoryDropdown from "@/modules/product.management/ui/CategoryDropdown";
 import ImageUploader from "@/modules/product.management/ui/ImageUploader";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
+import ProductDescription from "@/modules/product.management/ui/ProductDescription";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
 
-export default function CreateContainer() {
+export default function Create() {
   const {
     nameRef,
-    descriptionRef,
+    basePriceRef,
+    productDescriptionRef,
+    productHighlightsRef,
+    productBoxItemsRef,
     showDropdown,
+    existingProductImages,
     selectedCategories,
     subChildCategories,
     subCategories,
@@ -45,24 +49,7 @@ export default function CreateContainer() {
 
   return (
     <PageContainer pageTitle="Create Products">
-      <ProductCard
-        title="Product Images"
-        tooltip={{
-          trigger: { type: "icon" },
-          texts: [
-            "This is the main image of your product page. Maximum 8 images can be uploaded.",
-            "Image size between 330x330 and 5000x5000 px. Max file size: 3 MB.",
-            "Obscene image is strictly prohibited.",
-          ],
-        }}
-      >
-        <ImageUploader
-          onImageSelect={handleProductImageUpload}
-          initialImages={[
-            "https://gw.alicdn.com/imgextra/i3/O1CN01x7m2GQ1LsdRDBgVMZ_!!6000000001355-2-tps-104-108.png",
-          ]}
-        />
-      </ProductCard>
+      {/*** Product Basic information start ***/}
       <ProductCard title="Basic Information">
         <div className="w-full max-w-6xl flex-col items-center space-y-3">
           <Label htmlFor="product-name">Product Name</Label>
@@ -72,6 +59,13 @@ export default function CreateContainer() {
             type="text"
             id="product-name"
             placeholder="Ex. Nikon Coolpix A300 Digital Camera"
+          />
+          <Input
+            ref={basePriceRef}
+            className="focus-visible:ring-primary"
+            type="number"
+            id="product-base-price"
+            placeholder="base price"
           />
         </div>
         <div
@@ -99,8 +93,29 @@ export default function CreateContainer() {
           />
         </div>
       </ProductCard>
+      {/*** Product Basic information ends ***/}
+
       {selectedCategories?.length === 3 && (
         <>
+          {/*** Product Image Start ***/}
+          <ProductCard
+            title="Product Images"
+            tooltip={{
+              trigger: { type: "icon" },
+              texts: [
+                "This is the main image of your product page. Maximum 8 images can be uploaded.",
+                "Image size between 330x330 and 5000x5000 px. Max file size: 3 MB.",
+                "Obscene image is strictly prohibited.",
+              ],
+            }}
+          >
+            <ImageUploader
+              onImageSelect={handleProductImageUpload}
+              initialImages={existingProductImages}
+            />
+          </ProductCard>
+          {/*** Product Image ends ***/}
+          {/*** Product Specifications starts ***/}
           {categorySpecifications.length > 0 && (
             <ProductCard title="Product Specifications">
               <div className="grid grid-cols-2 gap-x-8 gap-y-5">
@@ -132,7 +147,9 @@ export default function CreateContainer() {
               </div>
             </ProductCard>
           )}
+          {/*** Product Specifications ends ***/}
 
+          {/*** Product variants starts ***/}
           {categoryAttributes?.length > 0 && (
             <ProductCard title="Product Variants">
               <ProductVariant
@@ -153,16 +170,18 @@ export default function CreateContainer() {
               />
             </ProductCard>
           )}
+          {/*** Product variants ends ***/}
+
+          {/*** Product description starts ***/}
           <ProductCard title="Product Description">
-            <Textarea
-              ref={descriptionRef}
-              id="product-description"
-              name="description"
-              rows={4}
-              placeholder="Write a short product description here..."
-              className="w-full rounded-md border px-3 py-2"
+            <ProductDescription
+              productDescriptionRef={productDescriptionRef}
+              productHighlightsRef={productHighlightsRef}
+              productBoxItemsRef={productBoxItemsRef}
             />
           </ProductCard>
+          {/*** Product description ends ***/}
+
           <div className="pb-10">
             <ThemedButton onClick={handleSubmit} className="w-full">
               Submit

@@ -5,81 +5,108 @@ import {
 } from "@/modules/core";
 import { buildFetchParams } from "@/modules/core/lib/utils.index";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export function useDataTableController({
   entityKey,
   fetchAction,
 }: UseDataTableControllerOptions) {
   const router = useRouter();
-
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<Entity[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState<SimplePaginationMeta | undefined>(undefined);
   const [loading, setLoading] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({});
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Entity>({
     uuid: "",
     slug: "",
   });
   useEffect(() => {
-    fetchData();
-  }, [search, page, activeFilter]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await fetchAction(
+          buildFetchParams({ search, page, filters }),
+        );
+        if (res === null) {
+          toast.error("Error fetching data");
+          return;
+        }
+        const payload = res.data.payload[entityKey];
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const res = await fetchAction(
-        buildFetchParams({ search, page, activeFilter }),
-      );
-      const payload = res.data.payload[entityKey];
-
-      if (payload && "data" in payload) {
-        setData(payload.data || []);
-        setMeta(payload.meta);
-      } else {
-        setData([payload]);
+        if (payload && "data" in payload) {
+          setData(payload.data || []);
+          setMeta({
+            current_page: payload.current_page,
+            next_page_url: payload.next_page_url,
+            prev_page_url: payload.prev_page_url,
+          });
+        } else {
+          setData([payload]);
+          setMeta(undefined);
+        }
+      } catch (error) {
+        console.error(error);
+        setData([]);
         setMeta(undefined);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-      setData([]);
-      setMeta(undefined);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchData().then(() => undefined);
+  }, [search, page, filters, fetchAction, entityKey]);
 
-  const onSearchChange = (value: string) => {
+  const onSearchChange = () => {
+    const value = searchInputRef.current?.value;
+    if (!value) {
+      return;
+    }
     setSearch(value);
     setPage(1);
   };
 
   const onPageChange = (direction: "next" | "prev") => {
-    if (direction === "next") {
-      setPage((p) => p + 1);
-    } else if (direction === "prev") {
-      setPage((p) => Math.max(p - 1, 1));
+    if (direction === "next" && meta?.next_page_url) {
+      setPage((prev) => (prev || 1) + 1);
+    } else if (direction === "prev" && meta?.prev_page_url && (page || 1) > 1) {
+      setPage((prev) => Math.max((prev || 1) - 1, 1));
     }
   };
 
-  const onFilterChange = (value: string) => {
-    setActiveFilter(value);
+  const onFilterChange = (key: string, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+    setPage(1);
+  };
+  const onFilterClear = (key: string) => {
+    setFilters((prev) => {
+      const updatedFilters: Record<string, string> = {};
+      Object.keys(prev).forEach((k) => {
+        if (k !== key) {
+          updatedFilters[k] = prev[k];
+        }
+      });
+      return updatedFilters;
+    });
     setPage(1);
   };
 
   const onView = (item: Entity) => {
-    router.push(`/${entityKey}/${item.slug}/view`);
+    router.push(`/${entityKey}/${item.slug || item.uuid}/view`);
   };
 
   const onEdit = (item: Entity) => {
-    router.push(`/${entityKey}/${item.slug}/edit`);
+    router.push(`/${entityKey}/${item.slug || item.uuid}/edit`);
   };
 
   const onDelete = (item: Entity) => {
-    console.log("Delete action triggered for uuid:", item.slug);
+    console.log("Delete action triggered for uuid:", item.slug || item.uuid);
   };
 
   const handleConfirmDelete = () => {
@@ -96,14 +123,49 @@ export function useDataTableController({
     setOpenDialog(!openDialog);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getNestedValue = (obj: any, path: string): string => {
+    const parts = path.split(".");
+    let value = obj;
+
+    for (const part of parts) {
+      if (Array.isArray(value)) {
+        const arrayValues = value
+          .map((v) =>
+            v && typeof v === "object" && part in v ? v[part] : null,
+          )
+          .filter(Boolean);
+        const displayValues = arrayValues.slice(0, 3);
+        const remainingCount = arrayValues.length - displayValues.length;
+        return (
+          [
+            ...displayValues,
+            ...(remainingCount > 0 ? [`+${remainingCount} more`] : []),
+          ].join(", ") || "-"
+        );
+      }
+      if (value && typeof value === "object" && part in value) {
+        value = value[part];
+      } else {
+        return "-";
+      }
+    }
+
+    return typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+      ? String(value)
+      : "-";
+  };
   return {
     data,
     search,
     page,
     meta,
     loading,
-    activeFilter,
+    filters,
     openDialog,
+    searchInputRef,
     onSearchChange,
     onPageChange,
     onFilterChange,
@@ -113,5 +175,7 @@ export function useDataTableController({
     onDelete,
     handleConfirmDelete,
     handleOpenDialog,
+    getNestedValue,
+    onFilterClear,
   };
 }

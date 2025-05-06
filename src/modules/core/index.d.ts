@@ -35,18 +35,23 @@ export interface ApiResponse<T> {
     errorCode: number;
   };
 }
+
 export interface FetchAction {
   (params?: Record<string, T>): Promise<ApiResponse<T>>;
 }
+
 export interface UseDataTableControllerOptions {
   entityKey: string;
   fetchAction: FetchAction;
 }
+
 export interface Entity {
   uuid: string;
   slug: string;
+
   [key: string]: string | number | boolean | null;
 }
+
 type TCustomURLSearchParams = TURLSearchParams &
   Record<string, string | number | boolean>;
 
@@ -54,9 +59,10 @@ interface DataTableProps {
   entityKey: string;
   columns: { label: string; accessor: string }[];
   fetchAction: (params?: TURLSearchParams) => Promise<ApiResponse<T>>;
-  filterOptions?: { label: string; value: string }[];
+  filterOptions?: { label: string; value: string; key: string }[];
   defaultFilter?: string;
 }
+
 export interface SimplePaginationMeta {
   current_page: number;
   next_page_url: string | null;
@@ -67,8 +73,7 @@ export type TURLSearchParams = {
   page?: number;
   perPage?: string;
   with?: array;
-  filter?: { [key: string]: string };
-  activeFilter?: string;
+  filter?: object;
   rootOnly?: boolean;
   sort?: string;
   include?: string;
@@ -81,7 +86,8 @@ export type TEntities =
   | "specification"
   | "login"
   | "register"
-  | "reset";
+  | "reset"
+  | "user";
 
 export interface RouteConfig {
   path: string;

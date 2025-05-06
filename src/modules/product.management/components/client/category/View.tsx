@@ -13,14 +13,14 @@ import {
   actionViewCategory,
 } from "@/modules/product.management/actions/category";
 import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
-import CategoryAttributesCard from "@/modules/product.management/components/client/category/ui/CategoryAttributesCard";
-import CategoryCard from "@/modules/product.management/components/client/category/ui/CategoryCard";
-import CategorySpecificationsCard from "@/modules/product.management/components/client/category/ui/CategorySpecificationsCard";
+import CategoryAttributesCard from "@/modules/product.management/ui/CategoryAttributesCard";
+import CategoryCard from "@/modules/product.management/ui/CategoryCard";
+import CategorySpecificationsCard from "@/modules/product.management/ui/CategorySpecificationsCard";
 import { useQueries } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function CategoryView({ slug }: { slug: string }) {
+export default function View({ slug }: { slug: string }) {
   const [specificationPage, setSpecificationPage] = useState<number>(1);
   const [specificationPerPage, setSpecificationPerPage] = useState<string>("");
   const [
@@ -60,7 +60,6 @@ export default function CategoryView({ slug }: { slug: string }) {
   const [selectedSpecifications, setSelectedSpecifications] = useState<
     string[]
   >([]);
-
   useEffect(() => {
     if (response.category?.attributes) {
       setSelectedAttributes(response.category.attributes);

@@ -24,22 +24,17 @@ export const handleRemoteError = (error: unknown) => {
 export function buildFetchParams({
   search,
   page,
-  activeFilter,
+  filters,
 }: {
   search: string;
   page: number;
-  activeFilter?: string;
+  filters?: Record<string, string>;
+  includes?: string;
 }): TURLSearchParams {
-  const params: TURLSearchParams = {
-    filter: { name: search },
+  return {
+    filter: { name: search, ...(filters || {}) },
     page,
   };
-
-  if (activeFilter) {
-    return { ...params, [activeFilter]: true };
-  }
-
-  return params;
 }
 
 export function isSimplePaginationMeta(

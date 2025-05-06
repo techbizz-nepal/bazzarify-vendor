@@ -1,3 +1,3 @@
-import IndexContainer from "@/modules/product.management/components/client/product/IndexContainer";
+import Index from "@/modules/product.management/components/client/product/Index";
 
-export default IndexContainer;
+export default Index;

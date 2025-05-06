@@ -12,6 +12,7 @@ export const actionGetCategories = async (params?: TURLSearchParams) => {
       ...params,
     },
   });
+  console.log(response.config.url);
   return response.data;
 };
 export const actionViewCategory = async (slug: string) => {
@@ -19,6 +20,23 @@ export const actionViewCategory = async (slug: string) => {
     const response = await (
       await authAxiosInstance()
     ).get(PRODUCT_MANAGEMENT_ROUTES.category.show.path.replace(":slug", slug));
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const actionViewCategorySpecifications = async (slug: string) => {
+  try {
+    const response = await (
+      await authAxiosInstance()
+    ).get(
+      PRODUCT_MANAGEMENT_ROUTES.category.showSpecifications.path.replace(
+        ":slug",
+        slug,
+      ),
+    );
     return response.data;
   } catch (error) {
     console.error(error);

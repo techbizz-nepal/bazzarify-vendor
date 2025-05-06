@@ -5,7 +5,7 @@ import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { actionGetProducts } from "@/modules/product.management/actions/product";
 import Link from "next/link";
 
-export default function IndexContainer() {
+export default function Index() {
   return (
     <PageContainer pageTitle="Manage Products">
       <Card>
@@ -18,16 +18,13 @@ export default function IndexContainer() {
           <DataTable
             entityKey="products"
             columns={[
+              { label: "Category", accessor: "categories.name" },
               { label: "Name", accessor: "name" },
-              { label: "Slug", accessor: "slug" },
+              { label: "Created By", accessor: "user.name" },
               { label: "Created At", accessor: "created_at" },
+              { label: "Updated At", accessor: "updated_at" },
             ]}
             fetchAction={actionGetProducts}
-            // filterOptions={[
-            //   { label: "Root Only", value: "rootOnly" },
-            //   { label: "Leaf Only", value: "leafOnly" },
-            // ]}
-            // defaultFilter="rootOnly"
           />
         </CardContent>
       </Card>

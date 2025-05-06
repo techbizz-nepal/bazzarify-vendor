@@ -1,3 +1,3 @@
-import CreateContainer from "@/modules/product.management/components/client/product/CreateContainer";
+import Create from "@/modules/product.management/components/client/product/Create";
 
-export default CreateContainer;
+export default Create;

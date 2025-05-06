@@ -3,10 +3,11 @@
 import { ApiResponse, Entity, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";
+import { AxiosError } from "axios";
 
 export const actionGetProducts = async (
   params?: TURLSearchParams,
-): Promise<ApiResponse<{ data: Entity[] }>> => {
+): Promise<ApiResponse<{ data: Entity[] }> | null> => {
   try {
     const axios = await authAxiosInstance();
     const response = await axios.get(
@@ -17,8 +18,12 @@ export const actionGetProducts = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch products", error);
-    throw error;
+    if (error instanceof AxiosError) {
+      console.error("Failed to fetch products", error?.message);
+    } else {
+      console.error("Failed to fetch products", error);
+    }
+    return null;
   }
 };
 export const actionStoreProducts = async (payload: FormData) => {

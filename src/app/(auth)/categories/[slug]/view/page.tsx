@@ -1,5 +1,5 @@
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import CategoryView from "@/modules/product.management/components/client/category/CategoryView";
+import View from "@/modules/product.management/components/client/category/View";
 
 export default async function Page({
   params,
@@ -10,7 +10,7 @@ export default async function Page({
   const pageTitle = slug.replaceAll("-", " ");
   return (
     <PageContainer pageTitle={`View ${pageTitle}`}>
-      <CategoryView slug={slug} />
+      <View slug={slug} />
     </PageContainer>
   );
 }

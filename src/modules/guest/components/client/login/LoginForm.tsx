@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { actionLogin } from "@/modules/guest/actions/login";
 import {
   LoginFormSchema,
@@ -19,44 +18,30 @@ import {
 } from "@/modules/guest/config/schemas/login.form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { use, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function LoginForm() {
-  const sessionCtx = use(SessionContext);
-  if (!sessionCtx) {
-    throw new Error("SessionProvider must be used in correct place.");
-  }
-  const { session } = sessionCtx;
-  const router = useRouter();
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
-      credential: "9851040576",
-      password: "12345678",
+      credential: "",
+      password: "",
     },
   });
-  useEffect(() => {
-    if (session) {
-      return router.replace("/");
-    }
-  }, [router, session]);
 
   function handleSubmit(data: LoginFormValues) {
-    let t = toast("Signing In...");
+    toast.info("Signing In...");
     actionLogin(data)
-      .then(() => {
-        toast.dismiss(t);
+      .then((response) => {
+        if (response.error) {
+          toast.warning(response.error);
+          return;
+        }
+        toast.success("Sign in successfully.");
       })
       .catch(() => {
-        toast.dismiss(t);
-        t = toast.error("Cannot login");
-      })
-      .finally(() => {
-        toast.dismiss(t);
+        toast.error("Cannot login");
       });
   }
 

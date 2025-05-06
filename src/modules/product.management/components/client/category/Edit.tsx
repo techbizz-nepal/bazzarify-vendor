@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function CategoryEdit({ slug }: { slug: string }) {
+export default function Edit({ slug }: { slug: string }) {
   return (
     <Card>
       <CardContent className="flex items-center justify-center">

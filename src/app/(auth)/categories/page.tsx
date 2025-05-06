@@ -1,3 +1,3 @@
-import CategoryIndex from "@/modules/product.management/components/client/category/CategoryIndex";
+import Index from "@/modules/product.management/components/client/category/Index";
 
-export default CategoryIndex;
+export default Index;

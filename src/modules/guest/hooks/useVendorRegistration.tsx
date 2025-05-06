@@ -76,7 +76,6 @@ export default function useVendorRegistration(
     if (!phone) return alert("Invalid request");
     actionVerifyRegistration(data)
       .then((res) => {
-        console.log(res);
         if (res.data.message != "success") {
           return alert("Something went wrong!");
         }

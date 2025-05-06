@@ -44,7 +44,7 @@ const items: TMenuItem[] = [
   },
   {
     title: "Users",
-    path: "#",
+    path: "/users",
     icon: FaUsers,
   },
   {

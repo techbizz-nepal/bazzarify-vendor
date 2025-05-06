@@ -7,6 +7,9 @@ const category: IRoute["category"] = {
   show: {
     path: "/product-management/categories/:slug",
   },
+  showSpecifications: {
+    path: "/product-management/categories/:slug/specifications",
+  },
   update: {
     path: "/product-management/categories/:slug",
   },

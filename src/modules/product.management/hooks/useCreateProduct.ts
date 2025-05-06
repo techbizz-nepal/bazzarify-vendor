@@ -5,20 +5,32 @@ import {
   VariantData,
 } from "@/modules/product.management";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
-import { actionGetCategories } from "@/modules/product.management/actions/category";
+import {
+  actionGetCategories,
+  actionViewCategorySpecifications,
+} from "@/modules/product.management/actions/category";
 import { actionStoreProducts } from "@/modules/product.management/actions/product";
-import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
 import generateCombinations from "@/modules/product.management/utils/generateCombinations";
 import { useQuery } from "@tanstack/react-query";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import slugify from "slugify";
 import { toast } from "sonner";
 
 export default function useCreateProduct() {
+  const router = useRouter();
   // -------------------- STATE --------------------
   const nameRef = useRef<HTMLInputElement>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const basePriceRef = useRef<HTMLInputElement>(null);
+  const productDescriptionRef = useRef<HTMLTextAreaElement>(null);
+  const productHighlightsRef = useRef<HTMLTextAreaElement>(null);
+  const productBoxItemsRef = useRef<HTMLInputElement>(null);
+  const [existingProductImages] = useState<string[]>([
+    "https://gw.alicdn.com/imgextra/i3/O1CN01x7m2GQ1LsdRDBgVMZ_!!6000000001355-2-tps-104-108.png",
+  ]);
+  const [uploadedProductImages, setUploadedProductImages] = useState<File[]>(
+    [],
+  );
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<TCategory[]>([]);
   const [subCategories, setSubCategories] = useState<TCategory[]>([]);
@@ -41,7 +53,8 @@ export default function useCreateProduct() {
 
   const { data } = useQuery({
     queryKey: ["allCategories"],
-    queryFn: () => actionGetCategories({ rootOnly: true, sort: "name" }),
+    queryFn: () =>
+      actionGetCategories({ filter: { rootOnly: true }, sort: "name" }),
   });
 
   // -------------------- ACTIONS --------------------
@@ -64,11 +77,9 @@ export default function useCreateProduct() {
     setSelectedCategories((prev) => [prev[0], prev[1], category]);
     try {
       const promises = await Promise.all([
-        actionGetSpecifications({
-          uuids: category.specifications.join(","),
-        }),
+        actionViewCategorySpecifications(category.slug),
         actionGetAttributes({
-          uuids: category.attributes.join(","),
+          uuids: category.attributes?.join(","),
         }),
       ]);
 
@@ -76,14 +87,16 @@ export default function useCreateProduct() {
       const [specificationsResponse, attributesResponse] = promises;
 
       if (
-        specificationsResponse.metaData.error ||
-        attributesResponse.metaData.error
+        !specificationsResponse ||
+        !attributesResponse ||
+        specificationsResponse?.metaData.error ||
+        attributesResponse?.metaData.error
       ) {
         toast.error("Oops, something went wrong while fetching data!");
         return;
       }
 
-      const specificationsData = specificationsResponse.data.payload
+      const specificationsData = specificationsResponse?.data.payload
         .specifications?.data as TSpecification[];
       if (specificationsData) {
         setCategorySpecifications(specificationsData);
@@ -200,7 +213,8 @@ export default function useCreateProduct() {
     setSpecifications((prev) => ({ ...prev, [key]: value }));
   };
   const handleProductImageUpload = (files: File[]) => {
-    console.log("handleProductImageUpload", files);
+    console.log(files);
+    setUploadedProductImages(files);
   };
   const handleSubmit = async () => {
     const newVariantData = { ...variantData };
@@ -248,31 +262,56 @@ export default function useCreateProduct() {
       };
     });
     const name = nameRef.current?.value?.trim();
-    const description = descriptionRef.current?.value?.trim();
+    const basePrice = basePriceRef.current?.value?.trim();
+    const productDescription = productDescriptionRef.current?.value?.trim();
+    const productHighlights = productHighlightsRef.current?.value?.trim();
+    const productBoxItems = productBoxItemsRef.current?.value?.trim();
 
     if (!name) {
       toast.error("Product name is required");
       return;
     }
-    if (!description) {
+    if (!basePrice) {
+      toast.error("Product base price is required");
+      return;
+    }
+    if (!productDescription) {
       toast.error("Product description is required");
+      return;
+    }
+    if (!productHighlights) {
+      toast.error("Product highlights is required");
+      return;
+    }
+    if (!productBoxItems) {
+      toast.error("Product box items is required");
       return;
     }
     if (!variants.length) {
       toast.error("Select least one variant");
       return;
     }
+    if (
+      uploadedProductImages.length === 0 &&
+      existingProductImages.length === 0
+    ) {
+      toast.error("Please upload a product image");
+      return;
+    }
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("description", description || "");
+    formData.append("basePrice", basePrice);
+    formData.append("description", productDescription || "");
+    formData.append("highlights", productHighlights || "");
+    formData.append("boxItems", productBoxItems || "");
     formData.append("category", selectedCategories[2]?.uuid);
+    uploadedProductImages.forEach((image: File) => {
+      formData.append("images[]", image);
+    });
     for (const key in specifications) {
       formData.append(`specifications[${key}]`, specifications[key]);
     }
-    if (Object.keys(specifications).length === 0) {
-      toast.error("Please fill specifications");
-      return;
-    }
+
     variants.forEach((variant, variantIndex) => {
       columns.forEach((attr) => {
         const key = slugify(attr, { lower: true });
@@ -310,16 +349,18 @@ export default function useCreateProduct() {
         );
       });
     });
-
+    toast.info("Uploading product...");
     actionStoreProducts(formData)
       .then((res) => {
-        if (res.data.metaData.error) {
-          toast.error(res.data.metaData);
+        if (res.metaData.error) {
+          toast.error(res.metaData.error);
           return;
         }
-        redirect("/products");
+        toast.success(res.data.message);
+        router.replace("/products");
       })
       .catch((err) => {
+        console.log(err);
         toast.error("Error Submitted payload", err);
       });
   };
@@ -330,13 +371,17 @@ export default function useCreateProduct() {
     subCategories,
     subChildCategories,
     specifications,
+    existingProductImages,
     categorySpecifications,
     categoryAttributes,
     filters,
     handleProductImageUpload,
     responseData: data,
     nameRef,
-    descriptionRef,
+    basePriceRef,
+    productDescriptionRef,
+    productHighlightsRef,
+    productBoxItemsRef,
     handleShowDropdownChange,
     handleClickRoot,
     handleClickSub,
