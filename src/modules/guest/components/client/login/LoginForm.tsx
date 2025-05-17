@@ -38,7 +38,7 @@ export default function LoginForm() {
           toast.warning(response.error);
           return;
         }
-        toast.success("Sign in successfully.");
+        toast.success("Signing you in...");
       })
       .catch(() => {
         toast.error("Cannot login");

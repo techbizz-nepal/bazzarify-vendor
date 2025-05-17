@@ -8,6 +8,8 @@ COPY package.json bun.lock /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile
 
 FROM base AS build
+ARG SESSION_SECRET
+ENV SESSION_SECRET=$SESSION_SECRET
 COPY --from=install /temp/prod/node_modules node_modules
 COPY . .
 

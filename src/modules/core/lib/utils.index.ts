@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 
 export const phoneRegex = /^9\d{9}$/;
 export const handleRemoteError = (error: unknown) => {
+  console.log(error);
   let message: string = "Something went wrong!";
   let errorCode = 500;
   if (error instanceof AxiosError) {

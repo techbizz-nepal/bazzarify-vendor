@@ -17,7 +17,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: "1.2.5"
+          bun-version: "1.2.13"
 
       - name: Install dependencies
         run: bun install
@@ -37,3 +37,5 @@ jobs:
           context: .
           push: true
           tags: techbizz/vendor:latest
+          build-args: |
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
