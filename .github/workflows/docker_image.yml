@@ -37,5 +37,3 @@ jobs:
           context: .
           push: true
           tags: techbizz/vendor:latest
-          build-args: |
-            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
