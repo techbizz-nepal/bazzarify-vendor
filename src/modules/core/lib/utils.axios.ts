@@ -32,6 +32,7 @@ export const authAxiosInstance = async () => {
     redirect("/login");
   }
   const token = payload.token;
+  // const token = "";
   const instance = axios.create({
     ...defaultConfig,
     headers: { Authorization: `Bearer ${token}` },

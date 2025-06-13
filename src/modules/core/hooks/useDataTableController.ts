@@ -36,7 +36,11 @@ export function useDataTableController({
           toast.error("Error fetching data");
           return;
         }
-        const payload = res.data.payload[entityKey];
+        if ("error" in res) {
+          return false;
+        }
+
+        const payload = res[entityKey];
 
         if (payload && "data" in payload) {
           setData(payload.data || []);
@@ -102,7 +106,10 @@ export function useDataTableController({
   };
 
   const onEdit = (item: Entity) => {
-    router.push(`/${entityKey}/${item.slug || item.uuid}/edit`);
+    const identifier =
+      entityKey === "products" ? item.uuid : item.slug || item.uuid;
+
+    router.push(`/${entityKey}/${identifier}/edit`);
   };
 
   const onDelete = (item: Entity) => {

@@ -63,7 +63,7 @@ export default function AttributeSelector({
                     <SelectTrigger className="w-64">
                       <SelectValue placeholder="Please type or select" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-96">
                       {availableOptions.map((option) => (
                         <SelectItem key={option.uuid} value={option.label}>
                           {option.label}

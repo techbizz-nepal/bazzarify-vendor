@@ -1,43 +1,20 @@
-export type MetaData = {
-  error: string;
-  executionTime: number;
-  errorCode: number;
-};
-export type Data = {
+export interface IData<T> {
   message: string;
-  payload: unknown;
-};
-
-export type ResponseDTO = {
-  data: Data;
-  metaData: MetaData;
-};
-
-export const defaultResponseDTO: ResponseDTO = {
-  data: {
-    message: "",
-    payload: "",
-  },
-  metaData: {
-    error: "",
-    errorCode: 50000,
-    executionTime: 0,
-  },
-};
-
-export interface ApiResponse<T> {
-  data: {
-    message: string;
-    payload: Record<string, T>;
-  };
-  metaData: {
-    error: string | null;
-    errorCode: number;
-  };
+  payload: T;
 }
 
-export interface FetchAction {
-  (params?: Record<string, T>): Promise<ApiResponse<T> | null>;
+export interface IMetaData {
+  error: string | null;
+  errorCode?: number;
+}
+
+export interface ApiResponse<T> {
+  data: IData<T>;
+  metaData: IMetaData;
+}
+
+export interface FetchAction<T> {
+  (params?: Record<string, T>): Promise<T>;
 }
 
 export interface UseDataTableControllerOptions {
@@ -52,13 +29,10 @@ export interface Entity {
   [key: string]: string | number | boolean | null;
 }
 
-type TCustomURLSearchParams = TURLSearchParams &
-  Record<string, string | number | boolean>;
-
-interface DataTableProps {
+interface DataTableProps<T> {
   entityKey: string;
   columns: { label: string; accessor: string }[];
-  fetchAction: (params?: TURLSearchParams) => Promise<ApiResponse<T> | null>;
+  fetchAction: FetchAction<T>;
   filterOptions?: { label: string; value: string; key: string }[];
   defaultFilter?: string;
 }
@@ -96,4 +70,8 @@ export interface RouteConfig {
 
 export type IRoute = {
   [E in TEntities]: Record<string, RouteConfig>;
+};
+
+export type IPageParams = {
+  params: Promise<{ slug: string }>;
 };

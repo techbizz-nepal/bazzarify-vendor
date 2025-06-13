@@ -1,3 +1,8 @@
+import {
+  MAX_FILE_SIZE_MB,
+  MAX_IMAGES,
+} from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { validateImage } from "@/modules/product.management/utils/productForm";
 import { CirclePlus, X } from "lucide-react";
 import NextImage from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -8,12 +13,7 @@ interface ImageUploadProps {
   initialImages?: string[];
 }
 
-const MAX_IMAGES = 8;
-const MAX_FILE_SIZE_MB = 3;
-const MIN_DIMENSION = 330;
-const MAX_DIMENSION = 5000;
-
-export default function ImageUpload({
+export default function ImageUploader({
   onImageSelect,
   initialImages = [],
 }: ImageUploadProps) {
@@ -30,29 +30,6 @@ export default function ImageUpload({
 
   const handleIconClick = () => {
     inputRef.current?.click();
-  };
-
-  const validateImage = (file: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        if (
-          img.width < MIN_DIMENSION ||
-          img.height < MIN_DIMENSION ||
-          img.width > MAX_DIMENSION ||
-          img.height > MAX_DIMENSION
-        ) {
-          toast.error(
-            `Image dimensions must be between ${MIN_DIMENSION}x${MIN_DIMENSION} and ${MAX_DIMENSION}x${MAX_DIMENSION}px.`,
-          );
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      };
-      img.onerror = () => resolve(false);
-      img.src = URL.createObjectURL(file);
-    });
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {

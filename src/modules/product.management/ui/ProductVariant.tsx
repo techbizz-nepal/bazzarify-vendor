@@ -1,40 +1,42 @@
 "use client";
 
-import { TAttribute, VariantState } from "@/modules/product.management";
+import {
+  VariantSelectorState,
+  VariantState,
+} from "@/modules/product.management";
 import AttributeSelector from "@/modules/product.management/ui/AttributeSelector";
 import VariantGrid from "@/modules/product.management/ui/VariantGrid";
 
 interface IProductVariant {
   variantState: VariantState;
-  attributes: TAttribute[];
+  selectorState: VariantSelectorState;
 }
 
 export default function ProductVariant({
   variantState,
-  attributes,
+  selectorState,
 }: IProductVariant) {
   const {
-    selections,
     columns,
     combinations,
     variantData,
-    toggleValue,
-    removeValue,
     handleVariantChange,
     handleImageUpload,
     handleImageRemove,
   } = variantState;
 
+  const { variantSelections, attributes, toggleValue, removeValue } =
+    selectorState;
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8">
       <AttributeSelector
         attributes={attributes}
-        selections={selections}
+        selections={variantSelections}
         onToggle={toggleValue}
         onRemove={removeValue}
       />
       <VariantGrid
-        selections={selections}
+        selections={variantSelections}
         combinations={combinations}
         variantData={variantData}
         onChange={handleVariantChange}

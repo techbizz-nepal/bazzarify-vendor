@@ -1,367 +1,149 @@
 import {
   TAttribute,
-  TCategory,
-  TSpecification,
-  VariantData,
+  TProductForm,
+  TVariantPayload,
 } from "@/modules/product.management";
-import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
-import {
-  actionGetCategories,
-  actionViewCategorySpecifications,
-} from "@/modules/product.management/actions/category";
 import { actionStoreProducts } from "@/modules/product.management/actions/product";
-import generateCombinations from "@/modules/product.management/utils/generateCombinations";
-import { useQuery } from "@tanstack/react-query";
+import { PRODUCT_CRUD_CONSTANTS } from "@/modules/product.management/config/constants/PRODUCT_CRUD_CONSTANTS";
+import { CreateProductSchema } from "@/modules/product.management/config/schemas/product";
+import useCategory from "@/modules/product.management/hooks/useCategory";
+import useProduct from "@/modules/product.management/hooks/useProduct";
+import useVariant from "@/modules/product.management/hooks/useVariant";
+import {
+  appendFormDataVariants,
+  createVariantsPayload,
+  updateVariantValidity,
+} from "@/modules/product.management/utils/productForm";
+import { AxiosError } from "axios";
+import { omit } from "lodash-es";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
-import slugify from "slugify";
+import { ChangeEvent, useState } from "react";
 import { toast } from "sonner";
 
 export default function useCreateProduct() {
   const router = useRouter();
-  // -------------------- STATE --------------------
-  const nameRef = useRef<HTMLInputElement>(null);
-  const basePriceRef = useRef<HTMLInputElement>(null);
-  const productDescriptionRef = useRef<HTMLTextAreaElement>(null);
-  const productHighlightsRef = useRef<HTMLTextAreaElement>(null);
-  const productBoxItemsRef = useRef<HTMLInputElement>(null);
-  const [existingProductImages] = useState<string[]>([
-    "https://gw.alicdn.com/imgextra/i3/O1CN01x7m2GQ1LsdRDBgVMZ_!!6000000001355-2-tps-104-108.png",
-  ]);
-  const [uploadedProductImages, setUploadedProductImages] = useState<File[]>(
-    [],
-  );
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<TCategory[]>([]);
-  const [subCategories, setSubCategories] = useState<TCategory[]>([]);
-  const [subChildCategories, setSubChildCategories] = useState<TCategory[]>([]);
-  const [filters, setFilters] = useState({ root: "", sub: "", subchild: "" });
-  const [selections, setSelections] = useState<Record<string, string[]>>({});
-  const [specifications, setSpecifications] = useState<Record<string, string>>(
-    {},
-  );
-  const [categorySpecifications, setCategorySpecifications] = useState<
-    TSpecification[]
-  >([]);
   const [categoryAttributes, setCategoryAttributes] = useState<TAttribute[]>(
     [],
   );
-  const [columns, setColumns] = useState<string[]>([]);
-  const [variantData, setVariantData] = useState<Record<string, VariantData>>(
-    {},
-  );
+  const [variantSelections, setVariantSelections] = useState<
+    Record<string, string[]>
+  >({});
 
-  const { data } = useQuery({
-    queryKey: ["allCategories"],
-    queryFn: () =>
-      actionGetCategories({ filter: { rootOnly: true }, sort: "name" }),
+  const {
+    nameRef,
+    basePriceRef,
+    existingProductImages,
+    handleProductImageUpload,
+    productBoxItemsRef,
+    productDescriptionRef,
+    productHighlightsRef,
+    uploadedProductImages,
+    productForm,
+    handleProductForm,
+  } = useProduct();
+
+  const {
+    categorySpecifications,
+    filters,
+    handleClickRoot,
+    handleClickSub,
+    handleShowDropdownChange,
+    selectedCategories,
+    showDropdown,
+    specifications,
+    subCategories,
+    subChildCategories,
+    updateFilter,
+    handleClickSubChild,
+    setSpecifications,
+    handleSpecificationChange,
+  } = useCategory({
+    setCategoryAttributes,
+    setVariantSelections,
   });
 
-  // -------------------- ACTIONS --------------------
-  const handleShowDropdownChange = () => {
-    setShowDropdown(!showDropdown);
-  };
+  const {
+    columns,
+    variantData,
+    combinations,
+    handleImageRemove,
+    handleImageUpload,
+    handleReorderColumns,
+    handleVariantChange,
+    removeValue,
+    setVariantData,
+    toggleValue,
+  } = useVariant({ variantSelections, setVariantSelections });
 
-  const handleClickRoot = (category: TCategory) => {
-    setSubCategories(category.children || []);
-    setSubChildCategories([]);
-    setSelectedCategories([category]);
-  };
-
-  const handleClickSub = (category: TCategory) => {
-    setSubChildCategories(category.children || []);
-    setSelectedCategories((prev) => [prev[0], category]);
-  };
-
-  const handleClickSubChild = async (category: TCategory) => {
-    setSelectedCategories((prev) => [prev[0], prev[1], category]);
-    try {
-      const promises = await Promise.all([
-        actionViewCategorySpecifications(category.slug),
-        actionGetAttributes({
-          uuids: category.attributes?.join(","),
-        }),
-      ]);
-
-      // You can now destructure the responses from the promises array
-      const [specificationsResponse, attributesResponse] = promises;
-
-      if (
-        !specificationsResponse ||
-        !attributesResponse ||
-        specificationsResponse?.metaData.error ||
-        attributesResponse?.metaData.error
-      ) {
-        toast.error("Oops, something went wrong while fetching data!");
-        return;
-      }
-
-      const specificationsData = specificationsResponse?.data.payload
-        .specifications?.data as TSpecification[];
-      if (specificationsData) {
-        setCategorySpecifications(specificationsData);
-        setSpecifications({});
-      }
-
-      const attributesData = attributesResponse.data.payload.attributes
-        ?.data as TAttribute[];
-      if (attributesData) {
-        setCategoryAttributes(attributesData);
-        setSelections({});
-      }
-    } catch (error: unknown) {
-      console.error("Error fetching specifications and attributes:", error);
-      toast.error("Oops, an error occurred while fetching data!");
-    } finally {
-      setShowDropdown(!showDropdown);
-    }
-  };
-
-  const updateFilter = (level: "root" | "sub" | "subchild", value: string) => {
-    setFilters((prev) => ({ ...prev, [level]: value }));
-  };
-
-  const toggleValue = (attribute: string, value: string) => {
-    setSelections((prev) => {
-      const current = prev[attribute] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      const next = { ...prev, [attribute]: updated };
-
-      // Update columns based on filtered keys that still have values
-      const newColumnList = Object.keys(next).filter(
-        (attr) => next[attr].length > 0,
-      );
-      setColumns((prevCols) => {
-        return prevCols
-          .filter((col) => newColumnList.includes(col))
-          .concat(newColumnList.filter((col) => !prevCols.includes(col)));
-      });
-
-      return next;
-    });
-  };
-
-  const removeValue = (attribute: string, value: string) => {
-    setSelections((prev) => {
-      const current = prev[attribute] || [];
-      const updated = current.filter((v) => v !== value);
-      return { ...prev, [attribute]: updated };
-    });
-  };
-
-  const combinations = useMemo(() => {
-    const entries = Object.entries(selections).filter(
-      ([, values]) => values.length > 0,
-    );
-    if (entries.length === 0) return []; // no attribute values selected
-    if (entries.length === 1) {
-      return entries[0][1].map((value) => [value]); // map to single-value combos
-    }
-    return generateCombinations(selections); // default behavior for >1 attribute
-  }, [selections]);
-
-  const handleVariantChange = <K extends keyof VariantData>(
-    combo: string[],
-    field: K,
-    value: VariantData[K],
+  const onProductFormInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const key = combo.join("|");
-    setVariantData((prev) => ({
-      ...prev,
-      [key]: { ...(prev[key] || {}), [field]: value },
-    }));
+    handleProductForm(e.target.name as keyof TProductForm, e.target.value);
   };
 
-  const handleImageUpload = (combo: string[], files: FileList) => {
-    const key = combo.join("|");
-    const fileList = Array.from(files).filter((file) => file instanceof File);
-    setVariantData((prev) => {
-      const existing = (prev[key]?.images || []).filter(
-        (img) => img instanceof File,
-      );
-      return {
-        ...prev,
-        [key]: {
-          ...(prev[key] || {}),
-          images: [...existing, ...fileList].slice(0, 3),
-        },
-      };
-    });
-  };
+  const handleSubmit: () => Promise<void> = async () => {
+    const productFormData = omit(productForm, "uuid");
+    const { updated, allValid } = updateVariantValidity(
+      combinations,
+      variantData,
+    );
 
-  const handleImageRemove = (combo: string[], image: File) => {
-    const key = combo.join("|");
-    setVariantData((prev) => {
-      const images = prev[key]?.images?.filter((img) => img !== image) || [];
-      return {
-        ...prev,
-        [key]: {
-          ...(prev[key] || {}),
-          images,
-        },
-      };
-    });
-  };
+    console.log(variantData);
 
-  const handleReorderColumns = (newOrder: string[]) => {
-    setColumns(newOrder);
-  };
-
-  const handleSpecificationChange = (key: string, value: string) => {
-    setSpecifications((prev) => ({ ...prev, [key]: value }));
-  };
-  const handleProductImageUpload = (files: File[]) => {
-    console.log(files);
-    setUploadedProductImages(files);
-  };
-  const handleSubmit = async () => {
-    const newVariantData = { ...variantData };
-    let validStock = true;
-
-    combinations.forEach((combo) => {
-      const key = combo.join("|");
-      const variant = variantData[key] || {};
-      const isValid = !!(
-        variant.stock &&
-        variant.price &&
-        variant.sku &&
-        variant.images
-      );
-      newVariantData[key] = { ...variant, isValid };
-      if (!isValid) validStock = false;
-    });
-
-    setVariantData(newVariantData);
-
-    if (!validStock) {
+    if (!allValid) {
       toast.error("Please fill stock, price, SKU, images for variants.");
       return;
     }
+    setVariantData(updated);
 
-    const variants = combinations.map((combo) => {
-      const data: Record<string, string> = {};
-      columns.forEach((attr) => {
-        const key = slugify(attr, { lower: true });
-        const attrIndex = columns.indexOf(attr);
-        data[key] = combo[attrIndex] || "";
-      });
+    const variants: TVariantPayload[] = createVariantsPayload(
+      combinations,
+      columns,
+      updated,
+    );
 
-      const variantKey = combo.join("|");
-      const variant = variantData[variantKey] || {};
-
-      return {
-        ...data,
-        name: variantKey.toLowerCase(),
-        stock: variant.stock || "0",
-        price: variant.price || "",
-        sku: variant.sku || "",
-        images: variant.images || [],
-        available: variant.available ?? true,
-      };
+    const productFormValidation = CreateProductSchema.safeParse({
+      ...productFormData,
+      category: selectedCategories.at(2)?.uuid,
+      variants: [...variants],
     });
-    const name = nameRef.current?.value?.trim();
-    const basePrice = basePriceRef.current?.value?.trim();
-    const productDescription = productDescriptionRef.current?.value?.trim();
-    const productHighlights = productHighlightsRef.current?.value?.trim();
-    const productBoxItems = productBoxItemsRef.current?.value?.trim();
-
-    if (!name) {
-      toast.error("Product name is required");
-      return;
-    }
-    if (!basePrice) {
-      toast.error("Product base price is required");
-      return;
-    }
-    if (!productDescription) {
-      toast.error("Product description is required");
-      return;
-    }
-    if (!productHighlights) {
-      toast.error("Product highlights is required");
-      return;
-    }
-    if (!productBoxItems) {
-      toast.error("Product box items is required");
-      return;
-    }
-    if (!variants.length) {
-      toast.error("Select least one variant");
-      return;
-    }
-    if (
-      uploadedProductImages.length === 0 &&
-      existingProductImages.length === 0
-    ) {
-      toast.error("Please upload a product image");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("basePrice", basePrice);
-    formData.append("description", productDescription || "");
-    formData.append("highlights", productHighlights || "");
-    formData.append("boxItems", productBoxItems || "");
-    formData.append("category", selectedCategories[2]?.uuid);
-    uploadedProductImages.forEach((image: File) => {
-      formData.append("images[]", image);
-    });
-    for (const key in specifications) {
-      formData.append(`specifications[${key}]`, specifications[key]);
-    }
-
-    variants.forEach((variant, variantIndex) => {
-      columns.forEach((attr) => {
-        const key = slugify(attr, { lower: true });
-        const attributeValue = categoryAttributes
-          .filter((attr) => attr.name === key)[0]
-          .attribute_value.filter(
-            (values) => values.label === (variant as never)[key],
-          )[0];
-        formData.append(
-          `variants[${variantIndex}][attribute][${key}|${(variant as never)[key]}][attributeUuid]`,
-          attributeValue.attribute_uuid,
-        );
-        formData.append(
-          `variants[${variantIndex}][attribute][${key}|${(variant as never)[key]}][attributeValueUuid]`,
-          attributeValue.uuid,
-        );
-        // formData.append(
-        //   `variants[${variantIndex}][${key}]`,
-        //   (variant as never)[key] || "",
-        // );
-      });
-      formData.append(`variants[${variantIndex}][name]`, variant.name);
-      formData.append(`variants[${variantIndex}][stock]`, variant.stock);
-      formData.append(`variants[${variantIndex}][price]`, variant.price);
-      formData.append(`variants[${variantIndex}][sku]`, variant.sku);
-      formData.append(
-        `variants[${variantIndex}][available]`,
-        variant.available ? "1" : "0",
+    if (!productFormValidation.success) {
+      console.log(productFormValidation.error);
+      toast.error(
+        productFormValidation.error.issues.at(0)?.message || "Invalid input",
       );
+      return;
+    }
 
-      variant.images.forEach((image, imageIndex) => {
-        formData.append(
-          `variants[${variantIndex}][images][${imageIndex}]`,
-          image,
-        );
-      });
-    });
+    const formData = new FormData();
+
+    Object.entries(omit(productFormValidation.data, "variants")).forEach(
+      ([key, value]) => formData.append(key, value),
+    );
+    uploadedProductImages.forEach((img) => formData.append("images[]", img));
+    Object.entries(specifications).forEach(([key, value]) =>
+      formData.append(`specifications[${key}]`, value),
+    );
+
+    appendFormDataVariants(formData, variants, columns, categoryAttributes);
+
     toast.info("Uploading product...");
     actionStoreProducts(formData)
       .then((res) => {
-        if (res.metaData.error) {
-          toast.error(res.metaData.error);
+        if ("error" in res) {
+          toast.error(`${res.error}`);
           return;
         }
-        toast.success(res.data.message);
-        router.replace("/products");
+        toast.success(PRODUCT_CRUD_CONSTANTS.createProductSuccess);
+        // router.replace("/products");
+        return;
       })
       .catch((err) => {
-        console.log(err);
-        toast.error("Error Submitted payload", err);
+        console.log(typeof err);
+        if (err instanceof AxiosError) {
+          console.log(err);
+        }
+        toast.error("Please contact support. ", err);
       });
   };
 
@@ -373,15 +155,15 @@ export default function useCreateProduct() {
     specifications,
     existingProductImages,
     categorySpecifications,
-    categoryAttributes,
     filters,
     handleProductImageUpload,
-    responseData: data,
     nameRef,
     basePriceRef,
     productDescriptionRef,
     productHighlightsRef,
     productBoxItemsRef,
+    productForm,
+    onProductFormInputChange,
     handleShowDropdownChange,
     handleClickRoot,
     handleClickSub,
@@ -390,9 +172,15 @@ export default function useCreateProduct() {
     handleSubmit,
     setSpecifications,
     handleSpecificationChange,
+    selectorState: {
+      attributes: categoryAttributes,
+      toggleValue,
+      removeValue,
+      variantSelections,
+    },
     variantState: {
-      selections,
-      setSelections,
+      variantSelections,
+      setVariantSelections,
       toggleValue,
       removeValue,
       combinations,

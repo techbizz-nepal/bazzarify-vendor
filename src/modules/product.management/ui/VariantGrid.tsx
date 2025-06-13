@@ -1,20 +1,22 @@
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { VariantData } from "@/modules/product.management";
+import { TVariant, TVariantDataMap } from "@/modules/product.management";
+import { MAX_FILE_SIZE_MB } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { validateImage } from "@/modules/product.management/utils/productForm";
 import { CirclePlus } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
+import { ChangeEvent, useRef } from "react";
 import { FaX } from "react-icons/fa6";
 import { toast } from "sonner";
 
 type Props = {
   selections: Record<string, string[]>;
   combinations: string[][];
-  variantData: Record<string, VariantData>;
-  onChange: <K extends keyof VariantData>(
+  variantData: TVariantDataMap;
+  onChange: <K extends keyof TVariant>(
     combo: string[],
     field: K,
-    value: VariantData[K],
+    value: TVariant[K],
   ) => void;
   onUpload: (combo: string[], files: FileList) => void;
   onImageRemove: (combo: string[], image: File) => void;
@@ -34,6 +36,32 @@ export default function VariantGrid({
   if (combinations.length === 0) return null;
   const handleIconClick = () => {
     imageInputRef.current?.click();
+  };
+  const handleImageUpload = (
+    e: ChangeEvent<HTMLInputElement>,
+    variant: TVariant,
+    combo: string[],
+  ) => {
+    if (!e.target.files) return;
+    const fileCount = (variant.images?.length || 0) + e.target.files.length;
+    const hasTooLargeFile: boolean = Array.from(e.target.files).some(
+      async (image) =>
+        image.size > MAX_FILE_SIZE_MB * 1024 * 1024 ||
+        !(await validateImage(image)),
+    );
+    const hasInvalidDimension: boolean = Array.from(e.target.files).some(
+      async (image) => !(await validateImage(image)),
+    );
+    if (hasInvalidDimension) return;
+    if (hasTooLargeFile) {
+      toast.error(`Image exceeds max size of ${MAX_FILE_SIZE_MB}MB.`);
+      return;
+    }
+    if (fileCount > 3) {
+      toast.error("Maximum 3 images allowed per variant.");
+      return;
+    }
+    onUpload(combo, e.target.files);
   };
   return (
     <div className="overflow-auto rounded border">
@@ -60,7 +88,14 @@ export default function VariantGrid({
         <tbody>
           {combinations.map((combo, idx) => {
             const key = combo.join("|");
-            const variant = variantData[key] || {};
+            const variant = variantData[key] ?? {
+              stock: "",
+              price: "",
+              sku: "",
+              available: false,
+              images: [],
+              isValid: false,
+            };
             const safeCombo = [...combo];
             while (safeCombo.length < columns.length) safeCombo.push("");
 
@@ -120,16 +155,7 @@ export default function VariantGrid({
                     multiple
                     className="hidden"
                     accept="image/*"
-                    onChange={(e) => {
-                      if (!e.target.files) return;
-                      const fileCount =
-                        (variant.images?.length || 0) + e.target.files.length;
-                      if (fileCount > 3) {
-                        toast.error("Maximum 3 images allowed per variant.");
-                        return;
-                      }
-                      onUpload(combo, e.target.files);
-                    }}
+                    onChange={(e) => handleImageUpload(e, variant, combo)}
                   />
                   <div className="mt-1 flex flex-wrap gap-1">
                     {(variant.images || []).map((img, i) => {

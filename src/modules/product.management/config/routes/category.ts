@@ -13,5 +13,8 @@ const category: IRoute["category"] = {
   update: {
     path: "/product-management/categories/:slug",
   },
+  viewParentRecursive: {
+    path: "/product-management/categories/:slug/view-parent-recursive",
+  },
 };
 export default category;

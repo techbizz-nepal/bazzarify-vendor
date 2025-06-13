@@ -21,6 +21,7 @@ export default function Index() {
               { label: "Category", accessor: "categories.name" },
               { label: "Name", accessor: "name" },
               { label: "Created By", accessor: "user.name" },
+              { label: "Status", accessor: "status_text" },
               { label: "Created At", accessor: "created_at" },
               { label: "Updated At", accessor: "updated_at" },
             ]}
