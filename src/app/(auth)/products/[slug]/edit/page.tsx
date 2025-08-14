@@ -8,7 +8,6 @@ import { Suspense } from "react";
 export default async function Page({ params }: IPageParams) {
   const { slug } = await params;
   const productPayloadPromise = actionEditProduct(slug);
-  productPayloadPromise.then((data) => console.log({ data, slug }));
   const categoryIndexPayloadPromise = actionGetCategories({
     filter: { rootOnly: true },
     sort: "name",

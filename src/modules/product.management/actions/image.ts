@@ -1,3 +1,5 @@
+"use server";
+
 import { ApiResponse, IMetaData } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
