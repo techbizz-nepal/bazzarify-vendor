@@ -11,6 +11,8 @@ import { toast } from "sonner";
 interface ImageUploadProps {
   onImageSelect: (files: File[]) => void;
   initialImages?: string[];
+  onRemoveExisting?: (url: string) => Promise<boolean>;
+  onExistingListChange?: (urls: string[]) => void;
 }
 
 type PreviewItem = {
@@ -21,21 +23,44 @@ type PreviewItem = {
 export default function ImageUploader({
   onImageSelect,
   initialImages = [],
+  onRemoveExisting,
+  onExistingListChange,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<PreviewItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  // When initialImages change, replace previews and revoke any old object URLs
+  // When initialImages change, merge existing URLs with current new previews; trim to max
   useEffect(() => {
-    if (initialImages.length > 0) {
-      // Revoke any existing object URLs before replacing
-      previews.forEach((p) => p.revoke && URL.revokeObjectURL(p.url));
-      setPreviews(initialImages.map((url) => ({ url, revoke: false })));
-      setSelectedFiles([]);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Build existing items from incoming URLs, trimmed to max
+    const existing: PreviewItem[] = (initialImages || [])
+      .slice(0, MAX_PRODUCT_IMAGES_COUNT)
+      .map((url) => ({ url, revoke: false }));
+
+    setPreviews((prev) => {
+      // Keep current new (revoke=true) items if there is room
+      const newItems = prev.filter((p) => p.revoke);
+
+      const availableSlots = Math.max(
+        0,
+        MAX_PRODUCT_IMAGES_COUNT - existing.length,
+      );
+
+      // If no room left, revoke all current object URLs (they won't be shown)
+      if (availableSlots <= 0) {
+        newItems.forEach((p) => p.revoke && URL.revokeObjectURL(p.url));
+        // Also clear selected files because none can be shown
+        setSelectedFiles([]);
+        if (inputRef.current) inputRef.current.value = "";
+        return existing;
+      }
+
+      // Otherwise, keep up to availableSlots new items
+      const keptNew = newItems.slice(0, availableSlots);
+      return [...existing, ...keptNew];
+    });
+    // Note: do not clear selectedFiles unless we had to drop all new items above
+
   }, [initialImages]);
 
   // Revoke any remaining object URLs on unmount or when previews list changes
@@ -113,18 +138,44 @@ export default function ImageUploader({
     event.target.value = "";
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = async (index: number) => {
     const toRemove = previews[index];
-    if (toRemove?.revoke) URL.revokeObjectURL(toRemove.url);
+    if (!toRemove) return;
+
+    // If this is an existing image (revoke=false), call API before removing
+    if (!toRemove.revoke && typeof toRemove.url === "string") {
+      if (typeof onRemoveExisting === "function") {
+        const ok = await onRemoveExisting(toRemove.url);
+        if (!ok) return; // abort UI removal if API failed
+      }
+    } else if (toRemove.revoke) {
+      URL.revokeObjectURL(toRemove.url);
+    }
 
     const newPreviews = [...previews];
     newPreviews.splice(index, 1);
     setPreviews(newPreviews);
 
     const newFiles = [...selectedFiles];
-    newFiles.splice(index, 1);
-    setSelectedFiles(newFiles);
-    onImageSelect(newFiles);
+    // Only adjust files list for object-URL previews (new uploads)
+    if (toRemove.revoke) {
+      // Map preview index to selectedFiles index by counting revoke items prior to index
+      const priorRevokeCount = previews.slice(0, index).filter((p) => p.revoke)
+        .length;
+      if (priorRevokeCount >= 0 && priorRevokeCount < newFiles.length) {
+        newFiles.splice(priorRevokeCount, 1);
+        setSelectedFiles(newFiles);
+        onImageSelect(newFiles);
+      }
+    }
+
+    // Notify parent about existing list change (filter previews that are existing)
+    if (typeof onExistingListChange === "function") {
+      const existingUrls = newPreviews
+        .filter((p) => !p.revoke)
+        .map((p) => p.url);
+      onExistingListChange(existingUrls);
+    }
   };
 
   return (

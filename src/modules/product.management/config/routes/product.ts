@@ -16,6 +16,9 @@ const product: IRoute["product"] = {
   update: {
     path: "/product-management/products/:uuid",
   },
+  delete: {
+    path: "/product-management/products/:uuid",
+  }
 };
 
 export default product;

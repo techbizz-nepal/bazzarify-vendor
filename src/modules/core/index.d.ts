@@ -56,6 +56,8 @@ export type TURLSearchParams = {
 export type TEntities =
   | "category"
   | "product"
+  | "variant"
+  | "image"
   | "attribute"
   | "specification"
   | "login"

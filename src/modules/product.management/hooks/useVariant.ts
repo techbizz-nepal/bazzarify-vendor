@@ -1,19 +1,27 @@
 import { TVariant, TVariantDataMap } from "@/modules/product.management";
 import { generateCombinations } from "@/modules/product.management/utils/generateCombinations";
-import React, { useMemo, useState } from "react";
+import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import React, { useMemo, useRef, useState } from "react";
 
 interface useVariantProps {
   variantSelections: Record<string, string[]>;
   setVariantSelections: React.Dispatch<
     React.SetStateAction<Record<string, string[]>>
   >;
+  onExistingVariantImageRemove?: (
+    combo: string[],
+    url: string,
+  ) => Promise<boolean>;
 }
 export default function useVariant({
   variantSelections,
   setVariantSelections,
+  onExistingVariantImageRemove,
 }: useVariantProps) {
   const [columns, setColumns] = useState<string[]>([]);
   const [variantData, setVariantData] = useState<TVariantDataMap>({});
+  // Map of combo key -> input element to ensure per-row file input triggers the correct combo
+  const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const toggleValue = (attribute: string, value: string) => {
     setVariantSelections((prev) => {
@@ -88,21 +96,32 @@ export default function useVariant({
     const key = combo.join("|");
     const fileList = Array.from(files).filter((file) => file instanceof File);
     setVariantData((prev) => {
-      const existing = (prev[key]?.images || []).filter(
-        (img) => img instanceof File,
-      );
+      const existingAll = (prev[key]?.images || []);
+      // Keep both existing string URLs and Files
+      const existing = [...existingAll];
+      // Determine remaining slots considering both existing strings and Files
+      const remaining = Math.max(0, MAX_VARIANT_IMAGE_COUNT - existing.length);
+      if (remaining <= 0) {
+        return prev; // cannot add more
+      }
+      // Take only up to remaining new files
+      const toAdd = fileList.slice(0, remaining);
       return {
         ...prev,
         [key]: {
           ...(prev[key] || {}),
-          images: [...existing, ...fileList].slice(0, 3),
+          images: [...existing, ...toAdd].slice(0, MAX_VARIANT_IMAGE_COUNT),
         },
       };
     });
   };
 
-  const handleImageRemove = (combo: string[], image: File) => {
+  const handleImageRemove = async (combo: string[], image: File | string) => {
     const key = combo.join("|");
+    if (typeof image === "string" && onExistingVariantImageRemove) {
+      const ok = await onExistingVariantImageRemove(combo, image);
+      if (!ok) return; // abort removal if API fails
+    }
     setVariantData((prev) => {
       const images = prev[key]?.images?.filter((img) => img !== image) || [];
       return {

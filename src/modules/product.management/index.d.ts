@@ -22,6 +22,8 @@ export type TCategory = {
 export type TProduct = {
   type: "retail" | "wholesale";
   uuid?: string;
+  image_base_path: string;
+  image_base_url: string;
   id: string;
   name: string;
   slug: string;
@@ -30,9 +32,13 @@ export type TProduct = {
   highlights?: string;
   box_items?: string;
   category: TCategory;
-  images: File[];
+  images: TImage[];
   specifications: Record<string, string>;
   variants: TVariant[];
+};
+export type TImage = {
+  uuid: string;
+  file: string;
 };
 
 export interface TProductForm {
@@ -64,10 +70,12 @@ export type TAttribute = {
 
 export interface TVariant {
   name: string;
+  image_base_path: string;
+  image_base_url: string;
   stock?: string;
   price?: string;
   sku?: string;
-  images?: File[];
+  images?: (string | File | TImage)[];
   isValid?: boolean;
   available?: boolean;
   attributes?: { attribute: TAttribute; attribute_value: TAttributeValue }[];
@@ -78,9 +86,9 @@ export type TVariantPayload = {
   stock?: string;
   price?: string;
   sku?: string;
-  images?: File[];
+  images?: (string | File | TImage)[];
   available?: boolean;
-  [key: string]: string | string[] | boolean | File[] | undefined;
+  [key: string]: string | boolean | (string | File | TImage)[] | undefined;
 };
 export type TCategoryIndexPayload = {
   categories: IPaginatedData<TCategory[]>;
@@ -153,7 +161,7 @@ export interface VariantState {
     value: TVariant[K],
   ) => void;
   handleImageUpload: (combo: string[], files: FileList) => void;
-  handleImageRemove: (combo: string[], image: File) => void;
+  handleImageRemove: (combo: string[], image: File | string) => void;
   columns: string[];
   handleReorderColumns?: (newOrder: string[]) => void;
 }

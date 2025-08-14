@@ -51,6 +51,8 @@ export default function Edit({
     handleUpdate,
     productForm,
     onProductFormInputChange,
+    handleExistingProductImagesChange,
+    handleRemoveExistingProductImage,
   } = useUpdateProduct(productPayloadPromise);
   const categoryIndexPayload = use(categoryIndexPayloadPromise);
   if ("error" in categoryIndexPayload) {
@@ -124,6 +126,12 @@ export default function Edit({
             <ImageUploader
               onImageSelect={handleProductImageUpload}
               initialImages={existingProductImages}
+              onRemoveExisting={async (url) => {
+                // Delegate to hook to remove existing image via API then update state
+                // useUpdateProduct exposes handleExistingProductImagesChange to sync state; handled in hook
+                return await handleRemoveExistingProductImage(url);
+              }}
+              onExistingListChange={(urls) => handleExistingProductImagesChange(urls)}
             />
           </ProductCard>
           {/*** Product Image ends ***/}

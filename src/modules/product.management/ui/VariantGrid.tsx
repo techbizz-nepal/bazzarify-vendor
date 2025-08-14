@@ -22,7 +22,7 @@ type Props = {
     value: TVariant[K],
   ) => void;
   onUpload: (combo: string[], files: FileList) => void;
-  onImageRemove: (combo: string[], image: File) => void;
+  onImageRemove: (combo: string[], image: File | string) => void;
   columns: string[];
 };
 
@@ -54,11 +54,8 @@ export default function VariantGrid({
   onImageRemove,
   columns,
 }: Props) {
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   if (combinations.length === 0) return null;
-  const handleIconClick = () => {
-    imageInputRef.current?.click();
-  };
   const handleImageUpload = async (
     e: ChangeEvent<HTMLInputElement>,
     variant: TVariant,
@@ -204,7 +201,10 @@ export default function VariantGrid({
                 <td className="border px-2 py-1">
                   <input
                     type="file"
-                    ref={imageInputRef}
+                    ref={(el) => {
+                      const k = combo.join("|");
+                      imageInputRefs.current[k] = el;
+                    }}
                     multiple
                     className="hidden"
                     accept="image/*"
@@ -215,18 +215,26 @@ export default function VariantGrid({
                       <div key={i} className="relative">
                         {img instanceof File ? (
                           <PreviewImage file={img} />
-                        ) : null}
+                        ) : (
+                          <Image
+                            width={150}
+                            height={150}
+                            src={img as string}
+                            alt="variant"
+                            className="h-14 w-14 border object-cover"
+                          />
+                        )}
                         <ThemedButton
                           type="button"
                           className="absolute -top-1 -right-1 h-1 w-1 rounded-full border bg-white"
-                          onClick={() => onImageRemove(combo, img as File)}
+                          onClick={() => onImageRemove(combo, img)}
                         >
                           <FaX className="text-red-600" />
                         </ThemedButton>
                       </div>
                     ))}
 
-                    <div onClick={handleIconClick}>
+                    <div onClick={() => imageInputRefs.current[combo.join("|")]?.click()}>
                       <CirclePlus width={50} height={50} />
                     </div>
                   </div>

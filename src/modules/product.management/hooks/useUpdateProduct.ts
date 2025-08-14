@@ -9,11 +9,19 @@ import {
   TProductForm,
 } from "@/modules/product.management";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
+import { actionDelete as actionDeleteImage } from "@/modules/product.management/actions/image";
+import {
+  MAX_PRODUCT_IMAGES_COUNT,
+  MAX_VARIANT_IMAGE_COUNT,
+} from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { UpdateProductSchema } from "@/modules/product.management/config/schemas/product";
 import useCategory from "@/modules/product.management/hooks/useCategory";
 import useProduct from "@/modules/product.management/hooks/useProduct";
 import useVariant from "@/modules/product.management/hooks/useVariant";
-import { fillSelectedProductVariantData } from "@/modules/product.management/utils/editProductUtils";
+import {
+  fillSelectedProductVariantData,
+  getVariantNameWithUppercase,
+} from "@/modules/product.management/utils/editProductUtils";
 import { lexicalJsonToHtml } from "@/modules/product.management/utils/richTextEditorUtils";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +40,9 @@ export default function useUpdateProduct(
     Record<string, string>
   >({});
   const [product, setProduct] = useState<TProduct>();
+  const [variantImageIdMap, setVariantImageIdMap] = useState<
+    Record<string, Record<string, string>>
+  >({});
 
   const {
     showDropdown: showCategoryDropdown,
@@ -64,6 +75,26 @@ export default function useUpdateProduct(
   } = useVariant({
     variantSelections,
     setVariantSelections,
+    onExistingVariantImageRemove: async (combo, url) => {
+      const key = getVariantNameWithUppercase(combo.join("|"));
+      const uuid = variantImageIdMap[key]?.[url];
+      if (!uuid) return false;
+      const res = await actionDeleteImage(uuid);
+      if ("error" in res) {
+        toast.error(res.error);
+        return false;
+      }
+      // remove from local map
+      setVariantImageIdMap((prev) => {
+        const copy = { ...prev };
+        const inner = { ...(copy[key] || {}) };
+        delete inner[url];
+        copy[key] = inner;
+        return copy;
+      });
+      toast.success("Variant image removed.");
+      return true;
+    },
   });
   const {
     nameRef,
@@ -78,7 +109,38 @@ export default function useUpdateProduct(
     productForm,
     handleProductForm,
     setProductForm,
+    existingImageIdMap,
+    setExistingImageIdMap,
   } = useProduct();
+
+  // Remove existing product image via API, then update local state
+  const handleRemoveExistingProductImage = async (
+    url: string,
+  ): Promise<boolean> => {
+    try {
+      const uuid = existingImageIdMap[url];
+      if (!uuid) {
+        toast.error("Could not determine image id.");
+        return false;
+      }
+      const res = await actionDeleteImage(uuid);
+      if ("error" in res) {
+        toast.error(res.error);
+        return false;
+      }
+      const remaining = (existingProductImages || []).filter((u) => u !== url);
+      handleExistingProductImagesChange(remaining);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [url]: _, ...rest } = existingImageIdMap;
+      setExistingImageIdMap(rest);
+      toast.success("Image removed.");
+      return true;
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to remove image. Please try again.");
+      return false;
+    }
+  };
 
   const onProductFormInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -93,6 +155,31 @@ export default function useUpdateProduct(
         return;
       }
       const { product } = editProductPayload;
+      // Populate existing product images from TImage[] (file may be relative)
+      const imageUrls: string[] = [];
+      const idMap: Record<string, string> = {};
+      const base = (product.image_base_url || "").replace(/\/+$/, "");
+      const toFull = (file: string) =>
+        /^(https?:)?\/\//.test(file)
+          ? file
+          : `${base}/${String(file).replace(/^\/+/, "")}`;
+      if (Array.isArray(product.images)) {
+        for (const img of product.images as { uuid: string; file: string }[]) {
+          const url = toFull(img.file);
+          const uuid = img.uuid;
+          imageUrls.push(url);
+          idMap[url] = uuid;
+        }
+      }
+      // Enforce product image max: only keep up to MAX_PRODUCT_IMAGES_COUNT
+      const limitedUrls = imageUrls.slice(0, MAX_PRODUCT_IMAGES_COUNT);
+      const limitedIdMap: Record<string, string> = {};
+      limitedUrls.forEach((u) => {
+        if (idMap[u]) limitedIdMap[u] = idMap[u];
+      });
+      handleExistingProductImagesChange(limitedUrls);
+      setExistingImageIdMap(limitedIdMap);
+      setProduct(product);
 
       const productForm: TProductForm = {
         type: "retail",
@@ -120,6 +207,37 @@ export default function useUpdateProduct(
             selectedProductVariants: product?.variants,
             categoryAttributes: attributes,
           });
+          // Build variant image uuid map
+          const map: Record<string, Record<string, string>> = {};
+          (product?.variants || []).forEach((v) => {
+            const key = getVariantNameWithUppercase(v.name);
+            const base = (v.image_base_url || "").replace(/\/+$/, "");
+            const toFull = (file: string) =>
+              /^(https?:)?\/\//.test(file)
+                ? file
+                : `${base}/${String(file).replace(/^\/+/, "")}`;
+            const imgs = (v.images || []) as unknown[];
+            let count = 0;
+            for (const img of imgs) {
+              if (
+                typeof img === "object" &&
+                img !== null &&
+                "file" in (img as Record<string, unknown>) &&
+                typeof (img as { file?: unknown }).file === "string" &&
+                "uuid" in (img as Record<string, unknown>) &&
+                typeof (img as { uuid?: unknown }).uuid === "string"
+              ) {
+                if (count >= MAX_VARIANT_IMAGE_COUNT) break;
+                const file = (img as { file: string }).file;
+                const url = toFull(file);
+                const uuid = (img as { uuid: string }).uuid;
+                if (!map[key]) map[key] = {};
+                map[key][url] = uuid;
+                count += 1;
+              }
+            }
+          });
+          setVariantImageIdMap(map);
         },
       );
     });
@@ -215,5 +333,6 @@ export default function useUpdateProduct(
     productHighlightsRef,
     uploadedProductImages,
     handleUpdate,
+    handleRemoveExistingProductImage,
   };
 }

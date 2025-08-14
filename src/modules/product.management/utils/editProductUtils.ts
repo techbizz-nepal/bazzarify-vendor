@@ -3,6 +3,7 @@ import {
   TVariant,
   TVariantDataMap,
 } from "@/modules/product.management";
+import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { Dispatch, SetStateAction } from "react";
 
 interface IFillSelectedProductVariantData {
@@ -68,8 +69,27 @@ function transformProductVariants(
       }
     });
     const variantName = getVariantNameWithUppercase(variant.name);
-    variant["images"] = [];
-    variantData[variantName] = variant;
+    // Normalize images to string URLs for UI consumption while preserving other fields
+    const base = (variant.image_base_url || "").replace(/\/+$/, "");
+    const toFull = (file: string) => (/^(https?:)?\/\//.test(file) ? file : `${base}/${String(file).replace(/^\/+/, "")}`);
+    const normalizedImages = (variant.images || []).map((img: unknown) => {
+      if (img instanceof File) return img;
+      if (
+        img &&
+        typeof img === "object" &&
+        "file" in (img as Record<string, unknown>) &&
+        typeof (img as { file?: unknown }).file === "string"
+      ) {
+        return toFull((img as { file: string }).file);
+      }
+      if (typeof img === "string") return toFull(img);
+      return String(img);
+    });
+    const limitedImages = normalizedImages.slice(0, MAX_VARIANT_IMAGE_COUNT);
+    variantData[variantName] = {
+      ...variant,
+      images: limitedImages as unknown as TVariant["images"],
+    };
   });
   return { variantSelections, columns, variantData };
 }
