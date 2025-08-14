@@ -98,9 +98,9 @@ export default function useUpdateProduct(
         type: "retail",
         name: product.name,
         uuid: product.uuid,
-        description: lexicalJsonToHtml(product.description),
+        description: lexicalJsonToHtml(product.description || undefined),
         box_items: product.box_items || "",
-        highlights: lexicalJsonToHtml(product.highlights),
+        highlights: lexicalJsonToHtml(product.highlights || undefined),
         base_price: product.base_price,
       };
       setProductForm(productForm);

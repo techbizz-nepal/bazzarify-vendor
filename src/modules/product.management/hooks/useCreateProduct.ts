@@ -108,7 +108,6 @@ export default function useCreateProduct() {
       variants: [...variants],
     });
     if (!productFormValidation.success) {
-      console.log(productFormValidation.error);
       toast.error(
         productFormValidation.error.issues.at(0)?.message || "Invalid input",
       );
@@ -135,7 +134,7 @@ export default function useCreateProduct() {
           return;
         }
         toast.success(PRODUCT_CRUD_CONSTANTS.createProductSuccess);
-        // router.replace("/products");
+        router.replace("/products");
         return;
       })
       .catch((err) => {

@@ -37,7 +37,7 @@ export default function VariantGrid({
   const handleIconClick = () => {
     imageInputRef.current?.click();
   };
-  const handleImageUpload = (
+  const handleImageUpload = async (
     e: ChangeEvent<HTMLInputElement>,
     variant: TVariant,
     combo: string[],
@@ -50,9 +50,12 @@ export default function VariantGrid({
         !(await validateImage(image)),
     );
     const hasInvalidDimension: boolean = Array.from(e.target.files).some(
-      async (image) => !(await validateImage(image)),
+      async (image) => await validateImage(image),
     );
-    if (hasInvalidDimension) return;
+    if (!hasInvalidDimension) {
+      toast.error(`error dimension ${hasInvalidDimension}`);
+      return;
+    }
     if (hasTooLargeFile) {
       toast.error(`Image exceeds max size of ${MAX_FILE_SIZE_MB}MB.`);
       return;
