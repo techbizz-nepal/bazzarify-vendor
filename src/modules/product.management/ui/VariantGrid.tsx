@@ -43,28 +43,33 @@ export default function VariantGrid({
     combo: string[],
   ) => {
     if (!e.target.files) return;
-    const fileCount = (variant.images?.length || 0) + e.target.files.length;
-    const hasTooLargeFile: boolean = Array.from(e.target.files).some(
-      async (image) =>
-        image.size > MAX_FILE_SIZE_MB * 1024 * 1024 ||
-        !(await validateImage(image)),
-    );
-    const hasInvalidDimension: boolean = Array.from(e.target.files).some(
-      async (image) => await validateImage(image),
-    );
-    if (!hasInvalidDimension) {
-      toast.error(`error dimension ${hasInvalidDimension}`);
-      return;
-    }
-    if (hasTooLargeFile) {
-      toast.error(`Image exceeds max size of ${MAX_FILE_SIZE_MB}MB.`);
-      return;
-    }
+
+    const files = Array.from(e.target.files);
+    const fileCount = (variant.images?.length || 0) + files.length;
+
     if (fileCount > 3) {
       toast.error("Maximum 3 images allowed per variant.");
+      e.target.value = "";
       return;
     }
+
+    // Validate each file sequentially to ensure size and dimensions are correct
+    for (const image of files) {
+      if (image.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toast.error(`Image exceeds max size of ${MAX_FILE_SIZE_MB}MB.`);
+        e.target.value = "";
+        return;
+      }
+      const isValidDimension = await validateImage(image);
+      if (!isValidDimension) {
+        e.target.value = "";
+        // validateImage already shows a detailed toast; just stop the upload
+        return;
+      }
+    }
+
     onUpload(combo, e.target.files);
+    e.target.value = "";
   };
   return (
     <div className="overflow-auto rounded border">

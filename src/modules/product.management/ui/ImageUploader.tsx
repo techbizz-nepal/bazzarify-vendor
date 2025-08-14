@@ -34,7 +34,10 @@ export default function ImageUploader({
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {
+      event.target.value = "";
+      return;
+    }
 
     const fileArray = Array.from(files);
     const newValidFiles: File[] = [];
@@ -57,6 +60,12 @@ export default function ImageUploader({
 
     if (previews.length + newPreviews.length > MAX_IMAGES) {
       toast.error(`You can only upload a maximum of ${MAX_IMAGES} images.`);
+      event.target.value = "";
+      return;
+    }
+    if (newValidFiles.length === 0) {
+      // Nothing added; still reset so picking the same file retriggers change
+      event.target.value = "";
       return;
     }
 
@@ -66,6 +75,7 @@ export default function ImageUploader({
     setPreviews(updatedPreviews);
     setSelectedFiles(updatedFiles);
     onImageSelect(updatedFiles);
+    event.target.value = "";
   };
 
   const handleRemoveImage = (index: number) => {

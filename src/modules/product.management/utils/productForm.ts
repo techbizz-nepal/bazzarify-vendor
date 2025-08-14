@@ -107,8 +107,20 @@ export const appendFormDataVariants = (
 
 export const validateImage = (file: File): Promise<boolean> => {
   return new Promise((resolve) => {
+    // Basic MIME type guard
+    if (!file.type || !file.type.startsWith("image/")) {
+      toast.error("Selected file is not a valid image.");
+      resolve(false);
+      return;
+    }
+
     const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
     img.onload = () => {
+      // Revoke as soon as we're done to avoid memory leaks
+      URL.revokeObjectURL(objectUrl);
+
       if (
         img.width < MIN_DIMENSION ||
         img.height < MIN_DIMENSION ||
@@ -123,7 +135,13 @@ export const validateImage = (file: File): Promise<boolean> => {
         resolve(true);
       }
     };
-    img.onerror = () => resolve(false);
-    img.src = URL.createObjectURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      toast.error("Could not read the image. Please try a different file.");
+      resolve(false);
+    };
+
+    img.src = objectUrl;
   });
 };
