@@ -15,6 +15,7 @@ interface Props {
   selections: Record<string, string[]>;
   onToggle: (attribute: string, value: string) => void;
   onRemove: (attribute: string, value: string) => void;
+  nonRemovable?: Record<string, Set<string>>;
 }
 
 export default function AttributeSelector({
@@ -22,6 +23,7 @@ export default function AttributeSelector({
   selections,
   onToggle,
   onRemove,
+  nonRemovable,
 }: Props) {
   return (
     <div className="space-y-6">
@@ -37,23 +39,28 @@ export default function AttributeSelector({
               <Label className="text-base font-medium">{attr.name}</Label>
             </div>
             <div className="space-y-2">
-              {selectedValues.map((val) => (
-                <div key={val} className="flex items-center gap-2">
-                  <Select defaultValue={val} disabled>
-                    <SelectTrigger className="w-64">
-                      <SelectValue>{val}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent />
-                  </Select>
-                  <ThemedButton
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onRemove(attr.name, val)}
-                  >
-                    <Trash className="h-4 w-4 text-red-500" />
-                  </ThemedButton>
-                </div>
-              ))}
+              {selectedValues.map((val) => {
+                const isLocked = !!nonRemovable?.[attr.name]?.has(val);
+                return (
+                  <div key={val} className="flex items-center gap-2">
+                    <Select defaultValue={val} disabled>
+                      <SelectTrigger className="w-64">
+                        <SelectValue>{val}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent />
+                    </Select>
+                    <ThemedButton
+                      variant="ghost"
+                      size="icon"
+                      disabled={isLocked}
+                      onClick={() => onRemove(attr.name, val)}
+                      title={isLocked ? "Cannot remove: used by existing variant" : undefined}
+                    >
+                      <Trash className={`h-4 w-4 ${isLocked ? "text-gray-300" : "text-red-500"}`} />
+                    </ThemedButton>
+                  </div>
+                );
+              })}
               {availableOptions.length > 0 && (
                 <div className="flex items-center gap-2">
                   <Select

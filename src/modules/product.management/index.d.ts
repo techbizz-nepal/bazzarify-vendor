@@ -22,8 +22,8 @@ export type TCategory = {
 export type TProduct = {
   type: "retail" | "wholesale";
   uuid?: string;
-  image_base_path: string;
-  image_base_url: string;
+  image_base_path?: string;
+  image_base_url?: string;
   id: string;
   name: string;
   slug: string;
@@ -69,9 +69,10 @@ export type TAttribute = {
 };
 
 export interface TVariant {
+  uuid?: string;
   name: string;
-  image_base_path: string;
-  image_base_url: string;
+  image_base_path?: string;
+  image_base_url?: string;
   stock?: string;
   price?: string;
   sku?: string;

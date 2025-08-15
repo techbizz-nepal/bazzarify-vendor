@@ -1,6 +1,10 @@
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { TVariant, TVariantDataMap } from "@/modules/product.management";
+import {
+  TImage,
+  TVariant,
+  TVariantDataMap,
+} from "@/modules/product.management";
 import {
   MAX_FILE_SIZE_MB,
   MAX_VARIANT_IMAGE_COUNT,
@@ -22,7 +26,7 @@ type Props = {
     value: TVariant[K],
   ) => void;
   onUpload: (combo: string[], files: FileList) => void;
-  onImageRemove: (combo: string[], image: File | string) => void;
+  onImageRemove: (combo: string[], image: File | string | TImage) => void;
   columns: string[];
 };
 
@@ -61,6 +65,11 @@ export default function VariantGrid({
     variant: TVariant,
     combo: string[],
   ) => {
+    // Prevent uploads when variant is unavailable
+    if (variant.available === false) {
+      e.target.value = "";
+      return;
+    }
     if (!e.target.files) return;
 
     const files = Array.from(e.target.files);
@@ -142,7 +151,7 @@ export default function VariantGrid({
               stock: "",
               price: "",
               sku: "",
-              available: false,
+              available: true,
               images: [],
               isValid: false,
             };
@@ -159,7 +168,10 @@ export default function VariantGrid({
             );
 
             return (
-              <tr key={idx}>
+              <tr
+                key={idx}
+                className={`${variant.available === false ? "bg-gray-100 opacity-60" : ""}`}
+              >
                 {(columns.length || Object.keys(selections).length
                   ? columns.length
                     ? columns
@@ -208,6 +220,7 @@ export default function VariantGrid({
                     multiple
                     className="hidden"
                     accept="image/*"
+                    disabled={variant.available === false}
                     onChange={(e) => handleImageUpload(e, variant, combo)}
                   />
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -227,14 +240,28 @@ export default function VariantGrid({
                         <ThemedButton
                           type="button"
                           className="absolute -top-1 -right-1 h-1 w-1 rounded-full border bg-white"
-                          onClick={() => onImageRemove(combo, img)}
+                          disabled={variant.available === false}
+                          title={variant.available === false ? "Variant unavailable: cannot delete image" : undefined}
+                          aria-disabled={variant.available === false}
+                          onClick={() => {
+                            if (variant.available === false) return;
+                            onImageRemove(combo, img);
+                          }}
                         >
                           <FaX className="text-red-600" />
                         </ThemedButton>
                       </div>
                     ))}
 
-                    <div onClick={() => imageInputRefs.current[combo.join("|")]?.click()}>
+                    <div
+                      onClick={() => {
+                        if (variant.available === false) return;
+                        imageInputRefs.current[combo.join("|")]?.click();
+                      }}
+                      title={variant.available === false ? "Variant unavailable: cannot upload images" : undefined}
+                      aria-disabled={variant.available === false}
+                      className={variant.available === false ? "cursor-not-allowed opacity-60" : undefined}
+                    >
                       <CirclePlus width={50} height={50} />
                     </div>
                   </div>
