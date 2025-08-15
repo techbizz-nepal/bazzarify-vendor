@@ -333,8 +333,6 @@ export default function useUpdateProduct(
 
     // Variants + attributes (only File images are appended inside util)
     appendFormDataVariants(formData, variants, columns, categoryAttributes);
-    formData.entries().forEach(([key, value]) => console.log({ key, value }));
-    return;
     toast.info("Updating product...");
     const res = await actionUpdateProducts(formData, productForm.uuid);
     if ("error" in res) {
