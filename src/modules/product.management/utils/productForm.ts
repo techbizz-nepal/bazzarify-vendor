@@ -53,6 +53,7 @@ export const createVariantsPayload = (
 
     return {
       ...data,
+      uuid: variant.uuid,
       name: key.toLowerCase(),
       stock: variant.stock || "0",
       price: variant.price || "",
@@ -90,6 +91,9 @@ export const appendFormDataVariants = (
       );
     });
 
+    if (variant.uuid) {
+      formData.append(`variants[${index}][uuid]`, variant.uuid);
+    }
     formData.append(`variants[${index}][name]`, variant.name);
     formData.append(`variants[${index}][stock]`, variant.stock || "0");
     formData.append(`variants[${index}][price]`, variant.price || "0");
@@ -99,8 +103,13 @@ export const appendFormDataVariants = (
       variant.available ? "1" : "0",
     );
 
-    variant.images?.forEach((image, i) => {
-      formData.append(`variants[${index}][images][${i}]`, image);
+    // Only append new images (File instances). Existing images (strings/URLs or TImage) must not be re-submitted on update.
+    let imgIndex = 0;
+    variant.images?.forEach((image) => {
+      if (image instanceof File) {
+        formData.append(`variants[${index}][images][${imgIndex}]`, image);
+        imgIndex += 1;
+      }
     });
   });
 };

@@ -10,10 +10,12 @@ import {
 } from "@/modules/product.management";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
 import { actionDelete as actionDeleteImage } from "@/modules/product.management/actions/image";
+import { actionUpdateProducts } from "@/modules/product.management/actions/product";
 import {
   MAX_PRODUCT_IMAGES_COUNT,
   MAX_VARIANT_IMAGE_COUNT,
 } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { PRODUCT_CRUD_CONSTANTS } from "@/modules/product.management/config/constants/PRODUCT_CRUD_CONSTANTS";
 import { UpdateProductSchema } from "@/modules/product.management/config/schemas/product";
 import useCategory from "@/modules/product.management/hooks/useCategory";
 import useProduct from "@/modules/product.management/hooks/useProduct";
@@ -22,7 +24,13 @@ import {
   fillSelectedProductVariantData,
   getVariantNameWithUppercase,
 } from "@/modules/product.management/utils/editProductUtils";
+import {
+  appendFormDataVariants,
+  createVariantsPayload,
+  updateVariantValidity,
+} from "@/modules/product.management/utils/productForm";
 import { lexicalJsonToHtml } from "@/modules/product.management/utils/richTextEditorUtils";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ZodSafeParseResult } from "zod";
@@ -269,27 +277,72 @@ export default function useUpdateProduct(
     return attributesData;
   };
 
+  const router = useRouter();
+
   const handleUpdate: () => Promise<void> = async () => {
     if (!productForm?.uuid) {
       toast.error("Cannot proceed request.");
       return;
     }
+
+    // Validate base product fields
     const validation: ZodSafeParseResult<TProductForm> =
       UpdateProductSchema.safeParse({
         type: "retail",
         uuid: productForm.uuid,
         name: productForm.name,
-        base_price: productForm.base_price.toString(),
+        base_price: String(productForm.base_price ?? ""),
         description: productForm.description,
         highlights: productForm.highlights,
         box_items: productForm.box_items,
       });
     if (!validation.success) {
-      console.log(validation.error.message);
       validation.error.issues.forEach((error) => toast.error(error.message));
       return;
     }
-    console.log(validation.data);
+
+    // Validate variants like create flow
+    const { updated, allValid } = updateVariantValidity(
+      combinations,
+      variantData,
+    );
+    if (!allValid) {
+      toast.error("Please fill stock, price, SKU, images for variants.");
+      return;
+    }
+    setVariantData(updated);
+    const variants = createVariantsPayload(combinations, columns, updated);
+
+    // Build FormData (only new images will be appended)
+    const formData = new FormData();
+
+    // Append validated product fields
+    const { uuid, ...rest } = validation.data;
+
+    Object.entries(rest).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+
+    // Product images: append only newly uploaded files
+    uploadedProductImages.forEach((img) => formData.append("images[]", img));
+
+    // Specifications
+    Object.entries(selectedSpecifications || {}).forEach(([key, value]) => {
+      formData.append(`specifications[${key}]`, value);
+    });
+
+    // Variants + attributes (only File images are appended inside util)
+    appendFormDataVariants(formData, variants, columns, categoryAttributes);
+    formData.entries().forEach(([key, value]) => console.log({ key, value }));
+    return;
+    toast.info("Updating product...");
+    const res = await actionUpdateProducts(formData, productForm.uuid);
+    if ("error" in res) {
+      toast.error(`${res.error}`);
+      return;
+    }
+    toast.success(PRODUCT_CRUD_CONSTANTS.updateProductSuccess);
+    // router.replace("/products");
   };
   return {
     product,

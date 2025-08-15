@@ -21,7 +21,7 @@ export type TCategory = {
 };
 export type TProduct = {
   type: "retail" | "wholesale";
-  uuid?: string;
+  uuid: string;
   image_base_path?: string;
   image_base_url?: string;
   id: string;
@@ -83,6 +83,7 @@ export interface TVariant {
 }
 export type TVariantDataMap = Record<string, TVariant>;
 export type TVariantPayload = {
+  uuid?: string;
   name: string;
   stock?: string;
   price?: string;
