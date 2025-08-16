@@ -98,7 +98,8 @@ export const actionUpdateProducts = async (
 ): Promise<[] | IMetaData> => {
   const client = await authAxiosInstance();
   try {
-    const response = await client.patch(
+    payload.append("_method", "PUT");
+    const response = await client.post(
       PRODUCT_MANAGEMENT_ROUTES.product.update.path.replace(":uuid", uuid),
       payload,
       {

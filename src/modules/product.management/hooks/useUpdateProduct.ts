@@ -323,6 +323,16 @@ export default function useUpdateProduct(
       formData.append(key, value as string);
     });
 
+    // Category UUID (ensure it is included like create flow)
+    const selectedCategoryUuid = selectedCategories.at(2)?.uuid;
+    const fallbackCategoryUuid = product?.category?.uuid;
+    const categoryUuidToSend = selectedCategoryUuid || fallbackCategoryUuid;
+    if (!categoryUuidToSend) {
+      toast.error("Please select a category.");
+      return;
+    }
+    formData.append("category", categoryUuidToSend);
+
     // Product images: append only newly uploaded files
     uploadedProductImages.forEach((img) => formData.append("images[]", img));
 
@@ -333,6 +343,8 @@ export default function useUpdateProduct(
 
     // Variants + attributes (only File images are appended inside util)
     appendFormDataVariants(formData, variants, columns, categoryAttributes);
+    // formData.entries().forEach(([key, value]) => console.log({ key, value }));
+    // return;
     toast.info("Updating product...");
     const res = await actionUpdateProducts(formData, productForm.uuid);
     if ("error" in res) {
