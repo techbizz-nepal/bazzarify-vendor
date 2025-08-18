@@ -87,12 +87,12 @@ export default function useUpdateProduct(
       const key = getVariantNameWithUppercase(combo.join("|"));
       const uuid = variantImageIdMap[key]?.[url];
       if (!uuid) return false;
-      const res = await actionDeleteImage(uuid);
+      const res = await actionDeleteImage({ uuid, storageUrl: url });
       if ("error" in res) {
         toast.error(res.error);
         return false;
       }
-      // remove from local map
+      // remove from a local map
       setVariantImageIdMap((prev) => {
         const copy = { ...prev };
         const inner = { ...(copy[key] || {}) };
@@ -121,7 +121,7 @@ export default function useUpdateProduct(
     setExistingImageIdMap,
   } = useProduct();
 
-  // Remove existing product image via API, then update local state
+  // Remove the existing product image via API, then update the local state
   const handleRemoveExistingProductImage = async (
     url: string,
   ): Promise<boolean> => {
@@ -131,7 +131,7 @@ export default function useUpdateProduct(
         toast.error("Could not determine image id.");
         return false;
       }
-      const res = await actionDeleteImage(uuid);
+      const res = await actionDeleteImage({ uuid, storageUrl: url });
       if ("error" in res) {
         toast.error(res.error);
         return false;
@@ -163,7 +163,7 @@ export default function useUpdateProduct(
         return;
       }
       const { product } = editProductPayload;
-      // Populate existing product images from TImage[] (file may be relative)
+      // Populate existing product images from TImage[] (a file may be relative)
       const imageUrls: string[] = [];
       const idMap: Record<string, string> = {};
       const base = (product.image_base_url || "").replace(/\/+$/, "");
@@ -196,7 +196,7 @@ export default function useUpdateProduct(
         description: lexicalJsonToHtml(product.description || undefined),
         box_items: product.box_items || "",
         highlights: lexicalJsonToHtml(product.highlights || undefined),
-        base_price: parseFloat(product.base_price),
+        base_price: product.base_price,
       };
       setProductForm(productForm);
       setSelectedSpecifications(
@@ -283,13 +283,17 @@ export default function useUpdateProduct(
       toast.error("Cannot proceed request.");
       return;
     }
+    if (!existingProductImages.length && !uploadedProductImages.length) {
+      toast.error("Please select product image.");
+      return;
+    }
     // Validate base product fields
     const validation: ZodSafeParseResult<TProductForm> =
       UpdateProductSchema.safeParse({
         type: "retail",
         uuid: productForm.uuid,
         name: productForm.name,
-        base_price: productForm.base_price,
+        base_price: String(productForm.base_price),
         description: productForm.description,
         highlights: productForm.highlights,
         box_items: productForm.box_items,
@@ -317,10 +321,8 @@ export default function useUpdateProduct(
     // Append validated product fields
     const { uuid, ...rest } = validation.data;
 
-    Object.entries(rest).forEach(([key, value]) => console.log([key, value]));
-    return;
     Object.entries(rest).forEach(([key, value]) => {
-      formData.append(key, value as string);
+      formData.append(key, String(value));
     });
 
     // Category UUID (ensure it is included like create flow)

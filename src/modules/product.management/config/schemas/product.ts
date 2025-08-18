@@ -5,7 +5,12 @@ import { z } from "zod";
 export const CreateProductSchema = z.object({
   type: z.string(),
   name: z.string().min(8, "Product name must be at least 8 characters long"),
-  base_price: z.string().min(1, "Product base price is required"),
+  base_price: z
+    .string("Base price is not valid")
+    .min(1, "Product base price is required")
+    .refine((val) => /^(?:[1-9]\d*|0)(?:\.\d+)?$/.test(val), {
+      message: "Base price must be 1 to 9 digits",
+    }),
   description: z.string(),
   highlights: z.string().min(1, "Product highlights is required"),
   box_items: z.string().min(1, "Product box items is required"),
@@ -21,19 +26,14 @@ export const UpdateProductSchema = z.object({
   uuid: z.uuid("Product id is required"),
   name: z.string().min(8, "Product name must be at least 8 characters long"),
   base_price: z
-    .float64
-    //"Base price is not valid"
-    ()
-    .min(0.01, "Product base price is required"),
-  // .refine((val) => /^\d{1,9}$/.test(val), {
-  //   message: "Base price must be 1 to 9 digits",
-  // }),
+    .string()
+    .min(1, "Product base price is required")
+    .refine((val) => /^(?:[1-9]\d*|0)(?:\.\d+)?$/.test(val), {
+      message: "Base price must be 1 to 9 digits",
+    }),
   description: z.string().refine(isValidRichTextEditorContent, {
     message: "Product description is required",
   }),
   highlights: z.string().min(1, "Product highlights is required"),
   box_items: z.string().min(1, "Product box items is required"),
-  // variants: z.array(z.any()).min(1, "Select at least one variant"),
-  // uploadedImages: z.array(z.any()),
-  // existingImages: z.array(z.any()),
 });

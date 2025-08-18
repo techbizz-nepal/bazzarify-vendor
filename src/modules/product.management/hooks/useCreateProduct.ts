@@ -117,7 +117,7 @@ export default function useCreateProduct() {
     const formData = new FormData();
 
     Object.entries(omit(productFormValidation.data, "variants")).forEach(
-      ([key, value]) => formData.append(key, value),
+      ([key, value]) => formData.append(key, String(value)),
     );
     uploadedProductImages.forEach((img) => formData.append("images[]", img));
     Object.entries(specifications).forEach(([key, value]) =>

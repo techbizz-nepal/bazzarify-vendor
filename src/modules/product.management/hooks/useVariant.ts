@@ -1,6 +1,6 @@
 import { TVariant, TVariantDataMap } from "@/modules/product.management";
-import { generateCombinations } from "@/modules/product.management/utils/generateCombinations";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { generateCombinations } from "@/modules/product.management/utils/generateCombinations";
 import React, { useMemo, useRef, useState } from "react";
 
 interface useVariantProps {
@@ -20,7 +20,7 @@ export default function useVariant({
 }: useVariantProps) {
   const [columns, setColumns] = useState<string[]>([]);
   const [variantData, setVariantData] = useState<TVariantDataMap>({});
-  // Map of combo key -> input element to ensure per-row file input triggers the correct combo
+  // Map of a combo key -> input element to ensure per-row file input triggers the correct combo
   const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const toggleValue = (attribute: string, value: string) => {
@@ -96,7 +96,7 @@ export default function useVariant({
     const key = combo.join("|");
     const fileList = Array.from(files).filter((file) => file instanceof File);
     setVariantData((prev) => {
-      const existingAll = (prev[key]?.images || []);
+      const existingAll = prev[key]?.images || [];
       // Keep both existing string URLs and Files
       const existing = [...existingAll];
       // Determine remaining slots considering both existing strings and Files

@@ -83,11 +83,18 @@ HTTP/Server actions
 
 Constants over magic strings
 - Use existing constants (e.g., IMAGE_CONSTANTS for dimensions/file size limits; PRODUCT_MANAGEMENT_ROUTES for API endpoints) instead of inlining strings.
+- if no constant is found, create with Contextual Relevance.
 - When adding new limits or keys, add them under an appropriate config/constants module.
 
+Coding Conventions
+- Contextual relevant const and method name.
+- early return to avoid nested loop, conditions
+- modular approach 
+- follow SOLID principle (but not over engineering)
+
 FormData and file handling
-- appendFormDataVariants only appends File instances to avoid re-sending existing URLs/ids. Maintain this behavior on updates to prevent backend duplication.
-- Ensure availability flag is serialized as "1" | "0" (string) for server expectations.
+- appendFormDataVariants only append File instances to avoid re-sending existing URLs/ids. Maintain this behavior on updates to prevent backend duplication.
+- Ensure the availability flag is serialized as "1" | "0" (string) for server expectations.
 
 Slugging and variant keys
 - Variant attribute keys are slugified and joined by "|". Keep this contract stable: changes impact client/server mapping and persisted data.

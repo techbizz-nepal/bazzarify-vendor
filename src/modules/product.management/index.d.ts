@@ -45,7 +45,7 @@ export interface TProductForm {
   type: string;
   uuid?: string;
   name: string;
-  base_price: number;
+  base_price: string;
   description: string;
   highlights: string;
   box_items: string;
