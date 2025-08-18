@@ -3,7 +3,7 @@ import { TCategory } from "@/modules/product.management";
 import { CategoryDetailField } from "@/modules/product.management/ui/CategoryDetailField";
 
 const CategoryCard = ({ category }: { category: TCategory }) => {
-  const { name, parent, position, children } = category;
+  const { name, parent, children } = category;
   return (
     <Card>
       <CardHeader>
@@ -12,7 +12,6 @@ const CategoryCard = ({ category }: { category: TCategory }) => {
       <CardContent>
         <div className="flex-col space-y-2">
           <CategoryDetailField label="name" value={name} />
-          <CategoryDetailField label="position" value={position} />
           {parent && <CategoryDetailField label="parent" value={parent.name} />}
           {children && children.length > 0 && (
             <CategoryDetailField

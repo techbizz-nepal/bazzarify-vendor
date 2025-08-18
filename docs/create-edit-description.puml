@@ -1,0 +1,34 @@
+@startuml sequence
+' https://plantuml.com/sequence-diagram
+header %page%
+title Create/Update of Product Description/Highlights
+
+box "Next.js" #LightBlue
+participant LexicalEditor
+entity "NodeDOMConverter()" as clientConverter
+participant ServerAction
+end box
+
+box "Backend" #Orange
+participant Controller
+entity "HtmlLexicalConverter()" as ServerConverter
+database Postgres
+end box
+
+autonumber
+== Create Operation ==
+LexicalEditor -> clientConverter : sends lexical
+LexicalEditor <- clientConverter : gets html
+LexicalEditor -> ServerAction : sends html content
+ServerAction -> Controller : post request - html content
+Controller -> ServerConverter : sends html
+|||
+Controller <- ServerConverter : get lexical
+|||
+Controller -> Postgres: save to db
+== Update Operation ==
+Controller <- Postgres: fetch lexical content
+ServerAction <- Controller : get request - json content
+clientConverter <- ServerAction : converts json to html
+LexicalEditor <- clientConverter : converts html to json
+@enduml

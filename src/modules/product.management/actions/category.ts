@@ -1,20 +1,37 @@
 "use server";
 
-import { TURLSearchParams } from "@/modules/core";
+import { ApiResponse, IMetaData, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
+import { handleUnknownError } from "@/modules/core/lib/utils.index";
+import {
+  TCategoryIndexPayload,
+  TSpecificationsIndexPayload,
+} from "@/modules/product.management";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";
 
-export const actionGetCategories = async (params?: TURLSearchParams) => {
-  const response = await (
-    await authAxiosInstance()
-  ).get(PRODUCT_MANAGEMENT_ROUTES.category.index.path, {
-    params: {
-      ...params,
-    },
-  });
-  console.log(response.config.url);
-  return response.data;
-};
+export async function actionGetCategories(
+  params?: TURLSearchParams,
+): Promise<TCategoryIndexPayload | IMetaData> {
+  const instance = await authAxiosInstance();
+  try {
+    const response = await instance.get(
+      PRODUCT_MANAGEMENT_ROUTES.category.index.path,
+      {
+        params: {
+          ...params,
+        },
+      },
+    );
+    const responseData = response.data as ApiResponse<TCategoryIndexPayload>;
+    if (responseData.metaData.error) {
+      return { error: responseData.metaData.error };
+    }
+    return responseData.data.payload;
+  } catch (error) {
+    return handleUnknownError(error);
+  }
+}
+
 export const actionViewCategory = async (slug: string) => {
   try {
     const response = await (
@@ -27,7 +44,9 @@ export const actionViewCategory = async (slug: string) => {
   }
 };
 
-export const actionViewCategorySpecifications = async (slug: string) => {
+export const actionViewCategorySpecifications = async (
+  slug: string,
+): Promise<TSpecificationsIndexPayload | IMetaData> => {
   try {
     const response = await (
       await authAxiosInstance()
@@ -37,10 +56,14 @@ export const actionViewCategorySpecifications = async (slug: string) => {
         slug,
       ),
     );
-    return response.data;
+    const responseData =
+      response.data as ApiResponse<TSpecificationsIndexPayload>;
+    if (responseData.metaData.error) {
+      return { error: responseData.metaData.error };
+    }
+    return responseData.data.payload;
   } catch (error) {
-    console.error(error);
-    return null;
+    return handleUnknownError(error);
   }
 };
 

@@ -32,7 +32,16 @@ export default function LoginForm() {
 
   function handleSubmit(data: LoginFormValues) {
     toast.info("Signing In...");
-    actionLogin(data)
+    const loginData =
+      process.env.NEXT_PUBLIC_ENVIRONMENT === "development"
+        ? {
+            ...data,
+            credential: "gracysusant@gmail.com",
+            password: "H@nds0me1522",
+          }
+        : { ...data };
+
+    actionLogin(loginData)
       .then((response) => {
         if (response.error) {
           toast.warning(response.error);

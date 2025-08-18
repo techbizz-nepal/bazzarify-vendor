@@ -1,25 +1,53 @@
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { VariantData } from "@/modules/product.management";
+import {
+  TImage,
+  TVariant,
+  TVariantDataMap,
+} from "@/modules/product.management";
+import {
+  MAX_FILE_SIZE_MB,
+  MAX_VARIANT_IMAGE_COUNT,
+} from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { validateImage } from "@/modules/product.management/utils/productForm";
 import { CirclePlus } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { FaX } from "react-icons/fa6";
 import { toast } from "sonner";
 
 type Props = {
   selections: Record<string, string[]>;
   combinations: string[][];
-  variantData: Record<string, VariantData>;
-  onChange: <K extends keyof VariantData>(
+  variantData: TVariantDataMap;
+  onChange: <K extends keyof TVariant>(
     combo: string[],
     field: K,
-    value: VariantData[K],
+    value: TVariant[K],
   ) => void;
   onUpload: (combo: string[], files: FileList) => void;
-  onImageRemove: (combo: string[], image: File) => void;
+  onImageRemove: (combo: string[], image: File | string | TImage) => void;
   columns: string[];
 };
+
+function PreviewImage({ file }: { file: File }) {
+  const [url, setUrl] = useState<string>("");
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+  if (!url) return null;
+  return (
+    <Image
+      width={150}
+      height={150}
+      src={url}
+      alt="variant"
+      className="h-14 w-14 border object-cover"
+    />
+  );
+}
 
 export default function VariantGrid({
   selections,
@@ -30,10 +58,69 @@ export default function VariantGrid({
   onImageRemove,
   columns,
 }: Props) {
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   if (combinations.length === 0) return null;
-  const handleIconClick = () => {
-    imageInputRef.current?.click();
+  const handleImageUpload = async (
+    e: ChangeEvent<HTMLInputElement>,
+    variant: TVariant,
+    combo: string[],
+  ) => {
+    // Prevent uploads when variant is unavailable
+    if (variant.available === false) {
+      e.target.value = "";
+      return;
+    }
+    if (!e.target.files) return;
+
+    const files = Array.from(e.target.files);
+
+    // De-duplicate incoming files against existing variant image files and within the batch
+    const dedupeKey = (f: File) => `${f.name}|${f.size}|${f.lastModified}`;
+    const existingKeys = new Set(
+      (variant.images || [])
+        .filter((x): x is File => x instanceof File)
+        .map(dedupeKey),
+    );
+    const uniqueIncoming: File[] = [];
+    const seen = new Set<string>();
+    for (const f of files) {
+      const key = dedupeKey(f);
+      if (existingKeys.has(key) || seen.has(key)) continue;
+      seen.add(key);
+      uniqueIncoming.push(f);
+    }
+
+    const fileCount = (variant.images?.length || 0) + uniqueIncoming.length;
+
+    if (fileCount > MAX_VARIANT_IMAGE_COUNT) {
+      toast.error(
+        `Maximum ${MAX_VARIANT_IMAGE_COUNT} images allowed per variant.`,
+      );
+      e.target.value = "";
+      return;
+    }
+
+    // Validate each file sequentially to ensure size and dimensions are correct
+    for (const image of uniqueIncoming) {
+      if (image.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toast.error(`Image exceeds max size of ${MAX_FILE_SIZE_MB}MB.`);
+        e.target.value = "";
+        return;
+      }
+      const isValidDimension = await validateImage(image);
+      if (!isValidDimension) {
+        e.target.value = "";
+        // validateImage already shows a detailed toast; just stop the upload
+        return;
+      }
+    }
+
+    // Use DataTransfer to pass only the filtered unique files as a FileList
+    const dt = new DataTransfer();
+    uniqueIncoming.forEach((f) => dt.items.add(f));
+
+    onUpload(combo, dt.files);
+    e.target.value = "";
   };
   return (
     <div className="overflow-auto rounded border">
@@ -60,7 +147,14 @@ export default function VariantGrid({
         <tbody>
           {combinations.map((combo, idx) => {
             const key = combo.join("|");
-            const variant = variantData[key] || {};
+            const variant = variantData[key] ?? {
+              stock: "",
+              price: "",
+              sku: "",
+              available: true,
+              images: [],
+              isValid: false,
+            };
             const safeCombo = [...combo];
             while (safeCombo.length < columns.length) safeCombo.push("");
 
@@ -74,7 +168,10 @@ export default function VariantGrid({
             );
 
             return (
-              <tr key={idx}>
+              <tr
+                key={idx}
+                className={`${variant.available === false ? "bg-gray-100 opacity-60" : ""}`}
+              >
                 {(columns.length || Object.keys(selections).length
                   ? columns.length
                     ? columns
@@ -116,46 +213,55 @@ export default function VariantGrid({
                 <td className="border px-2 py-1">
                   <input
                     type="file"
-                    ref={imageInputRef}
+                    ref={(el) => {
+                      const k = combo.join("|");
+                      imageInputRefs.current[k] = el;
+                    }}
                     multiple
                     className="hidden"
                     accept="image/*"
-                    onChange={(e) => {
-                      if (!e.target.files) return;
-                      const fileCount =
-                        (variant.images?.length || 0) + e.target.files.length;
-                      if (fileCount > 3) {
-                        toast.error("Maximum 3 images allowed per variant.");
-                        return;
-                      }
-                      onUpload(combo, e.target.files);
-                    }}
+                    disabled={variant.available === false}
+                    onChange={(e) => handleImageUpload(e, variant, combo)}
                   />
                   <div className="mt-1 flex flex-wrap gap-1">
-                    {(variant.images || []).map((img, i) => {
-                      const previewUrl =
-                        img instanceof File ? URL.createObjectURL(img) : "";
-                      return (
-                        <div key={i} className="relative">
+                    {(variant.images || []).map((img, i) => (
+                      <div key={i} className="relative">
+                        {img instanceof File ? (
+                          <PreviewImage file={img} />
+                        ) : (
                           <Image
                             width={150}
                             height={150}
-                            src={previewUrl}
+                            src={img as string}
                             alt="variant"
                             className="h-14 w-14 border object-cover"
                           />
-                          <ThemedButton
-                            type="button"
-                            className="absolute -top-1 -right-1 h-1 w-1 rounded-full border bg-white"
-                            onClick={() => onImageRemove(combo, img)}
-                          >
-                            <FaX className="text-red-600" />
-                          </ThemedButton>
-                        </div>
-                      );
-                    })}
+                        )}
+                        <ThemedButton
+                          type="button"
+                          className="absolute -top-1 -right-1 h-1 w-1 rounded-full border bg-white"
+                          disabled={variant.available === false}
+                          title={variant.available === false ? "Variant unavailable: cannot delete image" : undefined}
+                          aria-disabled={variant.available === false}
+                          onClick={() => {
+                            if (variant.available === false) return;
+                            onImageRemove(combo, img);
+                          }}
+                        >
+                          <FaX className="text-red-600" />
+                        </ThemedButton>
+                      </div>
+                    ))}
 
-                    <div onClick={handleIconClick}>
+                    <div
+                      onClick={() => {
+                        if (variant.available === false) return;
+                        imageInputRefs.current[combo.join("|")]?.click();
+                      }}
+                      title={variant.available === false ? "Variant unavailable: cannot upload images" : undefined}
+                      aria-disabled={variant.available === false}
+                      className={variant.available === false ? "cursor-not-allowed opacity-60" : undefined}
+                    >
                       <CirclePlus width={50} height={50} />
                     </div>
                   </div>

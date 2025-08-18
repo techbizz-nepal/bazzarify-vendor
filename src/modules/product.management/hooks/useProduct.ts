@@ -1,0 +1,54 @@
+import { RichTextEditorHandle } from "@/modules/core/components/client/RichTextEditor";
+import { TProductForm } from "@/modules/product.management";
+import { useRef, useState } from "react";
+
+export default function useProduct() {
+  const nameRef = useRef<HTMLInputElement>(null);
+  const basePriceRef = useRef<HTMLInputElement>(null);
+  const productDescriptionRef = useRef<RichTextEditorHandle>(null);
+  const productHighlightsRef = useRef<HTMLTextAreaElement>(null);
+  const productBoxItemsRef = useRef<HTMLInputElement>(null);
+  const [existingProductImages, setExistingProductImages] = useState<string[]>([
+    // "https://placehold.co/600x400.png",
+  ]);
+  const [uploadedProductImages, setUploadedProductImages] = useState<File[]>(
+    [],
+  );
+  const [existingImageIdMap, setExistingImageIdMap] = useState<Record<string, string>>({});
+  const [productForm, setProductForm] = useState<TProductForm>({
+    name: "",
+    type: "retail",
+    box_items: "",
+    base_price: "",
+    category: "",
+    uuid: "",
+    highlights: "",
+    description: "",
+  });
+  const handleProductForm = (key: keyof TProductForm, value: string) => {
+    setProductForm((prevState) => ({ ...prevState, [key]: value }));
+  };
+  const handleProductImageUpload = (files: File[]) => {
+    setUploadedProductImages(files);
+  };
+  const handleExistingProductImagesChange = (images: string[]) => {
+    setExistingProductImages(images);
+  };
+
+  return {
+    nameRef,
+    basePriceRef,
+    productDescriptionRef,
+    productHighlightsRef,
+    productBoxItemsRef,
+    existingProductImages,
+    handleExistingProductImagesChange,
+    uploadedProductImages,
+    handleProductImageUpload,
+    productForm,
+    handleProductForm,
+    setProductForm,
+    existingImageIdMap,
+    setExistingImageIdMap,
+  };
+}

@@ -3,7 +3,6 @@
 import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
 import {
   IPaginatedData,
-  TAttribute,
   TCategory,
   TSpecification,
 } from "@/modules/product.management";
@@ -49,9 +48,7 @@ export default function View({ slug }: { slug: string }) {
   });
   const response = {
     category: categoryResponse?.data.payload.category as TCategory,
-    attributes: attributesResponse?.data.payload.attributes as IPaginatedData<
-      TAttribute[]
-    >,
+    attributes: attributesResponse,
     specifications: specificationsResponse?.data.payload
       .specifications as IPaginatedData<TSpecification[]>,
   };
@@ -122,9 +119,10 @@ export default function View({ slug }: { slug: string }) {
       )}
       {!response.category?.children?.length && (
         <>
-          {response.attributes ? (
+          {response.attributes !== undefined &&
+          !("error" in response.attributes) ? (
             <CategoryAttributesCard
-              attributes={response.attributes?.data}
+              attributes={response.attributes.attributes.data}
               selectedIds={selectedAttributes}
               onAttributeChange={handleAttributeChange}
               onUpdateAction={handleUpdateCategory}

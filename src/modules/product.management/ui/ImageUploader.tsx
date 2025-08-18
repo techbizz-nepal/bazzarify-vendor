@@ -1,3 +1,8 @@
+import {
+  MAX_FILE_SIZE_MB,
+  MAX_PRODUCT_IMAGES_COUNT,
+} from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { validateImage } from "@/modules/product.management/utils/productForm";
 import { CirclePlus, X } from "lucide-react";
 import NextImage from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -6,64 +11,92 @@ import { toast } from "sonner";
 interface ImageUploadProps {
   onImageSelect: (files: File[]) => void;
   initialImages?: string[];
+  onRemoveExisting?: (url: string) => Promise<boolean>;
+  onExistingListChange?: (urls: string[]) => void;
 }
 
-const MAX_IMAGES = 8;
-const MAX_FILE_SIZE_MB = 3;
-const MIN_DIMENSION = 330;
-const MAX_DIMENSION = 5000;
+type PreviewItem = {
+  url: string;
+  revoke: boolean; // whether this URL is an object URL that should be revoked
+};
 
-export default function ImageUpload({
+export default function ImageUploader({
   onImageSelect,
   initialImages = [],
+  onRemoveExisting,
+  onExistingListChange,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [previews, setPreviews] = useState<PreviewItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
+  // When initialImages change, merge existing URLs with current new previews; trim to max
   useEffect(() => {
-    if (initialImages.length > 0) {
-      setPreviews(initialImages);
-      setSelectedFiles([]);
-    }
+    // Build existing items from incoming URLs, trimmed to max
+    const existing: PreviewItem[] = (initialImages || [])
+      .slice(0, MAX_PRODUCT_IMAGES_COUNT)
+      .map((url) => ({ url, revoke: false }));
+
+    setPreviews((prev) => {
+      // Keep current new (revoke=true) items if there is room
+      const newItems = prev.filter((p) => p.revoke);
+
+      const availableSlots = Math.max(
+        0,
+        MAX_PRODUCT_IMAGES_COUNT - existing.length,
+      );
+
+      // If no room left, revoke all current object URLs (they won't be shown)
+      if (availableSlots <= 0) {
+        newItems.forEach((p) => p.revoke && URL.revokeObjectURL(p.url));
+        // Also clear selected files because none can be shown
+        setSelectedFiles([]);
+        if (inputRef.current) inputRef.current.value = "";
+        return existing;
+      }
+
+      // Otherwise, keep up to availableSlots new items
+      const keptNew = newItems.slice(0, availableSlots);
+      return [...existing, ...keptNew];
+    });
+    // Note: do not clear selectedFiles unless we had to drop all new items above
   }, [initialImages]);
+
+  // Revoke any remaining object URLs on unmount or when previews list changes
+  useEffect(() => {
+    return () => {
+      previews.forEach((p) => p.revoke && URL.revokeObjectURL(p.url));
+    };
+  }, [previews]);
 
   const handleIconClick = () => {
     inputRef.current?.click();
   };
 
-  const validateImage = (file: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        if (
-          img.width < MIN_DIMENSION ||
-          img.height < MIN_DIMENSION ||
-          img.width > MAX_DIMENSION ||
-          img.height > MAX_DIMENSION
-        ) {
-          toast.error(
-            `Image dimensions must be between ${MIN_DIMENSION}x${MIN_DIMENSION} and ${MAX_DIMENSION}x${MAX_DIMENSION}px.`,
-          );
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      };
-      img.onerror = () => resolve(false);
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {
+      event.target.value = "";
+      return;
+    }
 
+    // De-duplicate incoming files against current selection and within batch
     const fileArray = Array.from(files);
-    const newValidFiles: File[] = [];
-    const newPreviews: string[] = [];
+    const dedupeKey = (f: File) => `${f.name}|${f.size}|${f.lastModified}`;
+    const existingKeys = new Set(selectedFiles.map(dedupeKey));
+    const uniqueIncoming: File[] = [];
+    const seen = new Set<string>();
+    for (const f of fileArray) {
+      const key = dedupeKey(f);
+      if (existingKeys.has(key) || seen.has(key)) continue;
+      seen.add(key);
+      uniqueIncoming.push(f);
+    }
 
-    for (const file of fileArray) {
+    const newValidFiles: File[] = [];
+    const newPreviews: PreviewItem[] = [];
+
+    for (const file of uniqueIncoming) {
       if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
         toast.error(
           `File ${file.name} exceeds max size of ${MAX_FILE_SIZE_MB}MB.`,
@@ -74,12 +107,23 @@ export default function ImageUpload({
       const isValid = await validateImage(file);
       if (!isValid) continue;
 
+      const url = URL.createObjectURL(file);
       newValidFiles.push(file);
-      newPreviews.push(URL.createObjectURL(file));
+      newPreviews.push({ url, revoke: true });
     }
 
-    if (previews.length + newPreviews.length > MAX_IMAGES) {
-      toast.error(`You can only upload a maximum of ${MAX_IMAGES} images.`);
+    if (previews.length + newPreviews.length > MAX_PRODUCT_IMAGES_COUNT) {
+      toast.error(
+        `Maximum ${MAX_PRODUCT_IMAGES_COUNT} images allowed per product.`,
+      );
+      event.target.value = "";
+      // Revoke newly created URLs since we are discarding them
+      newPreviews.forEach((p) => p.revoke && URL.revokeObjectURL(p.url));
+      return;
+    }
+    if (newValidFiles.length === 0) {
+      // Nothing added; still reset so picking the same file retriggers change
+      event.target.value = "";
       return;
     }
 
@@ -89,17 +133,49 @@ export default function ImageUpload({
     setPreviews(updatedPreviews);
     setSelectedFiles(updatedFiles);
     onImageSelect(updatedFiles);
+    // Clear after success so re-selecting the same file triggers onChange
+    event.target.value = "";
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = async (index: number) => {
+    const toRemove = previews[index];
+    if (!toRemove) return;
+
+    // If this is an existing image (revoke=false), call API before removing
+    if (!toRemove.revoke) {
+      if (typeof onRemoveExisting === "function") {
+        const ok = await onRemoveExisting(toRemove.url);
+        if (!ok) return; // abort UI removal if API failed
+      }
+    } else if (toRemove.revoke) {
+      URL.revokeObjectURL(toRemove.url);
+    }
+
     const newPreviews = [...previews];
     newPreviews.splice(index, 1);
     setPreviews(newPreviews);
 
     const newFiles = [...selectedFiles];
-    newFiles.splice(index, 1);
-    setSelectedFiles(newFiles);
-    onImageSelect(newFiles);
+    // Only adjust files list for object-URL previews (new uploads)
+    if (toRemove.revoke) {
+      // Map preview index to selectedFiles index by counting revoke items prior to index
+      const priorRevokeCount = previews
+        .slice(0, index)
+        .filter((p) => p.revoke).length;
+      if (priorRevokeCount >= 0 && priorRevokeCount < newFiles.length) {
+        newFiles.splice(priorRevokeCount, 1);
+        setSelectedFiles(newFiles);
+        onImageSelect(newFiles);
+      }
+    }
+
+    // Notify parent about existing list change (filter previews that are existing)
+    if (typeof onExistingListChange === "function") {
+      const existingUrls = newPreviews
+        .filter((p) => !p.revoke)
+        .map((p) => p.url);
+      onExistingListChange(existingUrls);
+    }
   };
 
   return (
@@ -113,12 +189,12 @@ export default function ImageUpload({
         className="hidden"
       />
       <div className="flex flex-wrap gap-4">
-        {previews.map((src, index) => (
+        {previews.map((p, index) => (
           <div key={index} className="relative">
             <NextImage
               width={100}
               height={100}
-              src={src}
+              src={p.url}
               alt={`preview-${index}`}
               className="w-20 h-20 object-cover rounded border"
             />

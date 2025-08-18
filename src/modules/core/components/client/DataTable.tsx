@@ -23,12 +23,12 @@ import { ConfirmDialog } from "@/modules/core/components/client/ConfirmDialog";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { useDataTableController } from "@/modules/core/hooks/useDataTableController";
 
-export default function DataTable({
+export default function DataTable<T>({
   entityKey,
   columns,
   fetchAction,
   filterOptions = [],
-}: DataTableProps) {
+}: DataTableProps<T>) {
   const {
     data,
     page,
@@ -48,7 +48,6 @@ export default function DataTable({
     getNestedValue,
     onFilterClear,
   } = useDataTableController({ entityKey, fetchAction });
-
   return (
     <Card className="p-4 shadow-md">
       <div className="flex flex-col md:flex-row  justify-between mb-4 items-center gap-4">

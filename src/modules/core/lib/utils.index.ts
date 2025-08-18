@@ -1,4 +1,8 @@
-import { SimplePaginationMeta, TURLSearchParams } from "@/modules/core";
+import {
+  IMetaData,
+  SimplePaginationMeta,
+  TURLSearchParams,
+} from "@/modules/core";
 import { AxiosError } from "axios";
 
 export const phoneRegex = /^9\d{9}$/;
@@ -48,4 +52,29 @@ export function isSimplePaginationMeta(
     "next_page_url" in obj &&
     "prev_page_url" in obj
   );
+}
+
+export function isValidRichTextEditorContent(content?: string): boolean {
+  const hasImage = content?.includes("<img");
+  const plainText = content?.replace(/<[^>]*>?/gm, "").trim();
+  return !(plainText?.length === 0 && !hasImage);
+}
+
+export function isValidJson(value: string) {
+  try {
+    JSON.parse(value);
+    return true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    return false;
+  }
+}
+
+export function handleUnknownError(error: unknown): IMetaData {
+  if (error instanceof AxiosError) {
+    return { error: error.code || "An unexpected error occurred" };
+  } else {
+    console.log(error);
+    return { error: "An unexpected error occurred" };
+  }
 }
