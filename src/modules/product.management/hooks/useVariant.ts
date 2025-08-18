@@ -1,7 +1,11 @@
-import { TVariant, TVariantDataMap } from "@/modules/product.management";
+import {
+  TImage,
+  TVariant,
+  TVariantDataMap,
+} from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { generateCombinations } from "@/modules/product.management/utils/generateCombinations";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 interface useVariantProps {
   variantSelections: Record<string, string[]>;
@@ -20,9 +24,6 @@ export default function useVariant({
 }: useVariantProps) {
   const [columns, setColumns] = useState<string[]>([]);
   const [variantData, setVariantData] = useState<TVariantDataMap>({});
-  // Map of a combo key -> input element to ensure per-row file input triggers the correct combo
-  const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-
   const toggleValue = (attribute: string, value: string) => {
     setVariantSelections((prev) => {
       const current = prev[attribute] || [];
@@ -116,7 +117,10 @@ export default function useVariant({
     });
   };
 
-  const handleImageRemove = async (combo: string[], image: File | string) => {
+  const handleImageRemove = async (
+    combo: string[],
+    image: File | string | TImage,
+  ) => {
     const key = combo.join("|");
     if (typeof image === "string" && onExistingVariantImageRemove) {
       const ok = await onExistingVariantImageRemove(combo, image);

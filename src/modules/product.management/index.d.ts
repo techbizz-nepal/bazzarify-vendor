@@ -163,7 +163,7 @@ export interface VariantState {
     value: TVariant[K],
   ) => void;
   handleImageUpload: (combo: string[], files: FileList) => void;
-  handleImageRemove: (combo: string[], image: File | string) => void;
+  handleImageRemove: (combo: string[], image: File | string | TImage) => void;
   columns: string[];
   handleReorderColumns?: (newOrder: string[]) => void;
 }

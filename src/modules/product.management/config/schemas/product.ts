@@ -24,6 +24,7 @@ export const CreateProductSchema = z.object({
 export const UpdateProductSchema = z.object({
   type: z.string(),
   uuid: z.uuid("Product id is required"),
+  category: z.uuid(),
   name: z.string().min(8, "Product name must be at least 8 characters long"),
   base_price: z
     .string()

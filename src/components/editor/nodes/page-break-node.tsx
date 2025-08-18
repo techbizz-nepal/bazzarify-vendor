@@ -1,7 +1,6 @@
-import { useCallback, useEffect } from "react"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection"
-import { mergeRegister } from "@lexical/utils"
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
+import { mergeRegister } from "@lexical/utils";
 import {
   $getSelection,
   $isNodeSelection,
@@ -16,127 +15,130 @@ import {
   LexicalNode,
   NodeKey,
   SerializedLexicalNode,
-} from "lexical"
+} from "lexical";
+import { JSX, useCallback, useEffect } from "react";
 
-export type SerializedPageBreakNode = SerializedLexicalNode
+export type SerializedPageBreakNode = SerializedLexicalNode;
 
 function PageBreakComponent({ nodeKey }: { nodeKey: NodeKey }) {
-  const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext();
   const [isSelected, setSelected, clearSelection] =
-    useLexicalNodeSelection(nodeKey)
+    useLexicalNodeSelection(nodeKey);
 
   const $onDelete = useCallback(
     (event: KeyboardEvent) => {
-      event.preventDefault()
-      const deleteSelection = $getSelection()
+      event.preventDefault();
+      const deleteSelection = $getSelection();
       if (isSelected && $isNodeSelection(deleteSelection)) {
         editor.update(() => {
           deleteSelection.getNodes().forEach((node) => {
             if ($isPageBreakNode(node)) {
-              node.remove()
+              node.remove();
             }
-          })
-        })
+          });
+        });
       }
-      return false
+      return false;
     },
-    [editor, isSelected]
-  )
+    [editor, isSelected],
+  );
 
   useEffect(() => {
     return mergeRegister(
       editor.registerCommand(
         CLICK_COMMAND,
         (event: MouseEvent) => {
-          const pbElem = editor.getElementByKey(nodeKey)
+          const pbElem = editor.getElementByKey(nodeKey);
 
           if (event.target === pbElem) {
             if (!event.shiftKey) {
-              clearSelection()
+              clearSelection();
             }
-            setSelected(!isSelected)
-            return true
+            setSelected(!isSelected);
+            return true;
           }
 
-          return false
+          return false;
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_DELETE_COMMAND,
         $onDelete,
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_BACKSPACE_COMMAND,
         $onDelete,
-        COMMAND_PRIORITY_LOW
-      )
-    )
-  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected])
+        COMMAND_PRIORITY_LOW,
+      ),
+    );
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected]);
 
   useEffect(() => {
-    const pbElem = editor.getElementByKey(nodeKey)
+    const pbElem = editor.getElementByKey(nodeKey);
     if (pbElem !== null) {
       if (isSelected) {
-        pbElem.classList.add("!border-[var(--editor-color-primary,#4766cb)]")
+        pbElem.classList.add("!border-[var(--editor-color-primary,#4766cb)]");
         pbElem.classList.add(
-          "!after:text-[var(--editor-color-primary,#4766cb)]"
-        )
-        pbElem.classList.add("!before:opacity-100")
+          "!after:text-[var(--editor-color-primary,#4766cb)]",
+        );
+        pbElem.classList.add("!before:opacity-100");
       } else {
-        pbElem.classList.remove("!border-[var(--editor-color-primary,#4766cb)]")
         pbElem.classList.remove(
-          "!after:text-[var(--editor-color-primary,#4766cb)]"
-        )
-        pbElem.classList.remove("!before:opacity-100")
+          "!border-[var(--editor-color-primary,#4766cb)]",
+        );
+        pbElem.classList.remove(
+          "!after:text-[var(--editor-color-primary,#4766cb)]",
+        );
+        pbElem.classList.remove("!before:opacity-100");
       }
     }
-  }, [editor, isSelected, nodeKey])
+  }, [editor, isSelected, nodeKey]);
 
-  return null
+  return null;
 }
 
 export class PageBreakNode extends DecoratorNode<JSX.Element> {
   static getType(): string {
-    return "page-break"
+    return "page-break";
   }
 
   static clone(node: PageBreakNode): PageBreakNode {
-    return new PageBreakNode(node.__key)
+    return new PageBreakNode(node.__key);
   }
 
   static importJSON(serializedNode: SerializedPageBreakNode): PageBreakNode {
-    return $createPageBreakNode()
+    return $createPageBreakNode();
   }
 
   static importDOM(): DOMConversionMap | null {
     return {
       figure: (domNode: HTMLElement) => {
-        const tp = domNode.getAttribute("type")
+        const tp = domNode.getAttribute("type");
         if (tp !== this.getType()) {
-          return null
+          return null;
         }
 
         return {
           conversion: $convertPageBreakElement,
           priority: COMMAND_PRIORITY_HIGH,
-        }
+        };
       },
-    }
+    };
   }
 
   exportJSON(): SerializedLexicalNode {
     return {
       type: this.getType(),
       version: 1,
-    }
+    };
   }
 
   createDOM(): HTMLElement {
-    const el = document.createElement("figure")
-    el.setAttribute("type", this.getType())
-    el.style.pageBreakAfter = "always"
+    const el = document.createElement("figure");
+    el.setAttribute("type", this.getType());
+    el.style.pageBreakAfter = "always";
     el.className = `
       relative block w-[calc(100%+56px)] overflow-visible 
       -ml-[28px] mt-7 mb-7
@@ -152,37 +154,37 @@ export class PageBreakNode extends DecoratorNode<JSX.Element> {
       after:block after:py-0.5 after:px-1.5
       after:border after:border-solid after:border-[#ccc]
       after:bg-white after:text-xs after:text-black after:font-semibold
-    `
-    return el
+    `;
+    return el;
   }
 
   getTextContent(): string {
-    return "\n"
+    return "\n";
   }
 
   isInline(): false {
-    return false
+    return false;
   }
 
   updateDOM(): boolean {
-    return false
+    return false;
   }
 
   decorate(): JSX.Element {
-    return <PageBreakComponent nodeKey={this.__key} />
+    return <PageBreakComponent nodeKey={this.__key} />;
   }
 }
 
 function $convertPageBreakElement(): DOMConversionOutput {
-  return { node: $createPageBreakNode() }
+  return { node: $createPageBreakNode() };
 }
 
 export function $createPageBreakNode(): PageBreakNode {
-  return new PageBreakNode()
+  return new PageBreakNode();
 }
 
 export function $isPageBreakNode(
-  node: LexicalNode | null | undefined
+  node: LexicalNode | null | undefined,
 ): node is PageBreakNode {
-  return node instanceof PageBreakNode
+  return node instanceof PageBreakNode;
 }

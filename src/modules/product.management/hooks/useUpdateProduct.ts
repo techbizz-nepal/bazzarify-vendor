@@ -5,7 +5,6 @@ import {
   TCategory,
   TCategoryAncestors,
   TEditProductPayload,
-  TProduct,
   TProductForm,
 } from "@/modules/product.management";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
@@ -47,7 +46,6 @@ export default function useUpdateProduct(
   const [selectedSpecifications, setSelectedSpecifications] = useState<
     Record<string, string>
   >({});
-  const [product, setProduct] = useState<TProduct>();
   const [variantImageIdMap, setVariantImageIdMap] = useState<
     Record<string, Record<string, string>>
   >({});
@@ -187,7 +185,6 @@ export default function useUpdateProduct(
       });
       handleExistingProductImagesChange(limitedUrls);
       setExistingImageIdMap(limitedIdMap);
-      setProduct(product);
 
       const productForm: TProductForm = {
         type: "retail",
@@ -262,7 +259,7 @@ export default function useUpdateProduct(
       }),
     ]);
 
-    // You can now destructure the responses from the promises array
+    // You can now destructure the responses from the promise array
     const [attributesResponse] = promises;
     if ("error" in attributesResponse) {
       toast.error("Oops, something went wrong while fetching data!");
@@ -292,6 +289,7 @@ export default function useUpdateProduct(
       UpdateProductSchema.safeParse({
         type: "retail",
         uuid: productForm.uuid,
+        category: selectedCategories.at(2)?.uuid,
         name: productForm.name,
         base_price: String(productForm.base_price),
         description: productForm.description,
@@ -319,21 +317,11 @@ export default function useUpdateProduct(
     const formData = new FormData();
 
     // Append validated product fields
-    const { uuid, ...rest } = validation.data;
+    const { ...rest } = validation.data;
 
     Object.entries(rest).forEach(([key, value]) => {
       formData.append(key, String(value));
     });
-
-    // Category UUID (ensure it is included like create flow)
-    const selectedCategoryUuid = selectedCategories.at(2)?.uuid;
-    const fallbackCategoryUuid = product?.category?.uuid;
-    const categoryUuidToSend = selectedCategoryUuid || fallbackCategoryUuid;
-    if (!categoryUuidToSend) {
-      toast.error("Please select a category.");
-      return;
-    }
-    formData.append("category", categoryUuidToSend);
 
     // Product images: append only newly uploaded files
     uploadedProductImages.forEach((img) => formData.append("images[]", img));
@@ -352,10 +340,9 @@ export default function useUpdateProduct(
       return;
     }
     toast.success(PRODUCT_CRUD_CONSTANTS.updateProductSuccess);
-    // router.replace("/products");
+    router.replace("/products");
   };
   return {
-    product,
     showCategoryDropdown,
     filters,
     subCategories,

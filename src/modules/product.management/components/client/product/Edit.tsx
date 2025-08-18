@@ -16,7 +16,7 @@ import ImageUploader from "@/modules/product.management/ui/ImageUploader";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import ProductDetail from "@/modules/product.management/ui/ProductDetail";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
-import { use, useRef } from "react";
+import { use } from "react";
 
 interface EditProps {
   productPayloadPromise: Promise<TEditProductPayload | IMetaData>;
@@ -27,8 +27,6 @@ export default function Edit({
   productPayloadPromise,
   categoryIndexPayloadPromise,
 }: EditProps) {
-  const nameRef = useRef<HTMLInputElement>(null);
-  const basePriceRef = useRef<HTMLInputElement>(null);
   const {
     showCategoryDropdown,
     handleCategoryDropdownChange,
@@ -40,7 +38,6 @@ export default function Edit({
     handleClickSubChild,
     updateFilter,
     selectedCategories,
-    product,
     categorySpecifications,
     handleSpecificationChange,
     selectedSpecifications,
@@ -131,7 +128,9 @@ export default function Edit({
                 // useUpdateProduct exposes handleExistingProductImagesChange to sync state; handled in hook
                 return await handleRemoveExistingProductImage(url);
               }}
-              onExistingListChange={(urls) => handleExistingProductImagesChange(urls)}
+              onExistingListChange={(urls) =>
+                handleExistingProductImagesChange(urls)
+              }
             />
           </ProductCard>
           {/*** Product Image ends ***/}

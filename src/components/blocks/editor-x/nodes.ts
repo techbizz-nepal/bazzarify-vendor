@@ -21,7 +21,6 @@ import { CollapsibleTitleNode } from "@/components/editor/nodes/collapsible-titl
 import { FigmaNode } from "@/components/editor/nodes/embeds/figma-node";
 import { TweetNode } from "@/components/editor/nodes/embeds/tweet-node";
 import { YouTubeNode } from "@/components/editor/nodes/embeds/youtube-node";
-import { EmojiNode } from "@/components/editor/nodes/emoji-node";
 import { EquationNode } from "@/components/editor/nodes/equation-node";
 import { ImageNode } from "@/components/editor/nodes/image-node";
 import { InlineImageNode } from "@/components/editor/nodes/inline-image-node";
@@ -53,7 +52,6 @@ export const nodes: ReadonlyArray<Klass<LexicalNode> | LexicalNodeReplacement> =
     PageBreakNode,
     ImageNode,
     InlineImageNode,
-    EmojiNode,
     KeywordNode,
     PollNode,
     LayoutContainerNode,
