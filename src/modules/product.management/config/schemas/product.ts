@@ -21,11 +21,13 @@ export const UpdateProductSchema = z.object({
   uuid: z.uuid("Product id is required"),
   name: z.string().min(8, "Product name must be at least 8 characters long"),
   base_price: z
-    .string("Base price is not valid")
-    .min(1, "Product base price is required")
-    .refine((val) => /^\d{1,9}$/.test(val), {
-      message: "Base price must be 1 to 9 digits",
-    }),
+    .float64
+    //"Base price is not valid"
+    ()
+    .min(0.01, "Product base price is required"),
+  // .refine((val) => /^\d{1,9}$/.test(val), {
+  //   message: "Base price must be 1 to 9 digits",
+  // }),
   description: z.string().refine(isValidRichTextEditorContent, {
     message: "Product description is required",
   }),

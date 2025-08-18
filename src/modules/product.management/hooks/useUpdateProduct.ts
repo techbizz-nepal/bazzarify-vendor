@@ -196,7 +196,7 @@ export default function useUpdateProduct(
         description: lexicalJsonToHtml(product.description || undefined),
         box_items: product.box_items || "",
         highlights: lexicalJsonToHtml(product.highlights || undefined),
-        base_price: product.base_price,
+        base_price: parseFloat(product.base_price),
       };
       setProductForm(productForm);
       setSelectedSpecifications(
@@ -252,7 +252,6 @@ export default function useUpdateProduct(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  //write return type of this method
   const handleClickSubChildOnUpdate: (
     category: TCategory,
   ) => Promise<TAttribute[] | undefined> = async (category: TCategory) => {
@@ -284,14 +283,13 @@ export default function useUpdateProduct(
       toast.error("Cannot proceed request.");
       return;
     }
-
     // Validate base product fields
     const validation: ZodSafeParseResult<TProductForm> =
       UpdateProductSchema.safeParse({
         type: "retail",
         uuid: productForm.uuid,
         name: productForm.name,
-        base_price: String(productForm.base_price ?? ""),
+        base_price: productForm.base_price,
         description: productForm.description,
         highlights: productForm.highlights,
         box_items: productForm.box_items,
@@ -319,6 +317,8 @@ export default function useUpdateProduct(
     // Append validated product fields
     const { uuid, ...rest } = validation.data;
 
+    Object.entries(rest).forEach(([key, value]) => console.log([key, value]));
+    return;
     Object.entries(rest).forEach(([key, value]) => {
       formData.append(key, value as string);
     });
@@ -343,8 +343,6 @@ export default function useUpdateProduct(
 
     // Variants + attributes (only File images are appended inside util)
     appendFormDataVariants(formData, variants, columns, categoryAttributes);
-    // formData.entries().forEach(([key, value]) => console.log({ key, value }));
-    // return;
     toast.info("Updating product...");
     const res = await actionUpdateProducts(formData, productForm.uuid);
     if ("error" in res) {
