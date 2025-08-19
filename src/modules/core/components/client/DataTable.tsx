@@ -22,6 +22,7 @@ import { DataTableProps } from "@/modules/core";
 import { ConfirmDialog } from "@/modules/core/components/client/ConfirmDialog";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { useDataTableController } from "@/modules/core/hooks/useDataTableController";
+import { getDurationFromTimestamps } from "@/modules/core/lib/utils.index";
 
 export default function DataTable<T>({
   entityKey,
@@ -114,7 +115,12 @@ export default function DataTable<T>({
             data.map((item) => (
               <TableRow key={item?.uuid}>
                 {columns.map((col) => {
-                  const cellData = getNestedValue(item, col.accessor);
+                  let cellData = getNestedValue(item, col.accessor);
+                  //{col.accessor.includes("_at") ? "yes" : "no"}
+                  cellData =
+                    col.accessor.includes("_at") && cellData
+                      ? getDurationFromTimestamps(new Date(cellData))
+                      : cellData;
                   return (
                     <TableCell className="truncate" key={col.accessor}>
                       {cellData.length <= 25

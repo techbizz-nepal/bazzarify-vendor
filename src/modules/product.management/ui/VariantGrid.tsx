@@ -1,5 +1,6 @@
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import { capitalizeFirstLetter } from "@/modules/core/utils";
 import {
   TImage,
   TVariant,
@@ -139,18 +140,18 @@ export default function VariantGrid({
               ))}
             <th className="border px-4 py-2">Stock</th>
             <th className="border px-4 py-2">Price</th>
-            <th className="border px-4 py-2">SKU</th>
             <th className="border px-4 py-2">Images</th>
             <th className="border px-4 py-2">Availability</th>
           </tr>
         </thead>
         <tbody>
           {combinations.map((combo, idx) => {
-            const key = combo.join("|");
+            const key = combo
+              .map((v) => capitalizeFirstLetter(v.toLowerCase()))
+              .join("|");
             const variant = variantData[key] ?? {
               stock: "",
               price: "",
-              sku: "",
               available: true,
               images: [],
               isValid: false,
@@ -204,14 +205,6 @@ export default function VariantGrid({
                 </td>
                 <td className="border px-2 py-1">
                   <input
-                    type="text"
-                    className="w-28 rounded border px-2 py-1"
-                    value={variant.sku || ""}
-                    onChange={(e) => onChange(combo, "sku", e.target.value)}
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
                     type="file"
                     ref={(el) => {
                       const k = combo.join("|");
@@ -241,7 +234,11 @@ export default function VariantGrid({
                           type="button"
                           className="absolute -top-1 -right-1 h-1 w-1 rounded-full border bg-white"
                           disabled={variant.available === false}
-                          title={variant.available === false ? "Variant unavailable: cannot delete image" : undefined}
+                          title={
+                            variant.available === false
+                              ? "Variant unavailable: cannot delete image"
+                              : undefined
+                          }
                           aria-disabled={variant.available === false}
                           onClick={() => {
                             if (variant.available === false) return;
@@ -258,9 +255,17 @@ export default function VariantGrid({
                         if (variant.available === false) return;
                         imageInputRefs.current[combo.join("|")]?.click();
                       }}
-                      title={variant.available === false ? "Variant unavailable: cannot upload images" : undefined}
+                      title={
+                        variant.available === false
+                          ? "Variant unavailable: cannot upload images"
+                          : undefined
+                      }
                       aria-disabled={variant.available === false}
-                      className={variant.available === false ? "cursor-not-allowed opacity-60" : undefined}
+                      className={
+                        variant.available === false
+                          ? "cursor-not-allowed opacity-60"
+                          : undefined
+                      }
                     >
                       <CirclePlus width={50} height={50} />
                     </div>

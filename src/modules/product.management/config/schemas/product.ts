@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export const CreateProductSchema = z.object({
   type: z.string(),
+  sku: z.string().min(8),
   name: z.string().min(8, "Product name must be at least 8 characters long"),
   base_price: z
     .string("Base price is not valid")
@@ -26,6 +27,7 @@ export const UpdateProductSchema = z.object({
   uuid: z.uuid("Product id is required"),
   category: z.uuid(),
   name: z.string().min(8, "Product name must be at least 8 characters long"),
+  sku: z.string().min(8, "Product sku is required").max(32),
   base_price: z
     .string()
     .min(1, "Product base price is required")

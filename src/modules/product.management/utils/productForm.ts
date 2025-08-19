@@ -12,12 +12,7 @@ import slugify from "slugify";
 import { toast } from "sonner";
 
 export const isValidVariant = (variant: TVariant): boolean => {
-  return !!(
-    variant.stock &&
-    variant.price &&
-    variant.sku &&
-    variant.images?.length
-  );
+  return !!(variant.stock && variant.price && variant.images?.length);
 };
 
 export const updateVariantValidity = (
@@ -29,6 +24,7 @@ export const updateVariantValidity = (
 
   combinations.forEach((combo) => {
     const key = combo.join("|");
+    console.log(key);
     const variant = updated[key] || {};
     const isValid = isValidVariant(variant);
     updated[key] = { ...variant, isValid };
@@ -57,7 +53,6 @@ export const createVariantsPayload = (
       name: key.toLowerCase(),
       stock: variant.stock || "0",
       price: variant.price || "",
-      sku: variant.sku || "",
       images: variant.images,
       available: variant.available ?? true,
     };
@@ -97,7 +92,6 @@ export const appendFormDataVariants = (
     formData.append(`variants[${index}][name]`, variant.name);
     formData.append(`variants[${index}][stock]`, variant.stock || "0");
     formData.append(`variants[${index}][price]`, variant.price || "0");
-    formData.append(`variants[${index}][sku]`, variant.sku || "");
     formData.append(
       `variants[${index}][available]`,
       variant.available ? "1" : "0",

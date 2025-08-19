@@ -4,6 +4,7 @@ import {
   TURLSearchParams,
 } from "@/modules/core";
 import { AxiosError } from "axios";
+import { Duration, intervalToDuration } from "date-fns";
 
 export const phoneRegex = /^9\d{9}$/;
 export const handleRemoteError = (error: unknown) => {
@@ -77,4 +78,29 @@ export function handleUnknownError(error: unknown): IMetaData {
     console.log(error);
     return { error: "An unexpected error occurred" };
   }
+}
+
+export function getDurationFromTimestamps(pastDate: Date) {
+  const now = new Date();
+  const isFuture = pastDate > now;
+
+  const duration = intervalToDuration({
+    start: isFuture ? now : pastDate,
+    end: isFuture ? pastDate : now,
+  });
+
+  const interval = (
+    [
+      "years",
+      "months",
+      "days",
+      "hours",
+      "minutes",
+      "seconds",
+    ] as (keyof Duration)[]
+  ).find((key) => duration[key]! > 0);
+
+  return interval
+    ? `${duration[interval]} ${interval.slice(0, -1)}${duration[interval] === 1 ? "" : "s"} ${isFuture ? "from now" : "ago"}`
+    : "just now";
 }

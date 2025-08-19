@@ -14,9 +14,12 @@ export default function useProduct() {
   const [uploadedProductImages, setUploadedProductImages] = useState<File[]>(
     [],
   );
-  const [existingImageIdMap, setExistingImageIdMap] = useState<Record<string, string>>({});
+  const [existingImageIdMap, setExistingImageIdMap] = useState<
+    Record<string, string>
+  >({});
   const [productForm, setProductForm] = useState<TProductForm>({
     name: "",
+    sku: "",
     type: "retail",
     box_items: "",
     base_price: "",

@@ -2,7 +2,7 @@ name: Build and push Docker image to dockerhub
 
 on:
   push:
-    branches: ["main"]
+    branches: ["release-next"]
 
 jobs:
 
@@ -12,7 +12,15 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Build Cache
+        id: build-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -36,4 +44,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: techbizz/vendor:latest
+          tags: techbizz/vendor:next

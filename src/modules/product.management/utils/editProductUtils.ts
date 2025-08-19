@@ -71,7 +71,10 @@ function transformProductVariants(
     const variantName = getVariantNameWithUppercase(variant.name);
     // Normalize images to string URLs for UI consumption while preserving other fields
     const base = (variant.image_base_url || "").replace(/\/+$/, "");
-    const toFull = (file: string) => (/^(https?:)?\/\//.test(file) ? file : `${base}/${String(file).replace(/^\/+/, "")}`);
+    const toFull = (file: string) =>
+      /^(https?:)?\/\//.test(file)
+        ? file
+        : `${base}/${String(file).replace(/^\/+/, "")}`;
     const normalizedImages = (variant.images || []).map((img: unknown) => {
       if (img instanceof File) return img;
       if (
