@@ -1,6 +1,6 @@
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { toTitleCase } from "@/modules/core/utils";
+import { capitalizeFirstLetter } from "@/modules/core/utils";
 import {
   TImage,
   TVariant,
@@ -147,7 +147,7 @@ export default function VariantGrid({
         <tbody>
           {combinations.map((combo, idx) => {
             const key = combo
-              .map((v) => toTitleCase(v.toLowerCase()))
+              .map((v) => capitalizeFirstLetter(v.toLowerCase()))
               .join("|");
             const variant = variantData[key] ?? {
               stock: "",
