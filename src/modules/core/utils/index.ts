@@ -1,6 +1,12 @@
-export function capitalizeFirstLetter(str: string) {
-  if (str.length === 0) {
-    return str; // Handle empty or non-string inputs
+export function toTitleCase(str: string) {
+  if (!str) {
+    return ""; // Handle empty or null strings
   }
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
 }
