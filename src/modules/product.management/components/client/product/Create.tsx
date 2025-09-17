@@ -80,7 +80,7 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
             className="focus-visible:ring-primary"
             type="text"
             id="sku"
-            placeholder="NCADC"
+            placeholder="min 8 character alphabets or number"
           />
           <ProductDetail
             productForm={productForm}
