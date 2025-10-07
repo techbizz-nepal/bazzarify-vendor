@@ -34,7 +34,7 @@ const items: TMenuItem[] = [
   },
   {
     title: "Order",
-    path: "#",
+    path: "/orders",
     icon: FaFirstOrder,
   },
   {
