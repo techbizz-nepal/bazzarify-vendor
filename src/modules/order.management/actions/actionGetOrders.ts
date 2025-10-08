@@ -15,6 +15,8 @@ export const actionGetOrders = async (
         params,
       },
     );
+
+    console.log("responseData: ", response.data);
     const responseData = response.data as ApiResponse<TProductIndexPayload>;
 
     if (responseData.metaData.error) {
