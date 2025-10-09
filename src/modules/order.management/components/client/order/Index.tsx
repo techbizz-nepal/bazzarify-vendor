@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
+  CardDescription, CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -116,6 +116,32 @@ export default function Index() {
             emptyMessage="No orders found. Try adjusting your filters."
           />
         </CardContent>
+        <CardFooter>
+          <div className="flex flex-row items-center justify-between space-x-4">
+            <Button
+              onClick={handleFormSubmit}
+              variant="default"
+              disabled={isPending || !orderResponse?.prev_page_url}
+            >
+              Previous
+            </Button>
+            <Button
+              onClick={handleFormSubmit}
+              variant="default"
+              disabled={isPending || !orderResponse?.next_page_url}
+            >
+              Next
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Order Details</CardTitle>
+          <CardDescription>
+            View detailed information about each order.
+          </CardDescription>
+        </CardHeader>
       </Card>
     </PageContainer>
   );

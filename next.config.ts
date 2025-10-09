@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  allowedDevOrigins: ["larashops.local", "bazzarify.local"],
+  allowedDevOrigins: ["larashops.local", "bazzarify.local", "vendor.larashops.local"],
   images: {
     remotePatterns: [
       new URL("https://gw.alicdn.com/**"),

@@ -44,6 +44,11 @@ export default function useOrderIndex() {
     from: "",
     to: "",
   });
+
+  const [queryParams, setQueryParams] = useState({
+    filters,
+    page: 1,
+  });
   useEffect(() => {
     const loadInitialOrders = async () => {
       startTransition(async () => {
@@ -166,5 +171,7 @@ export default function useOrderIndex() {
     isPending,
     setFilters,
     handleFormSubmit,
+    setQueryParams,
+    queryParams,
   };
 }
