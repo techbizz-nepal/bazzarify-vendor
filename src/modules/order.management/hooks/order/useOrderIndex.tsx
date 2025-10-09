@@ -1,5 +1,6 @@
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
-import { useState } from "react";
+import { actionGetOrders } from "@/modules/order.management/actions/actionGetOrders";
+import { useEffect, useState, useTransition } from "react";
 
 interface OrderData {
   order_number: string;
@@ -34,12 +35,34 @@ export default function useOrderIndex() {
   const [orderResponse, setOrderResponse] = useState<OrderResponse | null>(
     null,
   );
+
+  const [isPending, startTransition] = useTransition();
+
   const [filters, setFilters] = useState({
     payment_method: "",
     status: "",
     from: "",
     to: "",
   });
+  useEffect(() => {
+    const loadInitialOrders = async () => {
+      startTransition(async () => {
+        try {
+          const formData = appendFilterParams(new FormData(), filters);
+          const result = await actionGetOrders(formData);
+          if (result.error) {
+            console.error("Error fetching initial orders:", result.error);
+          } else {
+            setOrderResponse(result.orders);
+          }
+        } catch (error) {
+          console.error("Error fetching initial orders:", error);
+        }
+      });
+    };
+
+    loadInitialOrders().then(() => undefined);
+  }, []);
   const columns: TableColumn<OrderData>[] = [
     {
       key: "order_number",
@@ -99,11 +122,11 @@ export default function useOrderIndex() {
   ];
 
   const appendFilterParams = (formData: FormData, filters: IFilters) => {
-    if (filters.payment_method)
+    if (filters.payment_method !== "null")
       formData.append("filter[payment_method]", filters.payment_method);
-    if (filters.status) formData.append("filter[status]", filters.status);
+    if (filters.status !== "null")
+      formData.append("filter[status]", filters.status);
 
-    // Send date range as comma-separated string
     if (filters.from && filters.to) {
       formData.append(
         "filter[placed_between]",
@@ -119,12 +142,29 @@ export default function useOrderIndex() {
     }
     return formData;
   };
+  const handleFormSubmit = async () => {
+    // Use current filter state values instead of extracting from form
+    const backendFormData = appendFilterParams(new FormData(), filters);
+
+    startTransition(async () => {
+      try {
+        const result = await actionGetOrders(backendFormData);
+        if (result.error) {
+          console.error("Error fetching orders:", result.error);
+        } else {
+          setOrderResponse(result.orders);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    });
+  };
   return {
     columns,
     orderResponse,
-    setOrderResponse,
     filters,
+    isPending,
     setFilters,
-    appendFilterParams,
+    handleFormSubmit,
   };
 }
