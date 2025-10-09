@@ -67,16 +67,12 @@ export default function Index() {
                 }
                 options={[
                   { id: "all", label: "All", value: "null" },
-                  { id: "draft", label: "Draft", value: "draft" },
-                  { id: "pending", label: "Pending", value: "pending" },
-                  {
-                    id: "processing",
-                    label: "Processing",
-                    value: "processing",
-                  },
+                  { id: "confirmed", label: "Confirmed", value: "confirmed" },
                   { id: "shipped", label: "Shipped", value: "shipped" },
                   { id: "delivered", label: "Delivered", value: "delivered" },
+                  { id: "completed", label: "Completed", value: "completed" },
                   { id: "cancelled", label: "Cancelled", value: "cancelled" },
+                  { id: "returned", label: "Returned", value: "returned" },
                 ]}
               />
               <DateFilter

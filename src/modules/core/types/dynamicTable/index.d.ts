@@ -12,6 +12,8 @@ export interface IFilters {
 
 //TODO use existing order schemas
 interface OrderData {
+  uuid: string;
+  payment_method: string;
   order_number: string;
   placed_at: string;
   status: string;
