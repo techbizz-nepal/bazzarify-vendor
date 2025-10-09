@@ -25,10 +25,9 @@ export default function useOrderIndex() {
     submitToApi(appendQueryParams(new FormData(), queryParams)).then(
       () => undefined,
     );
-  }, []);
-  const handleFormSubmit = async () => {
+  }, [queryParams]);
+  const handleFilterSubmit = async () => {
     await submitToApi(appendQueryParams(new FormData(), queryParams));
-    return;
   };
   const handleNextPage = async () => {
     const updateParams = {
@@ -36,7 +35,6 @@ export default function useOrderIndex() {
       page: queryParams.page + 1,
     };
     setQueryParams(updateParams);
-    await submitToApi(appendQueryParams(new FormData(), updateParams));
   };
   const handlePrevPage = async () => {
     const updateParams = {
@@ -44,7 +42,6 @@ export default function useOrderIndex() {
       page: queryParams.page - 1,
     };
     setQueryParams(updateParams);
-    await submitToApi(appendQueryParams(new FormData(), updateParams));
   };
   async function submitToApi(formData: FormData) {
     startTransition(async () => {
@@ -63,7 +60,7 @@ export default function useOrderIndex() {
   return {
     orderResponse,
     isPending,
-    handleFormSubmit,
+    handleFilterSubmit,
     setQueryParams,
     queryParams,
     handleNextPage,

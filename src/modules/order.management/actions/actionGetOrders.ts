@@ -3,6 +3,7 @@
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
 import { ORDER_MANAGEMENT_ROUTES } from "@/modules/order.management/routes";
+import { isAxiosError } from "axios";
 
 export const actionGetOrders = async (formData: FormData) => {
   try {
@@ -14,7 +15,7 @@ export const actionGetOrders = async (formData: FormData) => {
       [ORDER_MANAGEMENT_ROUTES.order.index.path, searchParams].join("?"),
     );
 
-    const responseData = response.data; //as ApiResponse<TProductIndexPayload>;
+    const responseData = response.data; //as ApiResponse<TOrderListPayloadSchema>;
 
     if (responseData.metaData.error) {
       return { error: responseData.metaData.error };
@@ -22,7 +23,11 @@ export const actionGetOrders = async (formData: FormData) => {
     console.log("success fetch orders: ", responseData.data.payload.orders);
     return responseData.data.payload;
   } catch (error) {
-    console.log("error fetch orders: ", error);
+    if (isAxiosError(error)) {
+      console.log("error fetch orders: ", error?.response?.data);
+    } else {
+      console.log("error fetch orders: ", error);
+    }
     return handleUnknownError(error);
   }
 };

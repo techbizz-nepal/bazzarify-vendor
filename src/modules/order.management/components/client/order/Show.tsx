@@ -1,26 +1,15 @@
+"use client";
+
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import { actionGetOrder } from "@/modules/order.management/actions/actionGetOrder";
+import { TOrder } from "@/modules/order.management/schemas/orderSchema";
 
-export default async function OrderPage({
-  params,
-}: {
-  params: Promise<{ uuid: string }>;
-}) {
-  const { uuid } = await params;
-  const order = await actionGetOrder(uuid);
-  if (!order) {
-    return <div>Loading...</div>;
-  }
-  if ("error" in order) {
-    return <div>Something went wrong.</div>;
-  }
+export default function Show({ order }: { order: TOrder }) {
   return (
     <PageContainer pageTitle="View Order">
       <Card>
@@ -30,9 +19,6 @@ export default async function OrderPage({
             View order details and manage order status.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p>Order Number: {order.order_number}</p>
-        </CardContent>
       </Card>
       <Card>
         <CardHeader>

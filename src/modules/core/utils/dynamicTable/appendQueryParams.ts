@@ -7,7 +7,7 @@ export default function appendQueryParams(
 ) {
   const { filters, page } = queryParams;
   const params = appendFilterParams(formData, filters);
-  if (page) {
+  if (page > 1) {
     formData.append("page", page.toString());
   }
   return params;

@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import DynamicTable from "@/modules/core/components/client/DynamicTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { orderIndexColumns } from "@/modules/core/lib/dynamicTable/orderIndexColumns";
@@ -22,11 +23,11 @@ export default function Index() {
     queryParams,
     orderResponse,
     isPending,
-    handleFormSubmit,
+    handleFilterSubmit,
     handleNextPage,
     handlePrevPage,
   } = useOrderIndex();
-  const { filters, page } = queryParams;
+  const { filters } = queryParams;
   return (
     <PageContainer pageTitle="Manage Orders">
       <Card>
@@ -95,7 +96,7 @@ export default function Index() {
             </div>
             <div className="flex flex-row space-x-4 w-auto">
               <Button
-                onClick={handleFormSubmit}
+                onClick={handleFilterSubmit}
                 variant="default"
                 disabled={isPending}
               >
@@ -116,12 +117,29 @@ export default function Index() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DynamicTable
-            columns={orderIndexColumns}
-            data={orderResponse?.data || []}
-            loading={isPending}
-            emptyMessage="No orders found. Try adjusting your filters."
-          />
+          {isPending ? (
+            <div className="flex flex-col items-center space-y-4">
+              {Array.from({ length: 15 }).map(() => (
+                <Skeleton
+                  key={Math.random()
+                    .toString(36)
+                    .substring(2, 2 + 10)}
+                  className="h-4 w-full "
+                />
+              ))}
+              {/*<div className="space-y-2">*/}
+              {/*  <Skeleton className="h-4 w-[250px]" />*/}
+              {/*  <Skeleton className="h-4 w-[200px]" />*/}
+              {/*</div>*/}
+            </div>
+          ) : (
+            <DynamicTable
+              columns={orderIndexColumns}
+              data={orderResponse?.data || []}
+              loading={isPending}
+              emptyMessage="No orders found. Try adjusting your filters."
+            />
+          )}
         </CardContent>
         <CardFooter>
           <div className="flex flex-row items-center justify-between space-x-4">

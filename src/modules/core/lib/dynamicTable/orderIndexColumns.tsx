@@ -1,3 +1,9 @@
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import { OrderData } from "@/modules/core/types/dynamicTable";
 import Link from "next/link";
@@ -44,8 +50,8 @@ export const orderIndexColumns: TableColumn<OrderData>[] = [
     ),
   },
   {
-    key: "sub_total",
-    title: "Sub Total",
+    key: "grand_total",
+    title: "Grand Total",
     width: "120px",
     align: "right" as const,
     render: (value: number) => `$${value?.toFixed(2) || "0.00"}`,
@@ -63,9 +69,22 @@ export const orderIndexColumns: TableColumn<OrderData>[] = [
     title: "Action",
     width: "100px",
     render: (value: string, record: OrderData) => (
-      <Link href={`/orders/${encodeURIComponent(record.uuid)}`}>
-        {record.order_number}
-      </Link>
+      <div className="flex-row space-x-4 flex">
+        <Link href={`/orders/${encodeURIComponent(record.uuid)}`}>
+          <Button variant="default">View</Button>
+        </Link>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline">Update Status</Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-32 flex flex-col space-y-3">
+            <Button variant="outline">Shipped</Button>
+            <Button variant="outline">Delivered</Button>
+            <Button variant="outline">Completed</Button>
+            <Button variant="outline">Returned</Button>
+          </PopoverContent>
+        </Popover>
+      </div>
     ),
   },
 ];

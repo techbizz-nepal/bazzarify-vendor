@@ -18,6 +18,7 @@ const defaultConfig: CreateAxiosDefaults = {
     "User-Agent": "BazzarifyVendor",
     "Content-Type": "application/json",
     "X-APP-Key": remoteData.appKey,
+    Accept: "application/json",
   },
   validateStatus: (status) => status < 500,
 };
