@@ -1,6 +1,17 @@
+import { UserSchema } from "@/modules/auth/schemas/UserSchema";
 import { VariantSchema } from "@/modules/product.management/schemas/VariantSchema";
 import { z } from "zod";
 
+export const ShippingInformationSchema = z
+  .object({
+    zip: z.string(),
+    city: z.string(),
+    name: z.string(),
+    phone: z.string(),
+    address: z.string(),
+    country: z.string(),
+  })
+  .strict();
 export const OrderItemSchema = z
   .object({
     line_id: z.string().optional(),
@@ -39,16 +50,19 @@ export const OrderSchema = z
     uuid: z.uuid(),
     buyer_uuid: z.uuid(),
     buyer_type: z.string(),
+    buyer: UserSchema.nullable(),
     order_number: z.string(),
     status: z.string().max(32),
-    items_count: z.number().int().nonnegative().default(0),
-    items_quantity: z.number().int().nonnegative().default(0),
+    item_count: z.number().int().nonnegative().default(0),
+    item_quantity: z.number().int().nonnegative().default(0),
     sub_total: z.float64().nonnegative().default(0),
     discount_total: z.float64().nonnegative().default(0),
     tax_total: z.float64().nonnegative().default(0),
     shipping_total: z.float64().nonnegative().default(0),
+    shipping_information: ShippingInformationSchema,
     grand_total: z.float64().nonnegative().default(0),
     payment_status: z.string().max(32),
+    payment_method: z.string().max(32),
     payment_fee: z.float64().nonnegative().default(0),
     placed_at: z.iso.datetime(),
     cancelled_at: z.iso.datetime().nullable().optional(),

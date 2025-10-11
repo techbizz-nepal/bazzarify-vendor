@@ -8,13 +8,13 @@ import { Duration, intervalToDuration } from "date-fns";
 
 export const phoneRegex = /^9\d{9}$/;
 export const handleRemoteError = (error: unknown) => {
-  console.log(error);
   let message: string = "Something went wrong!";
   let errorCode = 500;
   if (error instanceof AxiosError) {
-    message = error.response?.data?.message;
-    errorCode = error.response?.data?.errorCode;
+    message = error.response?.data?.metaData?.error;
+    errorCode = error.response?.data?.metaData?.errorCode;
   }
+
   return {
     data: {
       payload: [],

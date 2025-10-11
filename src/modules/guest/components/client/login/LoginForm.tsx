@@ -43,8 +43,8 @@ export default function LoginForm() {
 
     actionLogin(loginData)
       .then((response) => {
-        if (response.error) {
-          toast.warning(response.error);
+        if (response?.metaData?.error) {
+          toast.warning(response?.metaData?.error);
           return;
         }
         toast.success("Signing you in...");

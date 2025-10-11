@@ -15,6 +15,11 @@ export const orderIndexColumns: TableColumn<OrderData>[] = [
     width: "200px",
   },
   {
+    key: "items_count",
+    title: "Items Ordered",
+    width: "200px",
+  },
+  {
     key: "placed_at",
     title: "Placed At",
     width: "150px",
