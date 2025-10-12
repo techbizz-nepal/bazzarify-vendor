@@ -7,5 +7,8 @@ const order: IRoute["order"] = {
   show: {
     path: "/order-management/orders/:orderId",
   },
+  update: {
+    path: "/order-management/orders/:orderId",
+  },
 };
 export default order;

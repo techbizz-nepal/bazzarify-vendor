@@ -20,7 +20,6 @@ export const actionGetOrders = async (formData: FormData) => {
     if (responseData.metaData.error) {
       return { error: responseData.metaData.error };
     }
-    console.log("success fetch orders: ", responseData.data.payload.orders);
     return responseData.data.payload;
   } catch (error) {
     if (isAxiosError(error)) {
