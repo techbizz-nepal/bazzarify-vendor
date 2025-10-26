@@ -1,3 +1,5 @@
+"use server";
+
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import { AUTH_ROUTES } from "@/modules/guest/config/routes";

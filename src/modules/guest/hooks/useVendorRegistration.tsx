@@ -29,7 +29,7 @@ export default function useVendorRegistration(
   const registrationRequestForm = useForm<RegistrationRequestFormValues>({
     resolver: zodResolver(RegistrationRequestFormSchema),
     defaultValues: {
-      phone: "",
+      phone: "9851040576",
     },
   });
 
@@ -62,7 +62,7 @@ export default function useVendorRegistration(
     actionRequestRegistration({ ...data, channel })
       .then((res) => {
         if (res.data.message != "success") {
-          return alert("Something went wrong!");
+          return alert("Something went wrong! ".concat(res.metaData.error));
         }
         router.push("/register?phone=".concat(data.phone));
       })
