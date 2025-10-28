@@ -6,7 +6,6 @@ export function proxy(request: NextRequest) {
   if (host.startsWith("admin.")) {
     const url = request.nextUrl.clone();
     url.pathname = `/not-found`;
-    console.log(url);
     return NextResponse.redirect(url, 302);
   }
   return NextResponse.next();
