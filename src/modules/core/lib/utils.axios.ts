@@ -9,7 +9,7 @@ import { JWTPayload } from "jose";
 import { redirect } from "next/navigation";
 
 const remoteData: Record<string, string> = {
-  apiUrl: process.env.API_URL || "http://local-ne.bazzarify.local:8081/api/v1",
+  apiUrl: process.env.API_URL || "http://local-ne.larashops.local:8081/api/v1",
   appKey: process.env.APP_KEY || "",
 };
 const defaultConfig: CreateAxiosDefaults = {
@@ -18,6 +18,7 @@ const defaultConfig: CreateAxiosDefaults = {
     "User-Agent": "BazzarifyVendor",
     "Content-Type": "application/json",
     "X-APP-Key": remoteData.appKey,
+    Accept: "application/json",
   },
   validateStatus: (status) => status < 500,
 };

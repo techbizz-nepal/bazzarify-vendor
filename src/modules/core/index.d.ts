@@ -54,6 +54,7 @@ export type TURLSearchParams = {
   uuids?: string;
 };
 export type TEntities =
+  | "order"
   | "category"
   | "product"
   | "variant"

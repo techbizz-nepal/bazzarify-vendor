@@ -22,6 +22,7 @@ export type TCategory = {
 export type TProduct = {
   type: "retail" | "wholesale";
   uuid: string;
+  sku: string;
   image_base_path?: string;
   image_base_url?: string;
   id: string;
@@ -43,6 +44,7 @@ export type TImage = {
 
 export interface TProductForm {
   type: string;
+  sku: string;
   uuid?: string;
   name: string;
   base_price: string;
@@ -75,7 +77,6 @@ export interface TVariant {
   image_base_url?: string;
   stock?: string;
   price?: string;
-  sku?: string;
   images?: (string | File | TImage)[];
   isValid?: boolean;
   available?: boolean;
@@ -87,7 +88,6 @@ export type TVariantPayload = {
   name: string;
   stock?: string;
   price?: string;
-  sku?: string;
   images?: (string | File | TImage)[];
   available?: boolean;
   [key: string]: string | boolean | (string | File | TImage)[] | undefined;

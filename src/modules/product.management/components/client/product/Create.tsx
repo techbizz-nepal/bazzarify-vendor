@@ -72,6 +72,16 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
             placeholder="base price"
             name="base_price"
           />
+          <Label htmlFor="name">SKU</Label>
+          <Input
+            value={productForm.sku}
+            onChange={onProductFormInputChange}
+            name="sku"
+            className="focus-visible:ring-primary"
+            type="text"
+            id="sku"
+            placeholder="min 8 character alphabets or number"
+          />
           <ProductDetail
             productForm={productForm}
             onChange={onProductFormInputChange}

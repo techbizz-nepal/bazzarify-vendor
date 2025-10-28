@@ -17,7 +17,6 @@ import {
   LoginFormValues,
 } from "@/modules/guest/config/schemas/login.form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -43,8 +42,8 @@ export default function LoginForm() {
 
     actionLogin(loginData)
       .then((response) => {
-        if (response.error) {
-          toast.warning(response.error);
+        if (response?.metaData?.error) {
+          toast.warning(response?.metaData?.error);
           return;
         }
         toast.success("Signing you in...");
@@ -55,7 +54,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex w-4/12 flex-col space-y-6 rounded-md bg-white p-16">
+    <>
       <FormTitle
         label="Sign In"
         className="flex w-full items-center justify-center"
@@ -104,18 +103,6 @@ export default function LoginForm() {
           <ThemedButton className="text-md w-full py-6">Sign In</ThemedButton>
         </form>
       </Form>
-      <Link
-        href="/register"
-        className="text-secondary-foreground flex items-center justify-center"
-      >
-        <p>Doesn&apos;t have an account ?</p>
-      </Link>
-      <Link
-        href="/reset-password"
-        className="text-secondary-foreground flex items-center justify-center"
-      >
-        <p>Forgot Password ?</p>
-      </Link>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
+"use server";
+
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
-import "server-only";
 
 type SessionPayload = {
   token: string;
@@ -8,14 +9,15 @@ type SessionPayload = {
 };
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
+const SESSION_DOMAIN= process.env.SESSION_DOMAIN;
 
 export async function getSessionPayload() {
-  const session = (await cookies()).get("session")?.value;
+  const cookieStore = await cookies();
+
+  const session = cookieStore.get("session")?.value;
   if (!session) return null;
   const payload = await decrypt(session);
-  if (!payload) {
-    return null;
-  }
+  if (!payload) return null;
   return payload;
 }
 
@@ -26,10 +28,11 @@ export async function createSession(token: string) {
 
   cookieStore.set("session", session, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
+    domain: SESSION_DOMAIN,
   });
 }
 

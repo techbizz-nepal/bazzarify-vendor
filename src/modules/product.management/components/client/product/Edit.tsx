@@ -80,6 +80,17 @@ export default function Edit({
             placeholder="base price"
             name="base_price"
           />
+          <Label htmlFor="name">SKU</Label>
+          <Input
+            disabled={true}
+            value={productForm.sku}
+            onChange={onProductFormInputChange}
+            name="sku"
+            className="focus-visible:ring-primary"
+            type="text"
+            id="sku"
+            placeholder="NCADC"
+          />
           <ProductDetail
             productForm={productForm}
             onChange={onProductFormInputChange}

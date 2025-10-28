@@ -88,8 +88,6 @@ export default function useCreateProduct() {
       variantData,
     );
 
-    console.log(variantData);
-
     if (!allValid) {
       toast.error("Please fill stock, price, SKU, images for variants.");
       return;

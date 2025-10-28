@@ -11,10 +11,10 @@ Audience: Advanced developers working on this codebase. This document captures p
   - Start: bun run start
 - Next.js: App Router, TypeScript strict, moduleResolution: bundler, path alias @/* -> src/*.
 - Server Actions: enabled with bodySizeLimit 25mb (see next.config.ts). Use "use server" at top of server-only modules.
-- Images: next/image remotePatterns allow gw.alicdn.com and local-ne.bazzarify.local:8081. When adding external images, update next.config.ts accordingly.
+- Images: next/image remotePatterns allow gw.alicdn.com and local-ne.larashops.local:8081. When adding external images, update next.config.ts accordingly.
 - API Clients:
   - src/modules/core/lib/utils.axios.ts exports defaultAxiosInstance and authAxiosInstance.
-  - Base URL: API_URL env (default http://local-ne.bazzarify.local:8081/api/v1)
+  - Base URL: API_URL env (default http://local-ne.larashops.local:8081/api/v1)
   - App key header: APP_KEY env if set.
   - authAxiosInstance adds Bearer token from session; 401 triggers deleteSession() and redirect('/login'). Only call authAxiosInstance in server contexts.
 - Docker/Bun image:
@@ -23,7 +23,7 @@ Audience: Advanced developers working on this codebase. This document captures p
   - Run image: docker run -p 3000:3000 --env API_URL=... --env APP_KEY=... bazzarify-vendor
 
 Environment variables
-- API_URL: Backend API base (e.g., http://local-ne.bazzarify.local:8081/api/v1)
+- API_URL: Backend API base (e.g., http://local-ne.larashops.local:8081/api/v1)
 - APP_KEY: Optional application key header (X-APP-Key)
 
 Notes

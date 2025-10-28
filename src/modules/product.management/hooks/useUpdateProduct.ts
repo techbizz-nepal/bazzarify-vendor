@@ -188,6 +188,7 @@ export default function useUpdateProduct(
 
       const productForm: TProductForm = {
         type: "retail",
+        sku: product.sku,
         name: product.name,
         uuid: product.uuid,
         description: lexicalJsonToHtml(product.description || undefined),
@@ -289,6 +290,7 @@ export default function useUpdateProduct(
       UpdateProductSchema.safeParse({
         type: "retail",
         uuid: productForm.uuid,
+        sku: productForm.sku,
         category: selectedCategories.at(2)?.uuid,
         name: productForm.name,
         base_price: String(productForm.base_price),
