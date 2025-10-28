@@ -10,3 +10,7 @@ export function toTitleCase(str: string) {
     })
     .join(" ");
 }
+
+export function getSubDomain(url: string): string {
+  return url;
+}
