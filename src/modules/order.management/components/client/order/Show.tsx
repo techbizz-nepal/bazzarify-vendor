@@ -34,17 +34,6 @@ import { actionUpdateOrderStatus } from "@/modules/order.management/actions/acti
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
 import { SyntheticEvent, useOptimistic, useState, useTransition } from "react";
 
-const updateStatusOnServerMock = (
-  newStatus: string,
-): Promise<{ success: boolean; newStatus: string }> => {
-  console.log(`[MOCK API] Updating to: ${newStatus}`);
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Resolve successfully, returning the new status the server confirmed
-      resolve({ success: true, newStatus: newStatus });
-    }, 1500); // Wait 1.5 seconds to simulate network latency
-  });
-};
 export default function Show({ order }: { order: TOrder }) {
   const [orderStatus, setOrderStatus] = useState(order.status);
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(
