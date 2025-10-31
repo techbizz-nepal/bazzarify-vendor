@@ -14,9 +14,13 @@ export const actionLogin = async (data: LoginFormValues) => {
     );
 
     if (response.data.data.message === "success") {
-      return await createSession(response.data.data.payload.token).then(() => {
-        return response.data.data;
-      });
+      return await createSession(response.data.data.payload.token)
+        .then(() => {
+          return response.data.data;
+        })
+        .catch((err) => {
+          console.log("create session error: ", err);
+        });
     } else {
       return response.data.metaData;
     }
