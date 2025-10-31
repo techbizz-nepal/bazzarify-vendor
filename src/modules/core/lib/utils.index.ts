@@ -7,12 +7,20 @@ import { AxiosError } from "axios";
 import { Duration, intervalToDuration } from "date-fns";
 
 export const phoneRegex = /^9\d{9}$/;
-export const handleRemoteError = (error: unknown) => {
+export const handleRemoteError = (
+  error: unknown,
+  code: number | undefined = 500,
+) => {
   let message: string = "Something went wrong!";
-  let errorCode = 500;
+  let errorCode = code;
   if (error instanceof AxiosError) {
     message = error.response?.data?.metaData?.error;
     errorCode = error.response?.data?.metaData?.errorCode;
+  }
+  if (error instanceof Error) {
+    console.log(error);
+    message = error.message;
+    errorCode = parseInt(error.name) || errorCode;
   }
 
   return {

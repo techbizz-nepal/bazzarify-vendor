@@ -9,7 +9,9 @@ export default async function AuthLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  if (!(await getSessionPayload())) {
+  const sessionPayload = await getSessionPayload();
+  if (!sessionPayload) {
+    console.log("get session payload on Auth layout: ", sessionPayload);
     redirect("/login");
   }
   return (

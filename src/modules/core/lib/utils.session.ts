@@ -22,18 +22,23 @@ export async function getSessionPayload() {
 }
 
 export async function createSession(token: string) {
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const session = await encrypt({ token, expiresAt });
-  const cookieStore = await cookies();
+  try {
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const session = await encrypt({ token, expiresAt });
+    const cookieStore = await cookies();
 
-  cookieStore.set("session", session, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    expires: expiresAt,
-    sameSite: "lax",
-    path: "/",
-    domain: SESSION_DOMAIN,
-  });
+    cookieStore.set("session", session, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: expiresAt,
+      sameSite: "lax",
+      path: "/",
+      domain: SESSION_DOMAIN,
+    });
+    console.log("session created: ", await getSessionPayload());
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function updateSession() {
