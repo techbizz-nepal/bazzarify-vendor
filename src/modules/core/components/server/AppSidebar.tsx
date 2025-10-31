@@ -10,13 +10,14 @@ import {
 import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
 import { TMenuItem } from "@/modules/core/data";
 import { Settings } from "lucide-react";
+import { headers } from "next/headers";
 import Image from "next/image";
 import { AiFillProduct } from "react-icons/ai";
 import { FaHome } from "react-icons/fa";
 import { FaFirstOrder, FaProductHunt, FaUsers } from "react-icons/fa6";
 import { TbCategory } from "react-icons/tb";
 
-const items: TMenuItem[] = [
+const adminNavigations: TMenuItem[] = [
   {
     title: "Dashboard",
     path: "/",
@@ -54,7 +55,33 @@ const items: TMenuItem[] = [
   },
 ];
 
+const vendorNavigations: TMenuItem[] = [
+  {
+    title: "Dashboard",
+    path: "/",
+    icon: FaHome,
+  },
+  {
+    title: "Categories",
+    path: "/categories",
+    icon: TbCategory,
+  },
+  {
+    title: "Products",
+    path: "/products",
+    icon: FaProductHunt,
+  },
+  {
+    title: "Order",
+    path: "/orders",
+    icon: FaFirstOrder,
+  },
+];
+
 export async function AppSidebar({ className }: { className?: string }) {
+  const requestHeaders = await headers();
+  const isVendor = requestHeaders.get("host")?.startsWith("vendor.");
+  const items = isVendor ? vendorNavigations : adminNavigations;
   return (
     <Sidebar className={className}>
       <SidebarHeader>

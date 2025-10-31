@@ -11,7 +11,6 @@ export default async function AuthLayout({
 }>) {
   const sessionPayload = await getSessionPayload();
   if (!sessionPayload) {
-    console.log("get session payload on Auth layout: ", sessionPayload);
     redirect("/login");
   }
   return (

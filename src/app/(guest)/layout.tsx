@@ -8,11 +8,6 @@ export default async function GuestLayout({
   children: ReactNode;
 }>) {
   if (await getSessionPayload()) {
-    console.log(
-      "get session payload on guest layout: ",
-      await getSessionPayload(),
-    );
-
     redirect("/");
   }
   return children;

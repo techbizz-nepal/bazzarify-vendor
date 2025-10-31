@@ -33,10 +33,12 @@ export const authAxiosInstance = async () => {
     redirect("/login");
   }
   const token = payload.token;
-  // const token = "";
   const instance = axios.create({
     ...defaultConfig,
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      ...defaultConfig.headers,
+      Authorization: `Bearer ${token}`,
+    },
   });
   instance.interceptors.response.use((response) => {
     if (response.data?.metaData?.errorCode === 401) {

@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
     "larashops.local",
     "bazzarify.local",
     "*.larashops.local",
-    "admin.larashops.local",
   ],
   images: {
     remotePatterns: [
