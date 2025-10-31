@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "larashops.local",
     "bazzarify.local",
-    "vendor.larashops.local",
+    "*.larashops.local",
     "admin.larashops.local",
   ],
   images: {
