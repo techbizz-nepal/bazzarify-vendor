@@ -9,7 +9,7 @@ type SessionPayload = {
 };
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
-const SESSION_DOMAIN= process.env.SESSION_DOMAIN;
+const SESSION_DOMAIN = process.env.SESSION_DOMAIN;
 
 export async function getSessionPayload() {
   const cookieStore = await cookies();
@@ -28,7 +28,7 @@ export async function createSession(token: string) {
 
   cookieStore.set("session", session, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
