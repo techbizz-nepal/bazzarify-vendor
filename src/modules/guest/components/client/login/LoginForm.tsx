@@ -31,6 +31,7 @@ export default function LoginForm() {
 
   function handleSubmit(data: LoginFormValues) {
     toast.info("Signing In...");
+    console.log("env: ", process.env.NEXT_PUBLIC_ENVIRONMENT);
     const loginData =
       process.env.NEXT_PUBLIC_ENVIRONMENT === "development"
         ? {

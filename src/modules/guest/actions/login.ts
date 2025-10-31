@@ -12,7 +12,6 @@ export const actionLogin = async (data: LoginFormValues) => {
       AUTH_ROUTES.login.loginCredentials.path,
       data,
     );
-    console.log("vendor login response: ", response.data);
 
     if (response.data.data.message === "success") {
       return await createSession(response.data.data.payload.token).then(() => {
