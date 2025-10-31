@@ -66,7 +66,7 @@ export default function ResetPasswordForm() {
   };
 
   return (
-    <div className="flex w-4/12 flex-col space-y-6 rounded-md bg-white p-16">
+    <div className="flex w-11/12 md:w-6/12 flex-col space-y-6 rounded-md bg-white p-16">
       <FormTitle
         label="Password Reset"
         helpText="We Will Help You Reset your Password"
