@@ -1,3 +1,4 @@
+import CookieConsentBanner from "@/modules/core/components/client/CookieConsentBanner";
 import { SessionProvider } from "@/modules/core/contexts/SessionContextProvider";
 import QueryProvider from "@/modules/core/providers/queryProvider";
 import type { Metadata } from "next";
@@ -30,6 +31,7 @@ export default function RootLayout({
       >
         <SessionProvider>
           <QueryProvider>
+            <CookieConsentBanner />
             {children}
             <Toaster richColors={true} closeButton={true} />
           </QueryProvider>
