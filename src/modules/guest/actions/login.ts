@@ -16,6 +16,7 @@ export const actionLogin = async (data: LoginFormValues) => {
     );
     // @ts-ignore
     if (apiResponse.data.data.message !== "success") {
+      console.log("invalid login response: ", apiResponse.data);
       return handleRemoteError(new Error("Invalid login response"));
     }
 
