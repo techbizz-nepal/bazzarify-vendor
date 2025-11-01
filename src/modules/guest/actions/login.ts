@@ -2,7 +2,7 @@
 
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
-import { createSession } from "@/modules/core/lib/utils.session";
+import { createSession, deleteSession } from "@/modules/core/lib/utils.session";
 import { AUTH_ROUTES } from "@/modules/guest/config/routes";
 import { LoginFormValues } from "@/modules/guest/config/schemas/login.form";
 import { AxiosResponse } from "axios";
@@ -16,13 +16,22 @@ export const actionLogin = async (data: LoginFormValues) => {
     );
     // @ts-ignore
     if (apiResponse.data.data.message !== "success") {
-      console.log("invalid login response: ", apiResponse.data);
       return handleRemoteError(new Error("Invalid login response"));
     }
-
     // @ts-ignore
     await createSession(apiResponse.data.data.payload.token);
   } catch (error: unknown) {
     return handleRemoteError(error);
+  }
+};
+
+export const actionLogout = async (): Promise<boolean> => {
+  try {
+    console.log("logout", "deleting session");
+    await deleteSession();
+    return true;
+  } catch (error: unknown) {
+    console.log(error);
+    return false;
   }
 };

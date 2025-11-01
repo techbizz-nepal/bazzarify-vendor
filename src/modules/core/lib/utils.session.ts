@@ -1,4 +1,4 @@
-"server only";
+"use server";
 
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
@@ -21,7 +21,7 @@ export async function getSessionPayload() {
   return payload;
 }
 
-export async function createSession(token: string) {
+export async function createSession(token: string): Promise<void> {
   try {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const session = await encrypt({ token, expiresAt });
@@ -34,7 +34,6 @@ export async function createSession(token: string) {
       sameSite: "strict",
       path: "/",
     });
-    console.log("session created: ", await getSessionPayload());
   } catch (error) {
     throw error;
   }
@@ -55,14 +54,37 @@ export async function updateSession() {
     httpOnly: true,
     secure: true,
     expires: expires,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
   });
 }
 
-export async function deleteSession() {
+export async function deleteSession(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete("session");
+  try {
+    // Attempt standard deletion first (no domain)
+    cookieStore.delete("session");
+
+    // Force expire for robustness (no domain)
+    cookieStore.set("session", "", {
+      expires: new Date(0),
+      maxAge: 0,
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+  } catch {
+    // Ensure removal even if delete throws in certain runtimes
+    cookieStore.set("session", "", {
+      expires: new Date(0),
+      maxAge: 0,
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
 }
 
 export async function encrypt(payload: SessionPayload) {
