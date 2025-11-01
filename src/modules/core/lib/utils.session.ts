@@ -9,7 +9,6 @@ type SessionPayload = {
 };
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
-const SESSION_DOMAIN = process.env.SESSION_DOMAIN;
 
 export async function getSessionPayload() {
   const cookieStore = await cookies();
@@ -87,7 +86,7 @@ export async function deleteSession(): Promise<void> {
   }
 }
 
-export async function encrypt(payload: SessionPayload) {
+async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -95,7 +94,7 @@ export async function encrypt(payload: SessionPayload) {
     .sign(encodedKey);
 }
 
-export async function decrypt(session: string | undefined = "") {
+async function decrypt(session: string | undefined = "") {
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ["HS256"],

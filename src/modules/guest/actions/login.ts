@@ -25,13 +25,4 @@ export const actionLogin = async (data: LoginFormValues) => {
   }
 };
 
-export const actionLogout = async (): Promise<boolean> => {
-  try {
-    console.log("logout", "deleting session");
-    await deleteSession();
-    return true;
-  } catch (error: unknown) {
-    console.log(error);
-    return false;
-  }
-};
+export const actionLogout = async () => deleteSession();
