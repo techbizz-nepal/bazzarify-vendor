@@ -38,7 +38,7 @@ export const OrderItemSchema = z
     row_tax: z.float64().nonnegative().default(0),
     row_shipping: z.float64().nonnegative().default(0),
     row_total: z.float64().nonnegative().nonoptional(),
-
+    vendor: UserSchema.nullable(),
     meta: z.record(z.any(), z.string()).nullable(), // JSON column
     created_at: z.iso.datetime().optional(),
     updated_at: z.iso.datetime().optional(),

@@ -51,7 +51,7 @@ export default function DataTable<T>({
   } = useDataTableController({ entityKey, fetchAction });
   return (
     <Card className="p-4 shadow-md">
-      <div className="flex flex-col md:flex-row  justify-between mb-4 items-center gap-4">
+      <div className="flex flex-col md:flex-row  md:justify-between mb-4 md:items-center gap-4">
         <div className="flex-col space-y-7 items-center">
           <div className="flex items-center space-x-2">
             <Input

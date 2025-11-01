@@ -185,6 +185,10 @@ export default function Show({ order }: { order: TOrder }) {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <p className="truncate w-72">{item.name}</p>
+                        {item.variant_attrs ? (
+                          <p>Option: {item.variant_attrs?.name}</p>
+                        ) : null}
+                        {item.vendor ? <p>Vendor: {item.vendor.name}</p> : null}
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>{item.name}</p>
