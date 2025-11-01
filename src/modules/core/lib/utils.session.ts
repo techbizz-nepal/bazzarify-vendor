@@ -31,9 +31,8 @@ export async function createSession(token: string) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       expires: expiresAt,
-      sameSite: "lax",
+      sameSite: "strict",
       path: "/",
-      domain: SESSION_DOMAIN,
     });
     console.log("session created: ", await getSessionPayload());
   } catch (error) {
