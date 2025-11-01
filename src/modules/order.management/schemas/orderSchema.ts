@@ -1,5 +1,4 @@
 import { UserSchema } from "@/modules/auth/schemas/UserSchema";
-import { VariantSchema } from "@/modules/product.management/schemas/VariantSchema";
 import { z } from "zod";
 
 export const ShippingInformationSchema = z
@@ -21,13 +20,7 @@ export const OrderItemSchema = z
     orderable_type: z.string(),
     sku: z.string(),
     name: z.string(),
-    variant_attrs: VariantSchema.pick({
-      uuid: true,
-      name: true,
-      sku: true,
-    })
-      .strict()
-      .nullable(),
+    variant_attributes: z.string().nullable(),
     qty_ordered: z.number().int().nonnegative(),
     qty_canceled: z.number().int().nonnegative().default(0),
     qty_shipped: z.number().int().nonnegative().default(0),

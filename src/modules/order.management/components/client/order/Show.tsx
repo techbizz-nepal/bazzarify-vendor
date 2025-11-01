@@ -174,7 +174,6 @@ export default function Show({ order }: { order: TOrder }) {
                 <TableHead>Quantity</TableHead>
                 <TableHead>Discount</TableHead>
                 <TableHead>Shipping fee</TableHead>
-                <TableHead>Payment fee</TableHead>
                 <TableHead>Total</TableHead>
               </TableRow>
             </TableHeader>
@@ -185,15 +184,22 @@ export default function Show({ order }: { order: TOrder }) {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <p className="truncate w-72">{item.name}</p>
-                        {item.variant_attrs ? (
-                          <p>Option: {item.variant_attrs?.name}</p>
-                        ) : null}
-                        {item.vendor ? <p>Vendor: {item.vendor.name}</p> : null}
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>{item.name}</p>
                       </TooltipContent>
                     </Tooltip>
+                    {item.variant_attributes ? (
+                      <p>
+                        Option:{" "}
+                        {Object.entries(JSON.parse(item.variant_attributes))
+                          .map(
+                            ([key, value]) => `${toTitleCase(key)}: ${value}`,
+                          )
+                          .join(", ")}{" "}
+                      </p>
+                    ) : null}
+                    {item.vendor ? <p>Vendor: {item.vendor.name}</p> : null}
                   </TableCell>
                   <TableCell className="text-right">
                     {item.unit_price}
@@ -207,40 +213,37 @@ export default function Show({ order }: { order: TOrder }) {
                   <TableCell className="text-right">
                     {item.row_shipping}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {order.payment_fee}
-                  </TableCell>
                   <TableCell className="text-right">{item.row_total}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
             <TableFooter className="text-end">
               <TableRow>
-                <TableCell colSpan={6}>Sub Total</TableCell>
+                <TableCell colSpan={5}>Sub Total</TableCell>
                 <TableCell className="text-right">{order.sub_total}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={6}>Discount</TableCell>
+                <TableCell colSpan={5}>Discount</TableCell>
                 <TableCell className="text-right">
                   {order.discount_total}
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={6}>Tax</TableCell>
+                <TableCell colSpan={5}>Tax</TableCell>
                 <TableCell className="text-right">{order.tax_total}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={6}>Shipping</TableCell>
+                <TableCell colSpan={5}>Shipping</TableCell>
                 <TableCell className="text-right">
                   {order.shipping_total}
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={6}>Payment Fee</TableCell>
+                <TableCell colSpan={5}>Payment Fee</TableCell>
                 <TableCell>{order.payment_fee}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={6}>Grand Total</TableCell>
+                <TableCell colSpan={5}>Grand Total</TableCell>
                 <TableCell className="text-right">
                   {order.grand_total}
                 </TableCell>

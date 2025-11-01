@@ -16,10 +16,10 @@ export const actionGetOrders = async (formData: FormData) => {
     );
 
     const responseData = response.data; //as ApiResponse<TOrderListPayloadSchema>;
-
     if (responseData.metaData.error) {
       return { error: responseData.metaData.error };
     }
+    console.log("responseData: ", responseData.data.payload);
     return responseData.data.payload;
   } catch (error) {
     if (isAxiosError(error)) {
