@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,47 +29,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import PageContainer from "@/modules/core/components/server/PageContainer";
 import { toTitleCase } from "@/modules/core/utils";
-import { actionUpdateOrderStatus } from "@/modules/order.management/actions/actionUpdateOrderStatus";
+import ItemCell from "@/modules/order.management/components/client/orderItem/ItemCell";
+import useOrderShow from "@/modules/order.management/hooks/order/useOrderShow";
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
-import { SyntheticEvent, useOptimistic, useState, useTransition } from "react";
 
 export default function Show({ order }: { order: TOrder }) {
-  const [orderStatus, setOrderStatus] = useState(order.status);
-  const [optimisticStatus, setOptimisticStatus] = useOptimistic(
-    orderStatus,
-    (currentState, optimisticValue) => optimisticValue as string,
+  const { isPending, optimisticStatus, handleOrderStatusChange } = useOrderShow(
+    { order },
   );
-  const [isPending, startTransition] = useTransition();
-  const handleOrderStatusChange = (e: SyntheticEvent<HTMLButtonElement>) => {
-    const updatedStatus = e.currentTarget.value;
-
-    startTransition(async () => {
-      setOptimisticStatus(updatedStatus);
-      try {
-        const result = await actionUpdateOrderStatus(order.uuid, updatedStatus);
-        if (result.error) {
-          console.error("Error updating status:", result.error);
-        } else {
-          setOrderStatus(result.status);
-        }
-      } catch (error) {
-        console.error(
-          "Mock server error (should not happen in this version):",
-          error,
-        );
-      }
-    });
-  };
   return (
-    <PageContainer pageTitle="View Order">
-      <div className="grid grid-cols-2 gap-2">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-2xl">Order Details</CardTitle>
+        <CardDescription>Manage order information and status.</CardDescription>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Basic information</CardTitle>
@@ -159,99 +140,94 @@ export default function Show({ order }: { order: TOrder }) {
             <p>Fee: {order.payment_fee}</p>
           </CardContent>
         </Card>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Order Items</CardTitle>
-          <CardDescription>View order items.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Unit Price</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Discount</TableHead>
-                <TableHead>Shipping fee</TableHead>
-                <TableHead>Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {order?.items?.map((item) => (
-                <TableRow key={item.uuid}>
-                  <TableCell>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="truncate w-72">{item.name}</p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{item.name}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    {item.variant_attributes ? (
-                      <p>
-                        Option:{" "}
-                        {Object.entries(JSON.parse(item.variant_attributes))
-                          .map(
-                            ([key, value]) => `${toTitleCase(key)}: ${value}`,
-                          )
-                          .join(", ")}{" "}
-                      </p>
-                    ) : null}
-                    {item.vendor ? <p>Vendor: {item.vendor.name}</p> : null}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.unit_price}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.qty_ordered}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.row_discount}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.row_shipping}
-                  </TableCell>
-                  <TableCell className="text-right">{item.row_total}</TableCell>
+        <Card className="grid md:col-span-2 grid-cols-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Order Items</CardTitle>
+            <CardDescription>View order items.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Unit Price</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Discount</TableHead>
+                  <TableHead>Shipping fee</TableHead>
+                  <TableHead>Total</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter className="text-end">
-              <TableRow>
-                <TableCell colSpan={5}>Sub Total</TableCell>
-                <TableCell className="text-right">{order.sub_total}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}>Discount</TableCell>
-                <TableCell className="text-right">
-                  {order.discount_total}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}>Tax</TableCell>
-                <TableCell className="text-right">{order.tax_total}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}>Shipping</TableCell>
-                <TableCell className="text-right">
-                  {order.shipping_total}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}>Payment Fee</TableCell>
-                <TableCell>{order.payment_fee}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={5}>Grand Total</TableCell>
-                <TableCell className="text-right">
-                  {order.grand_total}
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </CardContent>
-      </Card>
-    </PageContainer>
+              </TableHeader>
+              <TableBody>
+                {order?.items?.map((item) => (
+                  <TableRow key={item.uuid}>
+                    <TableCell>
+                      <Accordion
+                        type="single"
+                        collapsible
+                        className="w-full"
+                        defaultValue="item-1"
+                      >
+                        <AccordionItem value={item.uuid}>
+                          <AccordionTrigger>
+                            <p className="truncate w-72">{item.name}</p>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <ItemCell
+                              item={item}
+                              className="flex flex-col w-72 gap-4 text-balance"
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.unit_price}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.qty_ordered}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.row_discount}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.row_shipping}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.row_total}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter className="text-end bg-transparent">
+                <TableRow>
+                  <TableCell className="text-left">Sub Total</TableCell>
+                  <TableCell colSpan={5}>{order.sub_total}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left">Discount</TableCell>
+                  <TableCell colSpan={5}>{order.discount_total}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left">Tax</TableCell>
+                  <TableCell colSpan={5}>{order.tax_total}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left">Shipping</TableCell>
+                  <TableCell colSpan={5}>{order.shipping_total}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left">Payment Fee</TableCell>
+                  <TableCell colSpan={5}>{order.payment_fee}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left">Grand Total</TableCell>
+                  <TableCell colSpan={5}>{order.grand_total}</TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </CardContent>
+        </Card>
+      </CardContent>
+    </Card>
   );
 }

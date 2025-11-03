@@ -299,10 +299,11 @@ export default function useUpdateProduct(
         box_items: productForm.box_items,
       });
     if (!validation.success) {
-      validation.error.issues.forEach((error) => toast.error(error.message));
+      validation.error.issues.forEach((error) =>
+        toast.error(`${error.path} : ${error.message}`),
+      );
       return;
     }
-
     // Validate variants like create flow
     const { updated, allValid } = updateVariantValidity(
       combinations,
