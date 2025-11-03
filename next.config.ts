@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       new URL("https://gw.alicdn.com/**"),
       new URL("http://local-ne.bazzarify.local:8081/**"),
       new URL("http://local-ne.larashops.local:8081/**"),
+      new URL("https://bazzarify-assets.s3.ap-southeast-1.amazonaws.com/**"),
     ],
   },
   experimental: {
