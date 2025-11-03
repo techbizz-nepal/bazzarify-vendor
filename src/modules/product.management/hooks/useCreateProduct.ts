@@ -1,3 +1,4 @@
+import { toTitleCase } from "@/modules/core/utils";
 import {
   TAttribute,
   TProductForm,
@@ -106,9 +107,12 @@ export default function useCreateProduct() {
       variants: [...variants],
     });
     if (!productFormValidation.success) {
-      toast.error(
-        productFormValidation.error.issues.at(0)?.message || "Invalid input",
+      productFormValidation.error.issues.map((issue) =>
+        toast.error(
+          `${toTitleCase(issue.path.join(",").replaceAll("_", " "))}: ${issue.message}`,
+        ),
       );
+
       return;
     }
 
