@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--inspect=0.0.0.0' next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
+    "dev": "NODE_OPTIONS='--inspect=0.0.0.0' bun --bun next dev --turbopack",
+    "build": "bun --bun next build",
+    "start": "bun --bun next start",
+    "lint": "bun --bun next lint",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache"
   },
