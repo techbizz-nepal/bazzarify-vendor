@@ -197,9 +197,7 @@ export default function useUpdateProduct(
         base_price: product.base_price,
       };
       setProductForm(productForm);
-      setSelectedSpecifications(
-        JSON.parse(product.specifications?.toString() || "{}"),
-      );
+      setSelectedSpecifications(product.specifications);
       const categoryAncestors: TCategoryAncestors =
         editProductPayload.categoryAncestors;
       setSelectedCategories([categoryAncestors.root, categoryAncestors.sub]);
