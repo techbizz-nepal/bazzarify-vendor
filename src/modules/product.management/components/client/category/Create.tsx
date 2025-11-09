@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +14,7 @@ import { actionGetCategories } from "@/modules/product.management/actions/catego
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa6";
 
-export default function Index() {
+export default function Create() {
   return (
     <Card>
       <CardHeader>

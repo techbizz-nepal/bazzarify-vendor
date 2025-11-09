@@ -15,7 +15,9 @@ export default function Index() {
   return (
     <Card>
       <CardHeader className="flex flex-col gap-y-5 md:items-center md:flex-row md:justify-between">
-        <CardTitle>Manage Products</CardTitle>
+        <CardTitle>
+          <p className="text-2xl">Manage Products</p>
+        </CardTitle>
         <CardAction>
           <Link href="/products/create">
             <Button variant="default" size="sm">
