@@ -7,17 +7,10 @@ import {
 } from "@/components/ui/card";
 
 const pageInfo = {
-  name: { singular: "Category", plural: "Categories" },
-  title: "Create new category",
-  action: {
-    create: {
-      title: "Create Category",
-      path: "",
-    },
-  },
-  description:
-    "manage your categories with creating, updating and assigning attributes and specifications",
-  slug: "categories",
+  name: { singular: "Slider", plural: "Sliders" },
+  title: "Create Sliders",
+  slug: "sliders",
+  description: "create your slider",
 };
 export default function SliderPage() {
   return (
