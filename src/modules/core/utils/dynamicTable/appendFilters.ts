@@ -1,23 +1,28 @@
-import { IFilters } from "@/modules/core/types/dynamicTable";
+import { TTableFilters } from "@/modules/core/domain/schemas/TableFilters";
 
-export default function appendFilterParams (formData: FormData, filters: IFilters) {
-  if (filters.payment_method !== "null")
-    formData.append("filter[payment_method]", filters.payment_method);
-  if (filters.status !== "null")
-    formData.append("filter[status]", filters.status);
+export default function appendFilterParams(
+  formData: FormData,
+  filters: TTableFilters,
+) {
+  const appendIfValid = (key: string, value?: string) => {
+    if (value && value !== "null") formData.append(`filter[${key}]`, value);
+  };
 
-  if (filters.from !== "null" && filters.to !== "null") {
-    formData.append(
-      "filter[placed_between]",
-      `${filters.from},${filters.to}`,
-    );
-  } else if (filters.from !== "null" || filters.to !== "null") {
-    if (filters.from) {
-      formData.append("filter[placed_after]", filters.from);
-    }
-    if (filters.to) {
-      formData.append("filter[placed_before]", filters.to);
-    }
+  const { from, to, ...rest } = filters;
+
+  // generic filters
+  Object.entries(rest).forEach(([key, value]) => appendIfValid(key, value));
+
+  // date filters
+  const validFrom = from && from !== "null" ? from : null;
+  const validTo = to && to !== "null" ? to : null;
+
+  if (validFrom && validTo) {
+    appendIfValid("placed_between", `${validFrom},${validTo}`);
+  } else {
+    appendIfValid("placed_after", validFrom ?? undefined);
+    appendIfValid("placed_before", validTo ?? undefined);
   }
+
   return formData;
-};
+}

@@ -8,7 +8,8 @@
     "start": "bun --bun next start",
     "lint": "bun --bun next lint",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
-    "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache"
+    "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
+    "create-module": "node module-generator.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -82,6 +83,7 @@
     "@types/react-dom": "^19.2.2",
     "eslint": "^9.38.0",
     "eslint-config-next": "16.0.1",
+    "module-generator": "^3.0.0",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.7.1",

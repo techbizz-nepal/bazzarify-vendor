@@ -60,7 +60,6 @@ export default function DynamicTable<T = any>({
       </div>
     );
   }
-
   return (
     <Table className={className}>
       <TableHeader>

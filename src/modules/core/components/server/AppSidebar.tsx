@@ -13,7 +13,7 @@ import { Settings } from "lucide-react";
 import { headers } from "next/headers";
 import Image from "next/image";
 import { AiFillProduct } from "react-icons/ai";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaImage } from "react-icons/fa";
 import { FaFirstOrder, FaProductHunt, FaUsers } from "react-icons/fa6";
 import { TbCategory } from "react-icons/tb";
 
@@ -22,6 +22,11 @@ const adminNavigations: TMenuItem[] = [
     title: "Dashboard",
     path: "/",
     icon: FaHome,
+  },
+  {
+    title: "Sliders",
+    path: "/sliders",
+    icon: FaImage,
   },
   {
     title: "Categories",
@@ -70,6 +75,11 @@ const vendorNavigations: TMenuItem[] = [
     title: "Products",
     path: "/products",
     icon: FaProductHunt,
+  },
+  {
+    title: "Sliders",
+    path: "/sliders",
+    icon: FaImage,
   },
   {
     title: "Order",

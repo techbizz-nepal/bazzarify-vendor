@@ -1,23 +1,25 @@
+"use client";
+
 import { TQueryParams } from "@/modules/core/domain/schemas/QueryParams";
-import { OrderResponse } from "@/modules/core/types/dynamicTable";
 import appendQueryParams from "@/modules/core/utils/dynamicTable/appendQueryParams";
-import { actionGetOrders } from "@/modules/order.management/actions/actionGetOrders";
+import { actionGetSliders } from "@/modules/marketing/domain/actionGetSliders";
+import { TSliderResponse } from "@/modules/marketing/domain/schemas/SliderIndexResponsePayload";
 import { useEffect, useState, useTransition } from "react";
 
-export default function useOrderIndex() {
-  const [orderResponse, setOrderResponse] = useState<OrderResponse | null>(
+export default function useSliderIndexPage() {
+  const [sliderResponse, setSliderResponse] = useState<TSliderResponse | null>(
     null,
   );
   const [isPending, startTransition] = useTransition();
   const [queryParams, setQueryParams] = useState<TQueryParams>({
     filters: {
-      payment_method: "null",
       status: "null",
       from: "null",
       to: "null",
     },
     page: 1,
   });
+
   useEffect(() => {
     submitToApi(appendQueryParams(new FormData(), queryParams)).then(
       () => undefined,
@@ -43,11 +45,11 @@ export default function useOrderIndex() {
   async function submitToApi(formData: FormData) {
     startTransition(async () => {
       try {
-        const result = await actionGetOrders(formData);
+        const result = await actionGetSliders(formData);
         if (result.error) {
           console.error("Error fetching orders:", result.error);
         } else {
-          setOrderResponse(result.orders);
+          setSliderResponse(result.sliders);
         }
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -55,7 +57,7 @@ export default function useOrderIndex() {
     });
   }
   return {
-    orderResponse,
+    sliderResponse,
     isPending,
     handleFilterSubmit,
     setQueryParams,

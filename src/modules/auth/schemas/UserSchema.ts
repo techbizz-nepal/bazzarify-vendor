@@ -14,5 +14,5 @@ export const UserSchema = z
     updated_at: z.string().nullable(),
     deleted_at: z.string().nullable(),
   })
-  .strict();
+  .strip();
 export type TUser = z.infer<typeof UserSchema>;
