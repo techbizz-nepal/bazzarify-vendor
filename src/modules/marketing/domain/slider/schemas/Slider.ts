@@ -21,6 +21,8 @@ export const Slider = z
     created_at: z.string().optional(),
     updated_at: z.string().optional(),
     owner: UserSchema.nullable(),
+    image_base_path: z.string(),
+    image_base_url: z.string(),
   })
   .strip();
 
