@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import IndexContent from "@/modules/marketing/presentation/components/client/IndexContent";
+import IndexContent from "@/modules/marketing/presentation/slider/components/client/IndexContent";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa6";
 

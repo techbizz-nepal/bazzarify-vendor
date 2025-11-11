@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import useSliderIndexPage from "@/modules/marketing/presentation/hooks/useSliderIndexPage";
+import useSliderIndexPage from "@/modules/marketing/presentation/slider//hooks/useSliderIndexPage";
 import DateFilter from "@/modules/order.management/components/client/DateFilter";
 import FilterDropdown from "@/modules/order.management/components/client/FilterDropdown";
 

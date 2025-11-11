@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import DynamicTable from "@/modules/core/components/client/DynamicTable";
-import { sliderIndexColumns } from "@/modules/marketing/domain/SliderIndexColumns";
-import useSliderIndexPage from "@/modules/marketing/presentation/hooks/useSliderIndexPage";
+import { sliderIndexColumns } from "@/modules/marketing/domain/slider/consts/SliderIndexColumns";
+import useSliderIndexPage from "@/modules/marketing/presentation/slider/hooks/useSliderIndexPage";
 
 interface Props {
   sliderResponse: ReturnType<typeof useSliderIndexPage>["sliderResponse"];

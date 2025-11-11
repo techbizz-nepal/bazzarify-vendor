@@ -81,9 +81,10 @@ export function isValidJson(value: string) {
 
 export function handleUnknownError(error: unknown): IMetaData {
   if (error instanceof AxiosError) {
+    console.log("Axios error: ", error.response?.data || error.message);
     return { error: error.code || "An unexpected error occurred" };
   } else {
-    console.log(error);
+    console.log("Unknown error: ", error);
     return { error: "An unexpected error occurred" };
   }
 }

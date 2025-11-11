@@ -2,7 +2,7 @@
 
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
-import { SLIDER_MANAGEMENT_ROUTES } from "@/modules/marketing/domain/routes/slider-management";
+import { SLIDER_MANAGEMENT_ROUTES } from "@/modules/marketing/domain/slider/routes/slider-management";
 import { isAxiosError } from "axios";
 
 export const actionGetSliders = async (formData: FormData) => {

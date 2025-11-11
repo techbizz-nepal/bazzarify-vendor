@@ -1,7 +1,7 @@
 "use client";
-import IndexFilterCard from "@/modules/marketing/presentation/components/client/IndexFilterCard";
-import List from "@/modules/marketing/presentation/components/client/List";
-import useSliderIndexPage from "@/modules/marketing/presentation/hooks/useSliderIndexPage";
+import IndexFilterCard from "@/modules/marketing/presentation/slider/components/client/IndexFilterCard";
+import List from "@/modules/marketing/presentation/slider/components/client/List";
+import useSliderIndexPage from "@/modules/marketing/presentation/slider/hooks/useSliderIndexPage";
 
 export default function IndexContent() {
   const {

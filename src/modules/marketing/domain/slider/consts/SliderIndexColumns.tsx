@@ -5,8 +5,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
-import { SliderStatus } from "@/modules/marketing/domain/enums/SliderStatus";
-import { TSlider } from "@/modules/marketing/domain/schemas/Slider";
+import { SliderStatus } from "@/modules/marketing/domain/slider/enums/SliderStatus";
+import { TSlider } from "@/modules/marketing/domain/slider/schemas/Slider";
 import Link from "next/link";
 
 export const sliderIndexColumns: TableColumn<TSlider>[] = [

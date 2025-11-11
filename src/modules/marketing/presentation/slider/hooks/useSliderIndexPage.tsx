@@ -2,8 +2,8 @@
 
 import { TQueryParams } from "@/modules/core/domain/schemas/QueryParams";
 import appendQueryParams from "@/modules/core/utils/dynamicTable/appendQueryParams";
-import { actionGetSliders } from "@/modules/marketing/domain/actionGetSliders";
-import { TSliderResponse } from "@/modules/marketing/domain/schemas/SliderIndexResponsePayload";
+import { actionGetSliders } from "@/modules/marketing/domain/slider/actions/actionGetSliders";
+import { TSliderResponse } from "@/modules/marketing/domain/slider/schemas/SliderIndexResponsePayload";
 import { useEffect, useState, useTransition } from "react";
 
 export default function useSliderIndexPage() {
