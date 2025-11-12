@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -7,6 +9,8 @@ import {
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import { SliderStatus } from "@/modules/marketing/domain/slider/enums/SliderStatus";
 import { TSlider } from "@/modules/marketing/domain/slider/schemas/Slider";
+import SliderStatusButton from "@/modules/marketing/presentation/slider/components/client/SliderStatusButton";
+import SliderStatusText from "@/modules/marketing/presentation/slider/components/client/SliderStatusText";
 import Link from "next/link";
 
 export const sliderIndexColumns: TableColumn<TSlider>[] = [
@@ -20,16 +24,8 @@ export const sliderIndexColumns: TableColumn<TSlider>[] = [
     key: "status",
     title: "Status",
     width: "100px",
-    render: (value: string) => (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          value === "active"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}
-      >
-        {value}
-      </span>
+    render: (value: string, record: TSlider) => (
+      <SliderStatusText slider={record} value={value} />
     ),
   },
   {
@@ -64,9 +60,7 @@ export const sliderIndexColumns: TableColumn<TSlider>[] = [
           </PopoverTrigger>
           <PopoverContent className="w-32 flex flex-col space-y-3">
             {Object.entries(SliderStatus).map(([key, value]) => (
-              <Button key={key} variant="outline">
-                {value}
-              </Button>
+              <SliderStatusButton key={key} value={value} slider={record} />
             ))}
           </PopoverContent>
         </Popover>

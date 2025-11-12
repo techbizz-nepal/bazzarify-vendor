@@ -5,4 +5,10 @@ export const SLIDER_MANAGEMENT_ROUTES = {
   store: {
     path: "/marketing/sliders",
   },
+  update: {
+    path: "/marketing/sliders/:uuid",
+  },
+  updateStatus: {
+    path: "/marketing/sliders/:uuid/status",
+  },
 };

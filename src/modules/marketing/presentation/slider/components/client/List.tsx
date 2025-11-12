@@ -20,6 +20,7 @@ interface Props {
   handlePrevPage: ReturnType<typeof useSliderIndexPage>["handlePrevPage"];
   handleNextPage: ReturnType<typeof useSliderIndexPage>["handleNextPage"];
 }
+
 export default function List({
   sliderResponse,
   isPending,
