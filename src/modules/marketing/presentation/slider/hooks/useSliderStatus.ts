@@ -27,7 +27,6 @@ export default function useSliderStatus({ slider }: { slider: TSlider }) {
         if (result?.error) {
           console.error("Error updating status:", result.error);
         } else {
-          console.log(result.status);
           setSliderStatus(result.status);
         }
       } catch (error) {
