@@ -1,5 +1,6 @@
 import { UserSchema } from "@/modules/auth/schemas/UserSchema";
 import { SliderStatus } from "@/modules/marketing/domain/slider/enums/SliderStatus";
+import { ImageSchema } from "@/modules/product.management/schemas/ImageSchema";
 import { z } from "zod";
 
 export const Slider = z
@@ -26,4 +27,9 @@ export const Slider = z
   })
   .strip();
 
+export const SliderWithImages = Slider.extend({
+  images: z.array(ImageSchema).nullable(),
+});
+
 export type TSlider = z.infer<typeof Slider>;
+export type TSliderWithImages = z.infer<typeof SliderWithImages>;

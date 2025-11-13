@@ -11,4 +11,7 @@ export const SLIDER_MANAGEMENT_ROUTES = {
   updateStatus: {
     path: "/marketing/sliders/:uuid/status",
   },
+  delete: {
+    path: "/marketing/sliders/:uuid",
+  },
 };

@@ -1,8 +1,12 @@
 import { actionUpdateSliderStatus } from "@/modules/marketing/domain/slider/actions/actionUpdateSliderStatus";
-import { TSlider } from "@/modules/marketing/domain/slider/schemas/Slider";
+import { TSliderWithImages } from "@/modules/marketing/domain/slider/schemas/Slider";
 import { SyntheticEvent, useOptimistic, useState, useTransition } from "react";
 
-export default function useSliderStatus({ slider }: { slider: TSlider }) {
+export default function useSliderStatus({
+  slider,
+}: {
+  slider: TSliderWithImages;
+}) {
   const [sliderStatus, setSliderStatus] = useState(slider.status);
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(
     sliderStatus,

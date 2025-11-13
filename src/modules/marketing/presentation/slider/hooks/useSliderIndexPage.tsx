@@ -3,13 +3,12 @@
 import { TQueryParams } from "@/modules/core/domain/schemas/QueryParams";
 import appendQueryParams from "@/modules/core/utils/dynamicTable/appendQueryParams";
 import { actionGetSliders } from "@/modules/marketing/domain/slider/actions/actionGetSliders";
-import { TSliderResponse } from "@/modules/marketing/domain/slider/schemas/SliderIndexResponsePayload";
+import { TSliderWithImagesResponse } from "@/modules/marketing/domain/slider/schemas/SliderIndexResponsePayload";
 import { useEffect, useState, useTransition } from "react";
 
 export default function useSliderIndexPage() {
-  const [sliderResponse, setSliderResponse] = useState<TSliderResponse | null>(
-    null,
-  );
+  const [sliderResponse, setSliderResponse] =
+    useState<TSliderWithImagesResponse | null>(null);
   const [isPending, startTransition] = useTransition();
   const [queryParams, setQueryParams] = useState<TQueryParams>({
     filters: {

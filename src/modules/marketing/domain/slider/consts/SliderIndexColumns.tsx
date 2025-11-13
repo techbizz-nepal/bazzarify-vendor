@@ -1,12 +1,10 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
-import { TSlider } from "@/modules/marketing/domain/slider/schemas/Slider";
+import { TSliderWithImages } from "@/modules/marketing/domain/slider/schemas/Slider";
 import SliderStatusTextWithUpdateAction from "@/modules/marketing/presentation/slider/components/client/SliderStatusText";
 import Link from "next/link";
 
-export const sliderIndexColumns: TableColumn<TSlider>[] = [
+export const sliderIndexColumns: TableColumn<TSliderWithImages>[] = [
   {
     key: "title",
     title: "Title",
@@ -17,7 +15,7 @@ export const sliderIndexColumns: TableColumn<TSlider>[] = [
     key: "status",
     title: "Status",
     width: "10%",
-    render: (_value: string, record: TSlider) => (
+    render: (_value: string, record: TSliderWithImages) => (
       <SliderStatusTextWithUpdateAction key={record.uuid} slider={record} />
     ),
   },
@@ -25,7 +23,7 @@ export const sliderIndexColumns: TableColumn<TSlider>[] = [
     key: "owner.name",
     title: "Owner",
     width: "30%",
-    render: (value: string, record: TSlider) => {
+    render: (value: string, record: TSliderWithImages) => {
       return record.owner?.name || record.owner?.email || "-";
     },
   },
@@ -42,9 +40,9 @@ export const sliderIndexColumns: TableColumn<TSlider>[] = [
     key: "action",
     title: "Action",
     width: "10%",
-    render: (_value: string, record: TSlider) => (
-      <Link href={`/sliders/${encodeURIComponent(record.uuid)}/edit`}>
-        <Button variant="default">Edit</Button>
+    render: (_value: string, record: TSliderWithImages) => (
+      <Link href={`/sliders/${record.uuid}/delete`}>
+        <Button>Delete</Button>
       </Link>
     ),
   },

@@ -8,11 +8,11 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { SliderStatus } from "@/modules/marketing/domain/slider/enums/SliderStatus";
-import { TSlider } from "@/modules/marketing/domain/slider/schemas/Slider";
+import { TSliderWithImages } from "@/modules/marketing/domain/slider/schemas/Slider";
 import useSliderStatus from "@/modules/marketing/presentation/slider/hooks/useSliderStatus";
 
 interface Props {
-  slider: TSlider;
+  slider: TSliderWithImages;
 }
 export default function SliderStatusText({ slider }: Props) {
   const { isPending, optimisticStatus, handleOrderStatusChange } =
