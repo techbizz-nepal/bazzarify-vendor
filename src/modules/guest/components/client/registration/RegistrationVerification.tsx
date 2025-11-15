@@ -17,13 +17,10 @@ import {
 } from "@/components/ui/input-otp";
 import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
-import { phoneRegex } from "@/modules/core/lib/utils.index";
 import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { UseFormReturn } from "react-hook-form";
 
 interface IRegistrationRequestVerification {
@@ -32,12 +29,7 @@ interface IRegistrationRequestVerification {
   formHelpText: string;
   buttonLabel: string;
   onSubmitAction: (data: RegistrationVerificationFormValues) => void;
-  form: UseFormReturn<{
-    phone: string;
-    otp: string;
-    password: string;
-    password_confirmation: string;
-  }>;
+  form: UseFormReturn<RegistrationVerificationFormValues>;
 }
 
 export default function RegistrationVerification({
@@ -49,21 +41,6 @@ export default function RegistrationVerification({
   form,
 }: IRegistrationRequestVerification) {
   const router = useRouter();
-  const urlSearchParams = useSearchParams();
-  const sessionCtx = use(SessionContext);
-  if (!sessionCtx) {
-    throw new Error("SessionProvider must be used in correct place.");
-  }
-  const { session } = sessionCtx;
-  const [phone] = useState<string>(urlSearchParams.get("phone")?.trim() || "");
-  useEffect(() => {
-    if (session) {
-      return router.replace("/");
-    }
-    if (!phone || !phoneRegex.test(phone)) {
-      throw new Error("403");
-    }
-  }, [phone, router, session]);
   return (
     <div className={className}>
       <FormTitle
@@ -78,9 +55,10 @@ export default function RegistrationVerification({
         >
           <Input
             type="hidden"
-            defaultValue={phone}
+            defaultValue={form.getValues("phone")}
             {...form.register("phone")}
           />
+
           <FormField
             render={({ field }) => (
               <FormItem className="flex flex-col gap-y-2">

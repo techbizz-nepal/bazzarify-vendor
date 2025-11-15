@@ -25,6 +25,7 @@ export const RegistrationVerificationFormSchema = z
       .max(100, {
         message: "Password must contain less than 100 character(s)",
       }),
+    verified: z.boolean(),
   })
   .refine((data) => data.password === data.password_confirmation, {
     message: "Passwords do not match",

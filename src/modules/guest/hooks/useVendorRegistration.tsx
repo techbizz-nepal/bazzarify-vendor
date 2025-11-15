@@ -1,3 +1,4 @@
+import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import { actionSetBusinessAndEmail } from "@/modules/guest/actions/auth";
 import {
   actionRequestRegistration,
@@ -17,15 +18,21 @@ import {
 } from "@/modules/guest/config/schemas/set.business.email.form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { ReadonlyURLSearchParams } from "next/navigation";
-import { BaseSyntheticEvent } from "react";
+import { BaseSyntheticEvent, use, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-export default function useVendorRegistration(
-  router: AppRouterInstance,
-  searchParams: ReadonlyURLSearchParams,
-  toggleSession: () => void,
-) {
+export default function useVendorRegistration(router: AppRouterInstance) {
+  const sessionCtx = use(SessionContext);
+  if (!sessionCtx) {
+    throw new Error("SessionProvider must be used in correct place.");
+  }
+  const { session } = sessionCtx;
+  useEffect(() => {
+    if (session) {
+      return router.replace("/");
+    }
+  }, [router, session]);
   const registrationRequestForm = useForm<RegistrationRequestFormValues>({
     resolver: zodResolver(RegistrationRequestFormSchema),
     defaultValues: {
@@ -37,10 +44,11 @@ export default function useVendorRegistration(
     useForm<RegistrationVerificationFormValues>({
       resolver: zodResolver(RegistrationVerificationFormSchema),
       defaultValues: {
-        phone: searchParams.get("phone") || "",
+        phone: registrationRequestForm.getValues("phone"),
         otp: undefined,
         password: "",
         password_confirmation: "",
+        verified: false,
       },
     });
 
@@ -49,6 +57,7 @@ export default function useVendorRegistration(
     defaultValues: {
       email: "",
       business_name: "",
+      phone: "",
     },
   });
 
@@ -62,9 +71,10 @@ export default function useVendorRegistration(
     actionRequestRegistration({ ...data, channel })
       .then((res) => {
         if (res.data.message != "success") {
+          console.log("Received response", res);
           return alert("Something went wrong! ".concat(res.metaData.error));
         }
-        router.push("/register?phone=".concat(data.phone));
+        router.push("/register");
       })
       .catch(() => alert("Something went wrong!"));
   };
@@ -72,23 +82,22 @@ export default function useVendorRegistration(
   const handleRegistrationVerification = (
     data: RegistrationVerificationFormValues,
   ) => {
-    const phone = searchParams.get("phone");
+    const phone = registrationRequestVerificationForm.getValues("phone");
     if (!phone) return alert("Invalid request");
     actionVerifyRegistration(data)
       .then((res) => {
-        if (res.data.message != "success") {
-          return alert("Something went wrong!");
+        if (res?.metaData?.error) {
+          toast.warning(res?.metaData?.error);
+          return;
         }
-        // router.push("/register?verified=true");
+        toast.success("Signing you in...");
       })
       .catch((err) => console.log(err));
   };
 
   const handleSetBusinessAndEmailSubmit = (data: BusinessAndEmailFormValues) =>
     actionSetBusinessAndEmail(data)
-      .then(() => {
-        toggleSession();
-      })
+      .then(() => undefined)
       .catch((error) => console.log(error));
   return {
     registrationRequestForm,
