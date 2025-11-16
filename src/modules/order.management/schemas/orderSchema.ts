@@ -1,4 +1,4 @@
-import { UserSchema } from "@/modules/auth01/domain/Schemas/UserSchema";
+import { UserSchema } from "@/modules/auth/domain/schemas/UserSchema";
 import { z } from "zod";
 
 export const ShippingInformationSchema = z
