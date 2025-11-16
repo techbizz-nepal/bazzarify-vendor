@@ -9,22 +9,23 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import { getSessionPayload } from "@/modules/core/lib/utils.session";
 import SetBusinessAndEmailForm from "@/modules/guest/components/client/registration/SetBusinessAndEmailForm";
 import { headers } from "next/headers";
 
 export default async function DashboardContainer() {
   const host = (await headers()).get("host") || "";
-  console.log(host);
+  const sessionPayload = await getSessionPayload();
+
   return (
     <PageContainer pageTitle={"Dashboard"}>
       <Statistics />
-      {host.startsWith("vendor.") && (
+      {host.startsWith("vendor.") && !sessionPayload?.store && (
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-destructive">
@@ -42,8 +43,9 @@ export default async function DashboardContainer() {
 
               <SheetContent>
                 <SheetHeader>
-                  <SheetTitle>Set Business and Email</SheetTitle>
-                  <SheetDescription>short description</SheetDescription>
+                  <SheetTitle className="text-2xl font-bold">
+                    Store Information
+                  </SheetTitle>
                 </SheetHeader>
                 <SetBusinessAndEmailForm />
               </SheetContent>

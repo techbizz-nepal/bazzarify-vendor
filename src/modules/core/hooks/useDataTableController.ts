@@ -37,6 +37,7 @@ export function useDataTableController({
           return;
         }
         if ("error" in res) {
+          toast.error(res.error);
           return false;
         }
 

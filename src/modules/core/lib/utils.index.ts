@@ -113,3 +113,6 @@ export function getDurationFromTimestamps(pastDate: Date) {
     ? `${duration[interval]} ${interval.slice(0, -1)}${duration[interval] === 1 ? "" : "s"} ${isFuture ? "from now" : "ago"}`
     : "just now";
 }
+
+export const getTokenExpirationDate = () =>
+  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

@@ -1,12 +1,13 @@
 "use server";
 
+import {
+  TSessionUser,
+  TSessionUserWithToken,
+} from "@/modules/auth/domain/schemas/UserSchema";
+import { getTokenExpirationDate } from "@/modules/core/lib/utils.index";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 
-type SessionPayload = {
-  token: string;
-  expiresAt: Date;
-};
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
@@ -19,11 +20,40 @@ export async function getSessionPayload() {
   if (!payload) return null;
   return payload;
 }
+export async function updateSessionWithUser(user: TSessionUser): Promise<void> {
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get("session");
+    const decodedSession = await decrypt(session?.value);
+    if (!decodedSession) {
+      throw new Error("Could not update session without token session");
+    }
+    const encryptedUser = await new SignJWT({ ...decodedSession, ...user })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime(getTokenExpirationDate())
+      .sign(encodedKey);
 
-export async function createSession(token: string): Promise<void> {
+    cookieStore.set("session", encryptedUser, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: getTokenExpirationDate(),
+      sameSite: "strict",
+      path: "/",
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+export async function createTokenSession(token: string): Promise<void> {
   try {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const session = await encrypt({ token, expiresAt });
+
+    const session = await new SignJWT({ token, expiresAt })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("7d")
+      .sign(encodedKey);
     const cookieStore = await cookies();
 
     cookieStore.set("session", session, {
@@ -36,26 +66,6 @@ export async function createSession(token: string): Promise<void> {
   } catch (error) {
     throw error;
   }
-}
-
-export async function updateSession() {
-  const session = (await cookies()).get("session")?.value;
-  const payload = await decrypt(session);
-
-  if (!session || !payload) {
-    return null;
-  }
-
-  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-  const cookieStore = await cookies();
-  cookieStore.set("session", session, {
-    httpOnly: true,
-    secure: true,
-    expires: expires,
-    sameSite: "strict",
-    path: "/",
-  });
 }
 
 export async function deleteSession(): Promise<void> {
@@ -86,7 +96,7 @@ export async function deleteSession(): Promise<void> {
   }
 }
 
-async function encrypt(payload: SessionPayload) {
+async function encrypt(payload: TSessionUserWithToken) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

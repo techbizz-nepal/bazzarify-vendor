@@ -3,6 +3,7 @@
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,6 +33,10 @@ const SetBusinessAndEmail = () => {
             name="business_name"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-y-2">
+                <FormLabel className="text-lg font-bold">Name</FormLabel>
+                <FormDescription className="text-xs">
+                  give a unique legal name
+                </FormDescription>
                 <FormControl>
                   <Input
                     autoComplete="given-name"
@@ -48,6 +53,10 @@ const SetBusinessAndEmail = () => {
             name="email"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-y-2">
+                <FormLabel className="text-lg font-bold">Email</FormLabel>
+                <FormDescription className="text-xs">
+                  give your store email
+                </FormDescription>
                 <FormControl>
                   <Input
                     type="email"
@@ -64,7 +73,10 @@ const SetBusinessAndEmail = () => {
           <FormField
             render={({ field }) => (
               <FormItem className="flex flex-col gap-y-2">
-                <FormLabel className="text-slate-500">Phone</FormLabel>
+                <FormLabel className="text-lg font-bold">Phone</FormLabel>
+                <FormDescription className="text-xs">
+                  give a store phone number.
+                </FormDescription>
                 <FormControl>
                   <Input
                     autoComplete="mobile tel"

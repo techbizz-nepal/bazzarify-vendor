@@ -1,16 +1,13 @@
+import { MetaDataSchema } from "@/modules/core/domain/schemas/MetaDataSchema";
 import { z } from "zod";
 
-export const ApiResponse = z
-  .object({
+export const ApiResponseSchema = <Payload>(payloadItem: z.ZodType<Payload>) =>
+  z.object({
     data: z.object({
-      message: z.string().nullable(),
-      payload: z.record(z.string(), z.any()).optional(),
+      message: z.string(),
+      payload: payloadItem.nullable(),
     }),
-    metaData: z.object({
-      error: z.string().optional(),
-      errorCode: z.number().optional(),
-    }),
-  })
-  .strip();
+    metaData: MetaDataSchema,
+  });
 
-export type TApiResponse = z.infer<typeof ApiResponse>;
+export default ApiResponseSchema;

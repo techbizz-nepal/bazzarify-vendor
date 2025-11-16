@@ -1,11 +1,16 @@
 "use server";
 
+import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
-import { createSession } from "@/modules/core/lib/utils.session";
+import {
+  createTokenSession,
+  updateSessionWithUser,
+} from "@/modules/core/lib/utils.session";
 import { AUTH_ROUTES } from "@/modules/guest/config/routes";
 import { RegistrationRequestFormValues } from "@/modules/guest/config/schemas/registrationRequestForm";
 import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
+import { actionGetUser } from "@/modules/product.management/actions/user";
 
 export const actionRequestRegistration = async (
   data: RegistrationRequestFormValues,
@@ -34,7 +39,13 @@ export const actionVerifyRegistration = async (
       return handleRemoteError(new Error("Invalid login response"));
     }
     // @ts-ignore
-    await createSession(response.data.data.payload.token);
+    await createTokenSession(response.data.data.payload.token);
+    const userResponse = await actionGetUser();
+    if ("error" in userResponse) {
+      throw userResponse.error;
+    }
+    const sessionUser: TSessionUser = userResponse;
+    await updateSessionWithUser(sessionUser);
   } catch (error: unknown) {
     return handleRemoteError(error);
   }

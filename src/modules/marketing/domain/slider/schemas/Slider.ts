@@ -1,4 +1,4 @@
-import { UserSchema } from "@/modules/auth/schemas/UserSchema";
+import { UserSchema } from "@/modules/auth01/domain/Schemas/UserSchema";
 import { SliderStatus } from "@/modules/marketing/domain/slider/enums/SliderStatus";
 import { ImageSchema } from "@/modules/product.management/schemas/ImageSchema";
 import { z } from "zod";
