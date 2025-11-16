@@ -30,7 +30,7 @@ const SetBusinessAndEmail = () => {
           className="flex-col space-y-6"
         >
           <FormField
-            name="business_name"
+            name="name"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-y-2">
                 <FormLabel className="text-lg font-bold">Name</FormLabel>
@@ -91,7 +91,10 @@ const SetBusinessAndEmail = () => {
             )}
             name="phone"
           />
-          <ThemedButton className={cn(`text-md w-full cursor-pointer py-6`)}>
+          <ThemedButton
+            className={cn(`text-md w-full cursor-pointer py-6`)}
+            disabled={form.formState.isSubmitting}
+          >
             Submit
           </ThemedButton>
         </form>

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const SetBusinessAndEmailSchema = z.object({
   email: z.email({ message: "Email is required." }),
-  business_name: z
+  name: z
     .string()
     .min(3, { message: "Name must be at least 3 characters." })
     .max(100, { message: "Name must be less than 100 characters." })

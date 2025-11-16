@@ -14,14 +14,18 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import { setRedisValue } from "@/modules/core/domain/actions/actionRedis";
 import { getSessionPayload } from "@/modules/core/lib/utils.session";
 import SetBusinessAndEmailForm from "@/modules/guest/components/client/registration/SetBusinessAndEmailForm";
+import { JWTPayload } from "jose";
 import { headers } from "next/headers";
 
 export default async function DashboardContainer() {
   const host = (await headers()).get("host") || "";
-  const sessionPayload = await getSessionPayload();
-
+  const sessionPayload: JWTPayload | null = await getSessionPayload();
+  setRedisValue("test", "hello")
+    .then((r) => console.log(r))
+    .catch((e) => console.log(e));
   return (
     <PageContainer pageTitle={"Dashboard"}>
       <Statistics />

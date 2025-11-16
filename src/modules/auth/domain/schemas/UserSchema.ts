@@ -18,6 +18,7 @@ export const UserSchema = z
   })
   .strip();
 export const SessionUserSchema = UserSchema.pick({
+  uuid: true,
   authType: true,
   name: true,
   email: true,

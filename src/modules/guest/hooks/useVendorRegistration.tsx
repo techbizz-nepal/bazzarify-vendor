@@ -1,5 +1,4 @@
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
-import { actionSetBusinessAndEmail } from "@/modules/guest/actions/auth";
 import {
   actionRequestRegistration,
   actionVerifyRegistration,
@@ -16,6 +15,7 @@ import {
   BusinessAndEmailFormValues,
   SetBusinessAndEmailSchema,
 } from "@/modules/guest/config/schemas/set.business.email.form";
+import { actionSetBusinessAndEmail } from "@/modules/vendor/domain/store-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { BaseSyntheticEvent, use, useEffect } from "react";
@@ -56,7 +56,7 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     resolver: zodResolver(SetBusinessAndEmailSchema),
     defaultValues: {
       email: "",
-      business_name: "",
+      name: "",
       phone: "",
     },
   });
