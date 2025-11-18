@@ -1,3 +1,4 @@
+import { errorOptions } from "@/modules/core/constants/toast";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import {
   actionRequestRegistration,
@@ -71,8 +72,8 @@ export default function useVendorRegistration(router: AppRouterInstance) {
       .then((res) => {
         if (res.data.message !== "success") {
           registrationRequestForm.reset();
-          console.log("recvd :", res.data);
-          return toast.error("Something went wrong in response");
+          console.log("response request registration: ", res.metaData.error);
+          return toast(res.metaData.error || "Unknown error", errorOptions);
         }
         setRegistrationPhone(registrationRequestForm.getValues("phone"));
         registrationRequestVerificationForm.setValue(
@@ -80,7 +81,10 @@ export default function useVendorRegistration(router: AppRouterInstance) {
           registrationRequestForm.getValues("phone"),
         );
       })
-      .catch(() => toast.error("Something went wrong on registration action!"));
+      .catch((e) => {
+        console.log("recvd :", e);
+        toast.error("Something went wrong on registration action!");
+      });
   };
 
   const handleRegistrationVerification = (
