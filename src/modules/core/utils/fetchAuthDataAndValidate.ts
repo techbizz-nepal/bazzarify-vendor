@@ -28,6 +28,7 @@ export async function fetchAuthDataAndValidate<Payload>(
 
   if (!result.success) {
     const issues = formattedIssues(result.error.issues);
+    console.log("schema error on fetch auth data: ", issues, endpoint.path);
     throw new Error("API response schema validation failed", { cause: issues });
   }
   const { payload } = result.data.data;
@@ -56,6 +57,7 @@ export default async function fetchDataAndValidate<Payload extends z.ZodType>(
 
   if (!result.success) {
     const issues = formattedIssues(result.error.issues);
+    console.log("schema error on fetch guest data: ", issues, endpoint);
     throw new Error("API response schema validation failed", { cause: issues });
   }
   const { payload } = result.data.data;

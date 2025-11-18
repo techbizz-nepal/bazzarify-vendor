@@ -1,31 +1,39 @@
 // app/actions/redis-actions.js
 "use server";
 
-import { connectRedis } from "@/modules/core/lib/redis";
+import { vendorPrefixedKey } from "@/modules/core/domain/constants/redis";
+import { connectRedis, disconnectRedis } from "@/modules/core/lib/redis";
+import { getJsonOrString } from "@/modules/core/utils";
 import { handleError } from "@/modules/core/utils/jsonResponse.utils";
 import { RedisArgument } from "@redis/client";
 
-const redisPrefix = "vendor_";
-const prefixedKey = (key: string) => redisPrefix.concat(key);
 export async function setRedisValue(key: string, value: RedisArgument) {
   try {
     const redisClient = await connectRedis();
-    await redisClient.set(prefixedKey(key), value);
-    return {
-      success: true,
-      message: `Key '${prefixedKey(key)}' set successfully.`,
-    };
+    await redisClient.set(vendorPrefixedKey(key).concat(":"), value);
+    await disconnectRedis();
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
 export async function getRedisValue(key: string) {
   try {
     const redisClient = await connectRedis();
-    const value = await redisClient.get(prefixedKey(key));
-    return { success: true, value };
+    const value = await redisClient.get(vendorPrefixedKey(key).concat(":"));
+    await disconnectRedis();
+    return getJsonOrString(value);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
+  }
+}
+
+export async function deleteRedisValue(key: string) {
+  try {
+    const redisClient = await connectRedis();
+    await redisClient.del(vendorPrefixedKey(key).concat(":"));
+    await disconnectRedis();
+  } catch (error) {
+    return handleError(error);
   }
 }

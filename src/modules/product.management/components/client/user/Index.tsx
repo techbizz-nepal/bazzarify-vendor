@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { actionGetUsers } from "@/modules/auth/domain/auth-actions";
 import DataTable from "@/modules/core/components/client/DataTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import { actionGetUsers } from "@/modules/product.management/actions/user";
 
 export default function Index() {
   return (

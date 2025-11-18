@@ -8,7 +8,7 @@ export const UserSchema = z
     id: z.number().nullable(),
     authType: z.string(),
     name: z.string().nullable(),
-    email: z.string(),
+    email: z.string().nullable(),
     phone: z.string().nullable(),
     email_verified_at: z.string().nullable(),
     phone_verified_at: z.string().nullable(),

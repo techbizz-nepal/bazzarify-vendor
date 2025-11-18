@@ -1,11 +1,14 @@
 "use server";
 
 import {
+  actionRemoveTokenFromCallback,
+  getSessionToken,
+} from "@/modules/auth/data/lib/auth-lib";
+import {
   deleteSession,
-  getSessionPayload,
+  getCookieStore,
 } from "@/modules/core/lib/utils.session";
 import axios, { CreateAxiosDefaults } from "axios";
-import { JWTPayload } from "jose";
 import { redirect } from "next/navigation";
 
 const remoteData: Record<string, string> = {
@@ -28,11 +31,10 @@ export const defaultAxiosInstance = axios.create({
 });
 
 export const authAxiosInstance = async () => {
-  const payload: JWTPayload | null = await getSessionPayload();
-  if (!payload) {
+  const token: string | null = await getSessionToken(await getCookieStore());
+  if (!token) {
     redirect("/login");
   }
-  const token = payload.token;
   const instance = axios.create({
     ...defaultConfig,
     headers: {
@@ -42,7 +44,9 @@ export const authAxiosInstance = async () => {
   });
   instance.interceptors.response.use((response) => {
     if (response.data?.metaData?.errorCode === 401) {
-      deleteSession();
+      deleteSession({
+        actionBeforeDeleteCookieCallback: actionRemoveTokenFromCallback,
+      });
       redirect("/login");
     }
     return response;

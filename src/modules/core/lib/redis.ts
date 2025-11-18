@@ -17,5 +17,10 @@ export async function connectRedis() {
   }
   return redisClient;
 }
-
+export async function disconnectRedis() {
+  if (!redisClient.isOpen) {
+    redisClient.destroy();
+    console.log("Redis disconnected");
+  }
+}
 export default redisClient;

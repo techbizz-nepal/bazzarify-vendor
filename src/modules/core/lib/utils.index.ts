@@ -18,11 +18,11 @@ export const handleRemoteError = (
     errorCode = error.response?.data?.metaData?.errorCode;
   }
   if (error instanceof Error) {
-    console.log(error);
+    console.log("error instance: ", error);
     message = error.message;
     errorCode = parseInt(error.name) || errorCode;
   }
-
+  console.log("handling error: ", error);
   return {
     data: {
       payload: [],

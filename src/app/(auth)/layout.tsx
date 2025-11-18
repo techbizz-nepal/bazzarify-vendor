@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { getSessionToken } from "@/modules/auth/data/lib/auth-lib";
 import { AppSidebar } from "@/modules/core/components/server/AppSidebar";
-import { getSessionPayload } from "@/modules/core/lib/utils.session";
+import { getCookieStore } from "@/modules/core/lib/utils.session";
 import AccountActions from "@/modules/dashboard/components/client/AccountActions";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
@@ -10,8 +11,8 @@ export default async function AuthLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const sessionPayload = await getSessionPayload();
-  if (!sessionPayload) {
+  const token = await getSessionToken(await getCookieStore());
+  if (!token) {
     redirect("/login");
   }
   return (

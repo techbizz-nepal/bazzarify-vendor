@@ -1,4 +1,7 @@
-import { getSessionPayload } from "@/modules/core/lib/utils.session";
+import {
+  getCookieStore,
+  getSessionDecrypted,
+} from "@/modules/core/lib/utils.session";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
@@ -7,7 +10,7 @@ export default async function GuestLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  if (await getSessionPayload()) {
+  if (await getSessionDecrypted(await getCookieStore())) {
     redirect("/");
   }
   return children;

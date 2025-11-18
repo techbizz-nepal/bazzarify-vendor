@@ -18,7 +18,7 @@ import {
 import { actionSetBusinessAndEmail } from "@/modules/vendor/domain/store-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { BaseSyntheticEvent, use, useEffect } from "react";
+import { BaseSyntheticEvent, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -33,18 +33,18 @@ export default function useVendorRegistration(router: AppRouterInstance) {
       return router.replace("/");
     }
   }, [router, session]);
+  const [registrationPhone, setRegistrationPhone] = useState("");
   const registrationRequestForm = useForm<RegistrationRequestFormValues>({
     resolver: zodResolver(RegistrationRequestFormSchema),
     defaultValues: {
-      phone: "9851040576",
+      phone: "",
     },
   });
-
   const registrationRequestVerificationForm =
     useForm<RegistrationVerificationFormValues>({
       resolver: zodResolver(RegistrationVerificationFormSchema),
       defaultValues: {
-        phone: registrationRequestForm.getValues("phone"),
+        phone: registrationPhone,
         otp: undefined,
         password: "",
         password_confirmation: "",
@@ -60,7 +60,6 @@ export default function useVendorRegistration(router: AppRouterInstance) {
       phone: "",
     },
   });
-
   const handleRequestRegistration = (
     data: RegistrationRequestFormValues,
     e: BaseSyntheticEvent | undefined,
@@ -70,13 +69,18 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     const channel: string = submitter.value;
     actionRequestRegistration({ ...data, channel })
       .then((res) => {
-        if (res.data.message != "success") {
-          console.log("Received response", res);
-          return alert("Something went wrong! ".concat(res.metaData.error));
+        if (res.data.message !== "success") {
+          registrationRequestForm.reset();
+          console.log("recvd :", res.data);
+          return toast.error("Something went wrong in response");
         }
-        router.push("/register");
+        setRegistrationPhone(registrationRequestForm.getValues("phone"));
+        registrationRequestVerificationForm.setValue(
+          "phone",
+          registrationRequestForm.getValues("phone"),
+        );
       })
-      .catch(() => alert("Something went wrong!"));
+      .catch(() => toast.error("Something went wrong on registration action!"));
   };
 
   const handleRegistrationVerification = (
@@ -97,7 +101,7 @@ export default function useVendorRegistration(router: AppRouterInstance) {
 
   const handleSetBusinessAndEmailSubmit = (data: BusinessAndEmailFormValues) =>
     actionSetBusinessAndEmail(data)
-      .then(() => undefined)
+      .then((r) => r !== undefined && r !== null && router.replace("/"))
       .catch((error) => console.log(error));
   return {
     registrationRequestForm,
@@ -106,5 +110,6 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     handleRequestRegistration,
     handleRegistrationVerification,
     handleSetBusinessAndEmailSubmit,
+    registrationPhone,
   };
 }

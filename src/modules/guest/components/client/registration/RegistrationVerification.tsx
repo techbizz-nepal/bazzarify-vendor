@@ -20,7 +20,6 @@ import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { UseFormReturn } from "react-hook-form";
 
 interface IRegistrationRequestVerification {
@@ -40,7 +39,6 @@ export default function RegistrationVerification({
   onSubmitAction,
   form,
 }: IRegistrationRequestVerification) {
-  const router = useRouter();
   return (
     <div className={className}>
       <FormTitle
@@ -53,10 +51,23 @@ export default function RegistrationVerification({
           onSubmit={form.handleSubmit(onSubmitAction)}
           className="flex-col space-y-6"
         >
-          <Input
-            type="hidden"
-            defaultValue={form.getValues("phone")}
-            {...form.register("phone")}
+          <FormField
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-y-2">
+                <FormLabel className="text-slate-500">Phone</FormLabel>
+                <FormControl>
+                  <Input
+                    autoComplete="mobile tel"
+                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
+                    type="number"
+                    placeholder="Enter phone"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+            name="phone"
           />
 
           <FormField
@@ -127,6 +138,7 @@ export default function RegistrationVerification({
             name="password_confirmation"
           />
           <ThemedButton
+            disabled={form.formState.isSubmitting}
             className="text-md w-full cursor-pointer py-6"
             type="submit"
           >

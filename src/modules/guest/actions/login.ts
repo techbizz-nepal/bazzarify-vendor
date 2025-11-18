@@ -1,16 +1,19 @@
 "use server";
 
+import {
+  actionRemoveTokenFromCallback,
+  setAuthUser,
+} from "@/modules/auth/data/lib/auth-lib";
+import { actionGetUser } from "@/modules/auth/domain/auth-actions";
 import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import {
-  createTokenSession,
+  createAuthCookieSession,
   deleteSession,
-  updateSessionWithUser,
 } from "@/modules/core/lib/utils.session";
 import { AUTH_ROUTES } from "@/modules/guest/config/routes";
 import { LoginFormValues } from "@/modules/guest/config/schemas/login.form";
-import { actionGetUser } from "@/modules/product.management/actions/user";
 import { AxiosResponse } from "axios";
 
 export const actionLogin = async (data: LoginFormValues) => {
@@ -22,19 +25,37 @@ export const actionLogin = async (data: LoginFormValues) => {
     );
     // @ts-ignore
     if (apiResponse.data.data.message !== "success") {
-      return handleRemoteError(new Error("Invalid login response"));
+      return handleRemoteError(
+        new Error(
+          ["Invalid login response", JSON.stringify(apiResponse.data)].join(
+            " ",
+          ),
+        ),
+      );
     }
     // @ts-ignore
-    await createTokenSession(apiResponse.data.data.payload.token);
+    const tokenPlainText = apiResponse.data.data.payload.token;
+    await createAuthCookieSession({
+      token: tokenPlainText,
+      userUUID: null,
+    });
     const userResponse = await actionGetUser();
     if ("error" in userResponse) {
       throw userResponse.error;
     }
     const sessionUser: TSessionUser = userResponse;
-    await updateSessionWithUser(sessionUser);
+    await createAuthCookieSession({
+      token: tokenPlainText,
+      userUUID: sessionUser.uuid,
+    });
+    await setAuthUser(sessionUser.uuid, sessionUser);
   } catch (error: unknown) {
+    console.log("login error: ", error);
     return handleRemoteError(error);
   }
 };
 
-export const actionLogout = async () => deleteSession();
+export const actionLogout = async () =>
+  deleteSession({
+    actionBeforeDeleteCookieCallback: actionRemoveTokenFromCallback,
+  });

@@ -7,7 +7,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { RegistrationRequestFormValues } from "@/modules/guest/config/schemas/registrationRequestForm";
@@ -55,13 +54,6 @@ const RegistrationRequest = ({ form, onSubmit }: IRegistrationRequest) => (
           )}
           name="phone"
         />
-        <ThemedButton
-          value={OTPChannel.whatsapp.value}
-          name="channel"
-          className={cn(`text-md w-full cursor-pointer py-6`)}
-        >
-          Send OTP via Whatsapp
-        </ThemedButton>
         <ThemedButton
           name="channel"
           value={OTPChannel.sms.value}

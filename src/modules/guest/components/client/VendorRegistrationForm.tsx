@@ -12,12 +12,10 @@ export default function VendorRegistrationForm() {
   const {
     registrationRequestForm,
     registrationRequestVerificationForm,
-    businessAndEmailForm,
     handleRequestRegistration,
     handleRegistrationVerification,
-    handleSetBusinessAndEmailSubmit,
+    registrationPhone,
   } = useVendorRegistration(router);
-
   return (
     <>
       <Banner>
@@ -27,7 +25,7 @@ export default function VendorRegistrationForm() {
             onSubmit={handleRequestRegistration}
           />
         )}
-        {registrationRequestVerificationForm.getValues("phone") &&
+        {registrationPhone &&
           !registrationRequestVerificationForm?.getValues("verified") && (
             <RegistrationVerification
               form={registrationRequestVerificationForm}

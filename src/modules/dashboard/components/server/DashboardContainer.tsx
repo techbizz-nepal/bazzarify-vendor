@@ -13,51 +13,63 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  getAuthUser,
+  getSessionUserUUID,
+} from "@/modules/auth/data/lib/auth-lib";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import { setRedisValue } from "@/modules/core/domain/actions/actionRedis";
-import { getSessionPayload } from "@/modules/core/lib/utils.session";
+import { getCookieStore } from "@/modules/core/lib/utils.session";
 import SetBusinessAndEmailForm from "@/modules/guest/components/client/registration/SetBusinessAndEmailForm";
-import { JWTPayload } from "jose";
+import { Loader } from "lucide-react";
 import { headers } from "next/headers";
+import { Suspense } from "react";
 
 export default async function DashboardContainer() {
   const host = (await headers()).get("host") || "";
-  const sessionPayload: JWTPayload | null = await getSessionPayload();
-  setRedisValue("test", "hello")
-    .then((r) => console.log(r))
-    .catch((e) => console.log(e));
+  const userUUID = await getSessionUserUUID(await getCookieStore());
+  if (!userUUID) {
+    console.log("no token on dashboard: ", userUUID);
+    return null;
+  }
+  const authUser = await getAuthUser(userUUID);
+  if (authUser && "error" in authUser) {
+    console.log("auth user: ", authUser);
+    return null;
+  }
   return (
-    <PageContainer pageTitle={"Dashboard"}>
-      <Statistics />
-      {host.startsWith("vendor.") && !sessionPayload?.store && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center text-destructive">
-              Due Work !!!
-            </CardTitle>
-            <CardDescription className="text-center text-destructive">
-              You have not set your Store Information.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="default">Update Store</Button>
-              </SheetTrigger>
+    <Suspense fallback={<Loader />}>
+      <PageContainer pageTitle={"Dashboard"}>
+        <Statistics />
+        {host.startsWith("vendor.") && !authUser?.store && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center text-destructive">
+                Due Work !!!
+              </CardTitle>
+              <CardDescription className="text-center text-destructive">
+                You have not set your Store Information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="default">Update Store</Button>
+                </SheetTrigger>
 
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle className="text-2xl font-bold">
-                    Store Information
-                  </SheetTitle>
-                </SheetHeader>
-                <SetBusinessAndEmailForm />
-              </SheetContent>
-            </Sheet>
-          </CardContent>
-        </Card>
-      )}
-    </PageContainer>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle className="text-2xl font-bold">
+                      Store Information
+                    </SheetTitle>
+                  </SheetHeader>
+                  <SetBusinessAndEmailForm />
+                </SheetContent>
+              </Sheet>
+            </CardContent>
+          </Card>
+        )}
+      </PageContainer>
+    </Suspense>
   );
 }
 

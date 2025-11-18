@@ -1,55 +1,49 @@
 "use server";
 
-import {
-  TSessionUser,
-  TSessionUserWithToken,
-} from "@/modules/auth/domain/schemas/UserSchema";
-import { getTokenExpirationDate } from "@/modules/core/lib/utils.index";
+import { TSessionUserWithToken } from "@/modules/auth/domain/schemas/UserSchema";
 import { jwtVerify, SignJWT } from "jose";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
 
+interface IDeleteSession {
+  actionBeforeDeleteCookieCallback:
+    | ((store: ReadonlyRequestCookies) => Promise<void>)
+    | undefined;
+}
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
-export async function getSessionPayload() {
-  const cookieStore = await cookies();
-
+export const getCookieStore = async () => cookies();
+async function getSessionCookieEncrypted(
+  cookieStore: ReadonlyRequestCookies | undefined,
+) {
+  if (!cookieStore) return null;
   const session = cookieStore.get("session")?.value;
   if (!session) return null;
-  const payload = await decrypt(session);
+  return session;
+}
+
+export async function getSessionDecrypted(
+  cookieStore: ReadonlyRequestCookies | undefined,
+) {
+  if (!cookieStore) return null;
+  const sessionCookie = await getSessionCookieEncrypted(cookieStore);
+  if (!sessionCookie) return null;
+  const payload = await decrypt(sessionCookie);
   if (!payload) return null;
   return payload;
 }
-export async function updateSessionWithUser(user: TSessionUser): Promise<void> {
-  try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get("session");
-    const decodedSession = await decrypt(session?.value);
-    if (!decodedSession) {
-      throw new Error("Could not update session without token session");
-    }
-    const encryptedUser = await new SignJWT({ ...decodedSession, ...user })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime(getTokenExpirationDate())
-      .sign(encodedKey);
-
-    cookieStore.set("session", encryptedUser, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      expires: getTokenExpirationDate(),
-      sameSite: "strict",
-      path: "/",
-    });
-  } catch (error) {
-    throw error;
-  }
-}
-export async function createTokenSession(token: string): Promise<void> {
+export async function createAuthCookieSession({
+  token,
+  userUUID,
+}: {
+  token: string;
+  userUUID: string | null;
+}): Promise<void> {
   try {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    const session = await new SignJWT({ token, expiresAt })
+    const session = await new SignJWT({ token, userUUID, expiresAt })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("7d")
@@ -64,13 +58,20 @@ export async function createTokenSession(token: string): Promise<void> {
       path: "/",
     });
   } catch (error) {
+    console.log("cookie storing error: ", error);
     throw error;
   }
 }
 
-export async function deleteSession(): Promise<void> {
-  const cookieStore = await cookies();
+export async function deleteSession({
+  actionBeforeDeleteCookieCallback,
+}: IDeleteSession): Promise<void> {
+  const cookieStore = await getCookieStore();
   try {
+    // Attempt to execute some task before deleting cookie
+    if (actionBeforeDeleteCookieCallback !== undefined) {
+      await actionBeforeDeleteCookieCallback(cookieStore);
+    }
     // Attempt standard deletion first (no domain)
     cookieStore.delete("session");
 

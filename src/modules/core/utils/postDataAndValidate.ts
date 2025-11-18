@@ -26,13 +26,16 @@ export default async function postDataAndValidate<TData, TResponse>(
 
   if (!parsed.success) {
     const issues = formattedIssues(parsed.error.issues);
-    console.log("postDataAndValidate", issues);
+    console.log(
+      "schema validation error on post data: ",
+      issues,
+      endpoint.path,
+    );
     throw new Error("API response schema validation failed");
   }
   const { payload } = parsed.data.data;
   if (payload === null) {
     throw new Error("API returned null payload");
   }
-  console.log("postDataAndValidate", payload);
   return payload;
 }

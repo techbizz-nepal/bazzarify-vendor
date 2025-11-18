@@ -1,11 +1,12 @@
 "use server";
 
-import StoreCreatePayloadSchema from "@/modules/auth/domain/schemas/payloads/StoreCreatePayloadSchema";
-import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
 import {
-  getSessionPayload,
-  updateSessionWithUser,
-} from "@/modules/core/lib/utils.session";
+  getAuthUser,
+  getSessionUserUUID,
+  setAuthUser,
+} from "@/modules/auth/data/lib/auth-lib";
+import StoreCreatePayloadSchema from "@/modules/auth/domain/schemas/payloads/StoreCreatePayloadSchema";
+import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { handleError } from "@/modules/core/utils/jsonResponse.utils";
 import postDataAndValidate from "@/modules/core/utils/postDataAndValidate";
 import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
@@ -14,22 +15,27 @@ export const actionSetBusinessAndEmail = async (
   data: BusinessAndEmailFormValues,
 ) => {
   try {
-    const sessionPayload = await getSessionPayload();
-    if (!sessionPayload) {
-      throw new Error("Session does not exist");
+    const userUUID = await getSessionUserUUID(await getCookieStore());
+    if (!userUUID) {
+      throw new Error("no userUUID on action set business: ");
+    }
+    const authUserRedis = await getAuthUser(userUUID);
+    if ("error" in authUserRedis) {
+      const msg = "authUser from redis fail: ";
+      console.error(msg, authUserRedis.error);
+      throw new Error(msg);
     }
 
     const response = await postDataAndValidate(
-      { module: "vendor", path: `vendor/${sessionPayload.uuid}/stores` },
+      { module: "vendor", path: `vendor/${authUserRedis.uuid}/stores` },
       data,
       StoreCreatePayloadSchema,
       "Unable to create store.",
     );
-    const sessionUser = {
-      ...sessionPayload,
+    await setAuthUser(userUUID, {
+      ...authUserRedis,
       store: response.store,
-    } as TSessionUser;
-    await updateSessionWithUser(sessionUser);
+    });
     return response.store;
   } catch (e) {
     return handleError(e);
