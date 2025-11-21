@@ -56,6 +56,7 @@ const RegistrationRequest = ({ form, onSubmit }: IRegistrationRequest) => (
         />
         <ThemedButton
           name="channel"
+          type="submit"
           value={OTPChannel.sms.value}
           className="text-md border-primary text-primary w-full cursor-pointer border bg-transparent py-6 hover:text-white"
         >

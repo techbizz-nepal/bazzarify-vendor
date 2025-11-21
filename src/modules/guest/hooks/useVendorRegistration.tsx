@@ -34,7 +34,7 @@ export default function useVendorRegistration(router: AppRouterInstance) {
       return router.replace("/");
     }
   }, [router, session]);
-  const [registrationPhone, setRegistrationPhone] = useState("");
+  const [requestVerificationPhone, setRegistrationPhone] = useState("");
   const registrationRequestForm = useForm<RegistrationRequestFormValues>({
     resolver: zodResolver(RegistrationRequestFormSchema),
     defaultValues: {
@@ -45,7 +45,7 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     useForm<RegistrationVerificationFormValues>({
       resolver: zodResolver(RegistrationVerificationFormSchema),
       defaultValues: {
-        phone: registrationPhone,
+        phone: requestVerificationPhone,
         otp: undefined,
         password: "",
         password_confirmation: "",
@@ -65,14 +65,16 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     data: RegistrationRequestFormValues,
     e: BaseSyntheticEvent | undefined,
   ) => {
+    e?.preventDefault();
     if (!(e?.nativeEvent instanceof SubmitEvent)) return;
     const submitter = e.nativeEvent.submitter as HTMLButtonElement;
     const channel: string = submitter.value;
     actionRequestRegistration({ ...data, channel })
       .then((res) => {
         if (res.data.message !== "success") {
-          registrationRequestForm.reset();
+          // registrationRequestForm.reset();
           console.log("response request registration: ", res.metaData.error);
+          // return toast.error(res.metaData.error);
           return toast(res.metaData.error || "Unknown error", errorOptions);
         }
         setRegistrationPhone(registrationRequestForm.getValues("phone"));
@@ -111,9 +113,9 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     registrationRequestForm,
     registrationRequestVerificationForm,
     businessAndEmailForm,
+    requestVerificationPhone,
     handleRequestRegistration,
     handleRegistrationVerification,
     handleSetBusinessAndEmailSubmit,
-    registrationPhone,
   };
 }

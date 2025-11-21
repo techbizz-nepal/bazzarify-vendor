@@ -33,9 +33,9 @@ export default function RootLayout({
           <QueryProvider>
             <CookieConsentBanner />
             {children}
-            <Toaster richColors={true} closeButton={true} />
           </QueryProvider>
         </SessionProvider>
+        <Toaster richColors={true} closeButton={true} />
       </body>
     </html>
   );
