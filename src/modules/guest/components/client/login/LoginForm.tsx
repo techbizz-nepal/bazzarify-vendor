@@ -35,7 +35,7 @@ export default function LoginForm() {
       process.env.NODE_ENV === "development"
         ? {
             ...data,
-            credential: "gracysusant@gmail.com",
+            credential: "techbizznepal@gmail.com",
             password: "H@nds0me1522",
           }
         : { ...data };

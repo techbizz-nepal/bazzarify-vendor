@@ -107,7 +107,13 @@ export default function useVendorRegistration(router: AppRouterInstance) {
 
   const handleSetBusinessAndEmailSubmit = (data: BusinessAndEmailFormValues) =>
     actionSetBusinessAndEmail(data)
-      .then((r) => r !== undefined && r !== null && router.replace("/"))
+      .then((r) => {
+        if ("metaData" in r && r?.metaData?.error) {
+          toast.error(r?.metaData?.error);
+          return;
+        }
+        r !== undefined && r !== null && router.replace("/");
+      })
       .catch((error) => console.log(error));
   return {
     registrationRequestForm,

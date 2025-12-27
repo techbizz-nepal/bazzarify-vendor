@@ -19,7 +19,7 @@ export default async function postDataAndValidate<TData, TResponse>(
   try {
     upstream = await instance.post(endpoint.path, data);
   } catch (error) {
-    console.error("postDataAndValidate error", error);
+    console.error("request error");
     throw new Error(errorMessage);
   }
   const parsed = ApiResponseSchema(responseSchema).safeParse(upstream.data);
@@ -33,9 +33,10 @@ export default async function postDataAndValidate<TData, TResponse>(
     );
     throw new Error("API response schema validation failed");
   }
-  const { payload } = parsed.data.data;
-  if (payload === null) {
-    throw new Error("API returned null payload");
+  const { data: payloadData, metaData } = parsed.data;
+
+  if (payloadData.payload === null || metaData.error) {
+    throw new Error(metaData.error.toString() || "API returned null payload");
   }
-  return payload;
+  return payloadData.payload;
 }

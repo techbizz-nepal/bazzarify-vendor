@@ -6,8 +6,8 @@ import {
   setAuthUser,
 } from "@/modules/auth/data/lib/auth-lib";
 import StoreCreatePayloadSchema from "@/modules/auth/domain/schemas/payloads/StoreCreatePayloadSchema";
+import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
-import { handleError } from "@/modules/core/utils/jsonResponse.utils";
 import postDataAndValidate from "@/modules/core/utils/postDataAndValidate";
 import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
 
@@ -26,18 +26,22 @@ export const actionSetBusinessAndEmail = async (
       throw new Error(msg);
     }
 
-    const response = await postDataAndValidate(
-      { module: "vendor", path: `vendor/${authUserRedis.uuid}/stores` },
-      data,
-      StoreCreatePayloadSchema,
-      "Unable to create store.",
-    );
-    await setAuthUser(userUUID, {
-      ...authUserRedis,
-      store: response.store,
-    });
-    return response.store;
+    try {
+      const response = await postDataAndValidate(
+        { module: "vendor", path: `vendor/${authUserRedis.uuid}/stores` },
+        data,
+        StoreCreatePayloadSchema,
+        "Unable to create store.",
+      );
+      await setAuthUser(userUUID, {
+        ...authUserRedis,
+        store: response.store,
+      });
+      return response.store;
+    } catch (e) {
+      return handleRemoteError(e);
+    }
   } catch (e) {
-    return handleError(e);
+    return handleRemoteError(e);
   }
 };
