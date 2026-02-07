@@ -81,7 +81,7 @@ export const CartItem = OrderItemSchema.pick({
   uuid: true,
   name: true,
   sku: true,
-  variant_attrs: true,
+  variant_attributes: true,
   unit_price: true,
   row_discount: true,
   row_tax: true,
@@ -96,8 +96,8 @@ export const CartMeta = OrderSchema.pick({
   tax_total: true,
   shipping_total: true,
   grand_total: true,
-  items_count: true,
-  items_quantity: true,
+  item_count: true,
+  item_quantity: true,
 }).strict();
 
 export const Cart = z
@@ -111,7 +111,7 @@ export const Cart = z
 export const CartItemToUpdateQuantitySchema = CartItem.pick({
   line_id: true,
   uuid: true,
-  variant_attrs: true,
+  variant_attributes: true,
   qty_ordered: true,
 });
 export const OrderTotalsSchema = OrderSchema.pick({

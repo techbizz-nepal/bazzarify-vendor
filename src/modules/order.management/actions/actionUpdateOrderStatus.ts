@@ -22,7 +22,6 @@ export const actionUpdateOrderStatus = async (
     if (responseData.metaData.error) {
       return { error: responseData.metaData.error };
     }
-    console.log("success fetch order: ", responseData.data.payload.order);
     return responseData.data.payload.order;
   } catch (error) {
     if (isAxiosError(error)) {

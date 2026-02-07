@@ -35,9 +35,12 @@ import useOrderShow from "@/modules/order.management/hooks/order/useOrderShow";
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
 
 export default function Show({ order }: { order: TOrder }) {
-  const { isPending, optimisticStatus, handleOrderStatusChange } = useOrderShow(
-    { order },
-  );
+  const {
+    isPending,
+    optimisticStatus,
+    statusOptions,
+    handleOrderStatusChange,
+  } = useOrderShow({ order });
   return (
     <Card>
       <CardHeader>
@@ -54,41 +57,28 @@ export default function Show({ order }: { order: TOrder }) {
             <CardAction>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="default">Update Status</Button>
+                  <Button variant="default" disabled={!statusOptions.length}>
+                    Update Status
+                  </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-32 flex flex-col space-y-3">
-                  <Button
-                    value={"shipped"}
-                    data-note="Order marked as shipped by vendor."
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Shipped
-                  </Button>
-                  <Button
-                    value="delivered"
-                    data-note="Order marked as delivered by vendor."
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Delivered
-                  </Button>
-                  <Button
-                    value={"completed"}
-                    data-note="Order marked as completed by vendor."
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Completed
-                  </Button>
-                  <Button
-                    value="returned"
-                    data-note="Order marked as returned by vendor."
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Returned
-                  </Button>
+                <PopoverContent className="w-full flex flex-col space-y-3">
+                  {statusOptions.length ? (
+                    statusOptions.map((status) => (
+                      <Button
+                        key={status.code}
+                        value={status.code}
+                        data-note={`Order marked as ${status.label.toLowerCase()} by vendor.`}
+                        onClick={handleOrderStatusChange}
+                        variant="outline"
+                      >
+                        {status.label}
+                      </Button>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No statuses available.
+                    </p>
+                  )}
                 </PopoverContent>
               </Popover>
             </CardAction>

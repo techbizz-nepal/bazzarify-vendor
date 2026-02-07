@@ -1,3 +1,8 @@
+import { actionUpdateOrderStatus } from "@/modules/order.management/actions/actionUpdateOrderStatus";
+import {
+  actionGetOrderStatuses,
+  TOrderStatusOption,
+} from "@/modules/order.management/actions/actionGetOrderStatuses";
 import { TQueryParams } from "@/modules/core/domain/schemas/QueryParams";
 import { OrderResponse } from "@/modules/core/types/dynamicTable";
 import appendQueryParams from "@/modules/core/utils/dynamicTable/appendQueryParams";
@@ -8,7 +13,9 @@ export default function useOrderIndex() {
   const [orderResponse, setOrderResponse] = useState<OrderResponse | null>(
     null,
   );
+  const [statusOptions, setStatusOptions] = useState<TOrderStatusOption[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [isUpdatingStatus, startUpdateTransition] = useTransition();
   const [queryParams, setQueryParams] = useState<TQueryParams>({
     filters: {
       payment_method: "null",
@@ -23,6 +30,15 @@ export default function useOrderIndex() {
       () => undefined,
     );
   }, [queryParams]);
+  useEffect(() => {
+    startTransition(async () => {
+      const result = await actionGetOrderStatuses();
+      if ("error" in result || !Array.isArray(result) || !result.length) {
+        return;
+      }
+      setStatusOptions(result);
+    });
+  }, []);
   const handleFilterSubmit = async () => {
     await submitToApi(appendQueryParams(new FormData(), queryParams));
   };
@@ -54,9 +70,30 @@ export default function useOrderIndex() {
       }
     });
   }
+  const handleRowOrderStatusChange = async (
+    orderUuid: string,
+    statusCode: string,
+    statusLabel: string,
+  ) => {
+    startUpdateTransition(async () => {
+      const result = await actionUpdateOrderStatus(
+        orderUuid,
+        statusCode,
+        `Order marked as ${statusLabel.toLowerCase()} by vendor.`,
+      );
+      if ("error" in result) {
+        console.error("Error updating order status:", result.error);
+        return;
+      }
+      await submitToApi(appendQueryParams(new FormData(), queryParams));
+    });
+  };
   return {
     orderResponse,
     isPending,
+    isUpdatingStatus,
+    statusOptions,
+    handleRowOrderStatusChange,
     handleFilterSubmit,
     setQueryParams,
     queryParams,

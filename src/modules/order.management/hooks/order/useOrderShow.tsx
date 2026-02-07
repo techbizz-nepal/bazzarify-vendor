@@ -1,14 +1,36 @@
+import {
+  actionGetOrderStatuses,
+  TOrderStatusOption,
+} from "@/modules/order.management/actions/actionGetOrderStatuses";
 import { actionUpdateOrderStatus } from "@/modules/order.management/actions/actionUpdateOrderStatus";
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
-import { SyntheticEvent, useOptimistic, useState, useTransition } from "react";
+import {
+  SyntheticEvent,
+  useEffect,
+  useOptimistic,
+  useState,
+  useTransition,
+} from "react";
 
 export default function useOrderShow({ order }: { order: TOrder }) {
   const [orderStatus, setOrderStatus] = useState(order.status);
+  const [statusOptions, setStatusOptions] = useState<TOrderStatusOption[]>([]);
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(
     orderStatus,
     (currentState, optimisticValue) => optimisticValue as string,
   );
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    startTransition(async () => {
+      const result = await actionGetOrderStatuses();
+      if ("error" in result || !Array.isArray(result) || !result.length) {
+        return;
+      }
+      setStatusOptions(result);
+    });
+  }, []);
+
   const handleOrderStatusChange = (e: SyntheticEvent<HTMLButtonElement>) => {
     const updatedStatus = e.currentTarget.value;
     const note = e.currentTarget.dataset.note;
@@ -37,6 +59,7 @@ export default function useOrderShow({ order }: { order: TOrder }) {
   return {
     optimisticStatus,
     isPending,
+    statusOptions,
     handleOrderStatusChange,
   };
 }

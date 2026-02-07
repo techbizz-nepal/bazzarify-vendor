@@ -23,11 +23,27 @@ export default function Index() {
     queryParams,
     orderResponse,
     isPending,
+    isUpdatingStatus,
+    statusOptions,
+    handleRowOrderStatusChange,
     handleFilterSubmit,
     handleNextPage,
     handlePrevPage,
   } = useOrderIndex();
   const { filters } = queryParams;
+  const statusFilterOptions = [
+    { id: "all", label: "All", value: "null" },
+    ...statusOptions.map((status) => ({
+      id: status.code,
+      label: status.label,
+      value: status.code,
+    })),
+  ];
+  const columns = orderIndexColumns({
+    statusOptions,
+    isUpdatingStatus,
+    onUpdateStatus: handleRowOrderStatusChange,
+  });
   return (
     <PageContainer pageTitle="Manage Orders">
       <Card>
@@ -66,15 +82,7 @@ export default function Index() {
                     filters: { ...prev.filters, status: value },
                   }))
                 }
-                options={[
-                  { id: "all", label: "All", value: "null" },
-                  { id: "confirmed", label: "Confirmed", value: "confirmed" },
-                  { id: "shipped", label: "Shipped", value: "shipped" },
-                  { id: "delivered", label: "Delivered", value: "delivered" },
-                  { id: "completed", label: "Completed", value: "completed" },
-                  { id: "cancelled", label: "Cancelled", value: "cancelled" },
-                  { id: "returned", label: "Returned", value: "returned" },
-                ]}
+                options={statusFilterOptions}
               />
               <DateFilter
                 label="Placed Date Range"
@@ -134,7 +142,7 @@ export default function Index() {
             </div>
           ) : (
             <DynamicTable
-              columns={orderIndexColumns}
+              columns={columns}
               data={orderResponse?.data || []}
               loading={isPending}
               emptyMessage="No orders found. Try adjusting your filters."
