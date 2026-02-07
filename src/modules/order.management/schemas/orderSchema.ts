@@ -60,6 +60,14 @@ export const OrderSchema = z
     placed_at: z.iso.datetime(),
     cancelled_at: z.iso.datetime().nullable().optional(),
     completed_at: z.iso.datetime().nullable().optional(),
+    status_history: z
+      .array(z.record(z.string(), z.unknown()))
+      .nullable()
+      .optional(),
+    status_histories: z
+      .array(z.record(z.string(), z.unknown()))
+      .nullable()
+      .optional(),
     created_at: z.iso.datetime().optional().optional(),
     updated_at: z.iso.datetime().optional().optional(),
     deleted_at: z.iso.datetime().nullable().optional(),

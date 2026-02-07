@@ -59,6 +59,7 @@ export default function Show({ order }: { order: TOrder }) {
                 <PopoverContent className="w-32 flex flex-col space-y-3">
                   <Button
                     value={"shipped"}
+                    data-note="Order marked as shipped by vendor."
                     onClick={handleOrderStatusChange}
                     variant="outline"
                   >
@@ -66,6 +67,7 @@ export default function Show({ order }: { order: TOrder }) {
                   </Button>
                   <Button
                     value="delivered"
+                    data-note="Order marked as delivered by vendor."
                     onClick={handleOrderStatusChange}
                     variant="outline"
                   >
@@ -73,6 +75,7 @@ export default function Show({ order }: { order: TOrder }) {
                   </Button>
                   <Button
                     value={"completed"}
+                    data-note="Order marked as completed by vendor."
                     onClick={handleOrderStatusChange}
                     variant="outline"
                   >
@@ -80,6 +83,7 @@ export default function Show({ order }: { order: TOrder }) {
                   </Button>
                   <Button
                     value="returned"
+                    data-note="Order marked as returned by vendor."
                     onClick={handleOrderStatusChange}
                     variant="outline"
                   >

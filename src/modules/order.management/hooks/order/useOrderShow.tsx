@@ -11,11 +11,16 @@ export default function useOrderShow({ order }: { order: TOrder }) {
   const [isPending, startTransition] = useTransition();
   const handleOrderStatusChange = (e: SyntheticEvent<HTMLButtonElement>) => {
     const updatedStatus = e.currentTarget.value;
+    const note = e.currentTarget.dataset.note;
 
     startTransition(async () => {
       setOptimisticStatus(updatedStatus);
       try {
-        const result = await actionUpdateOrderStatus(order.uuid, updatedStatus);
+        const result = await actionUpdateOrderStatus(
+          order.uuid,
+          updatedStatus,
+          note,
+        );
         if (result.error) {
           console.error("Error updating status:", result.error);
         } else {
