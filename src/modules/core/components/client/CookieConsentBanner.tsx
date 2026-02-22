@@ -8,19 +8,20 @@ import { getCookie, setCookie } from "@/modules/core/lib/utils.cookies.client";
 import { useEffect, useState } from "react";
 
 export default function CookieConsentBanner() {
-  const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    const existing = getCookie(COOKIE_CONSENT_NAME);
-    if (!existing) {
-      setVisible(true);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
   }, []);
 
   const choose = (value: CookieConsentValue) => {
     setCookie(COOKIE_CONSENT_NAME, value);
-    setVisible(false);
   };
 
+  if (!mounted) return null;
+
+  const visible = !getCookie(COOKIE_CONSENT_NAME);
   if (!visible) return null;
 
   return (

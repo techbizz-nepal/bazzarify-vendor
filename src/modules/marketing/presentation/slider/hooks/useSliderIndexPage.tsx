@@ -4,7 +4,7 @@ import { TQueryParams } from "@/modules/core/domain/schemas/QueryParams";
 import appendQueryParams from "@/modules/core/utils/dynamicTable/appendQueryParams";
 import { actionGetSliders } from "@/modules/marketing/domain/slider/actions/actionGetSliders";
 import { TSliderWithImagesResponse } from "@/modules/marketing/domain/slider/schemas/SliderIndexResponsePayload";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 export default function useSliderIndexPage() {
   const [sliderResponse, setSliderResponse] =
@@ -19,11 +19,26 @@ export default function useSliderIndexPage() {
     page: 1,
   });
 
+  const submitToApi = useCallback(
+    async (formData: FormData) => {
+      startTransition(async () => {
+        try {
+          const result = await actionGetSliders(formData);
+          if (result.error) {
+            console.error("Error fetching orders:", result.error);
+          } else {
+            setSliderResponse(result.sliders);
+          }
+        } catch (error) {
+          console.error("Error fetching orders:", error);
+        }
+      });
+    },
+    [startTransition],
+  );
   useEffect(() => {
-    submitToApi(appendQueryParams(new FormData(), queryParams)).then(
-      () => undefined,
-    );
-  }, [queryParams]);
+    void submitToApi(appendQueryParams(new FormData(), queryParams));
+  }, [queryParams, submitToApi]);
   const handleFilterSubmit = async () => {
     await submitToApi(appendQueryParams(new FormData(), queryParams));
   };
@@ -41,20 +56,6 @@ export default function useSliderIndexPage() {
     };
     setQueryParams(updateParams);
   };
-  async function submitToApi(formData: FormData) {
-    startTransition(async () => {
-      try {
-        const result = await actionGetSliders(formData);
-        if (result.error) {
-          console.error("Error fetching orders:", result.error);
-        } else {
-          setSliderResponse(result.sliders);
-        }
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    });
-  }
   return {
     sliderResponse,
     isPending,

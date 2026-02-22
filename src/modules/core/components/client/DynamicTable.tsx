@@ -10,15 +10,22 @@ import {
 } from "@/components/ui/table";
 import { ReactNode } from "react";
 
-export interface TableColumn<T = any> {
+type BivariantCallback<Args extends unknown[], Return> = {
+  bivarianceHack(...args: Args): Return;
+}["bivarianceHack"];
+
+export interface TableColumn<T = unknown> {
   key: string;
   title: string;
-  render?: (value: any, record: T, index: number) => ReactNode;
+  render?: BivariantCallback<
+    [value: unknown, record: T, index: number],
+    ReactNode
+  >;
   width?: string;
   align?: "left" | "center" | "right";
 }
 
-export interface DynamicTableProps<T = any> {
+export interface DynamicTableProps<T = unknown> {
   columns: TableColumn<T>[];
   data: T[];
   loading?: boolean;
@@ -26,7 +33,7 @@ export interface DynamicTableProps<T = any> {
   className?: string;
 }
 
-export default function DynamicTable<T = any>({
+export default function DynamicTable<T = unknown>({
   columns,
   data,
   loading = false,
@@ -37,20 +44,41 @@ export default function DynamicTable<T = any>({
     column: TableColumn<T>,
     record: T,
     index: number,
-  ) => {
+  ): ReactNode => {
     const value = getNestedValue(record, column.key);
 
     if (column.render) {
       return column.render(value, record, index);
     }
 
-    return value ?? "-";
+    return normalizeCellValue(value);
   };
 
-  const getNestedValue = (obj: any, path: string) => {
+  const getNestedValue = (obj: unknown, path: string): unknown => {
     return path.split(".").reduce((current, key) => {
-      return current && current[key] !== undefined ? current[key] : null;
+      if (
+        current &&
+        typeof current === "object" &&
+        key in (current as Record<string, unknown>)
+      ) {
+        return (current as Record<string, unknown>)[key];
+      }
+      return null;
     }, obj);
+  };
+
+  const normalizeCellValue = (value: unknown): ReactNode => {
+    if (value === null || value === undefined) {
+      return "-";
+    }
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
+      return value;
+    }
+    return JSON.stringify(value);
   };
 
   if (loading) {

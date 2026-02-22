@@ -2,7 +2,7 @@ import { IRoute } from "@/modules/core";
 
 const category: IRoute["category"] = {
   index: {
-    path: "/product-management/categories",
+    path: "/product-management/categories/assigned",
   },
   show: {
     path: "/product-management/categories/:slug",

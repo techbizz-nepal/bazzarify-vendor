@@ -16,7 +16,7 @@ import CategoryAttributesCard from "@/modules/product.management/ui/CategoryAttr
 import CategoryCard from "@/modules/product.management/ui/CategoryCard";
 import CategorySpecificationsCard from "@/modules/product.management/ui/CategorySpecificationsCard";
 import { useQueries } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function View({ slug }: { slug: string }) {
@@ -53,34 +53,32 @@ export default function View({ slug }: { slug: string }) {
       .specifications as IPaginatedData<TSpecification[]>,
   };
   // states
-  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
+  const [selectedAttributes, setSelectedAttributes] = useState<string[] | null>(
+    null,
+  );
   const [selectedSpecifications, setSelectedSpecifications] = useState<
-    string[]
-  >([]);
-  useEffect(() => {
-    if (response.category?.attributes) {
-      setSelectedAttributes(response.category.attributes);
-    }
-    if (response.category?.specifications) {
-      setSelectedSpecifications(response.category.specifications);
-    }
-  }, [response.category]);
+    string[] | null
+  >(null);
+  const effectiveSelectedAttributes =
+    selectedAttributes ?? response.category?.attributes ?? [];
+  const effectiveSelectedSpecifications =
+    selectedSpecifications ?? response.category?.specifications ?? [];
 
   const handleAttributeChange = (uuid: string) => {
     setSelectedAttributes((prevState) => {
-      if (prevState) {
-        return prevState?.includes(uuid)
-          ? prevState.filter((id) => id !== uuid)
-          : [...prevState, uuid];
-      }
-      return [];
+      const current = prevState ?? response.category?.attributes ?? [];
+      return current.includes(uuid)
+        ? current.filter((id) => id !== uuid)
+        : [...current, uuid];
     });
   };
   const handleSpecificationChange = (specId: string) => {
     setSelectedSpecifications((prevState) =>
-      prevState.includes(specId)
-        ? prevState.filter((id) => id !== specId)
-        : [...prevState, specId],
+      (prevState ?? response.category?.specifications ?? []).includes(specId)
+        ? (prevState ?? response.category?.specifications ?? []).filter(
+            (id) => id !== specId,
+          )
+        : [...(prevState ?? response.category?.specifications ?? []), specId],
     );
   };
 
@@ -94,10 +92,10 @@ export default function View({ slug }: { slug: string }) {
   const handleUpdateCategory = (entity: string) => {
     let body = null;
     if (entity === "attributes") {
-      body = { attributes: selectedAttributes };
+      body = { attributes: effectiveSelectedAttributes };
     }
     if (entity === "specifications") {
-      body = { specifications: selectedSpecifications };
+      body = { specifications: effectiveSelectedSpecifications };
     }
     if (!body) {
       return;
@@ -123,7 +121,7 @@ export default function View({ slug }: { slug: string }) {
           !("error" in response.attributes) ? (
             <CategoryAttributesCard
               attributes={response.attributes.attributes.data}
-              selectedIds={selectedAttributes}
+              selectedIds={effectiveSelectedAttributes}
               onAttributeChange={handleAttributeChange}
               onUpdateAction={handleUpdateCategory}
             />
@@ -134,7 +132,7 @@ export default function View({ slug }: { slug: string }) {
             <CategorySpecificationsCard
               specifications={response.specifications?.data}
               onSpecificationChange={handleSpecificationChange}
-              selectedIds={selectedSpecifications}
+              selectedIds={effectiveSelectedSpecifications}
               onNextPage={handleSpecificationNextPage}
               onPreviousPage={handleSpecificationPrevPage}
               onPerPageChange={handleSpecificationPerPage}

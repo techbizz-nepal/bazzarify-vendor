@@ -16,6 +16,15 @@ import { AUTH_ROUTES } from "@/modules/guest/config/routes";
 import { LoginFormValues } from "@/modules/guest/config/schemas/login.form";
 import { AxiosResponse } from "axios";
 
+type AuthSuccessResponse = {
+  data?: {
+    message?: string;
+    payload?: {
+      token?: string;
+    };
+  };
+};
+
 export const actionLogin = async (data: LoginFormValues) => {
   let apiResponse: AxiosResponse<unknown>;
   try {
@@ -23,8 +32,8 @@ export const actionLogin = async (data: LoginFormValues) => {
       AUTH_ROUTES.login.loginCredentials.path,
       data,
     );
-    // @ts-ignore
-    if (apiResponse.data.data.message !== "success") {
+    const authResponse = apiResponse.data as AuthSuccessResponse;
+    if (authResponse.data?.message !== "success") {
       return handleRemoteError(
         new Error(
           ["Invalid login response", JSON.stringify(apiResponse.data)].join(
@@ -33,8 +42,10 @@ export const actionLogin = async (data: LoginFormValues) => {
         ),
       );
     }
-    // @ts-ignore
-    const tokenPlainText = apiResponse.data.data.payload.token;
+    const tokenPlainText = authResponse.data?.payload?.token;
+    if (!tokenPlainText) {
+      return handleRemoteError(new Error("Missing auth token from login"));
+    }
     await createAuthCookieSession({
       token: tokenPlainText,
       userUUID: null,

@@ -10,6 +10,15 @@ import { AUTH_ROUTES } from "@/modules/guest/config/routes";
 import { RegistrationRequestFormValues } from "@/modules/guest/config/schemas/registrationRequestForm";
 import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
 
+type AuthSuccessResponse = {
+  data?: {
+    message?: string;
+    payload?: {
+      token?: string;
+    };
+  };
+};
+
 export const actionRequestRegistration = async (
   data: RegistrationRequestFormValues,
 ) => {
@@ -32,12 +41,14 @@ export const actionVerifyRegistration = async (
       AUTH_ROUTES.register.verifySignup.path,
       data,
     );
-    // @ts-ignore
-    if (response.data.data.message !== "success") {
+    const authResponse = response.data as AuthSuccessResponse;
+    if (authResponse.data?.message !== "success") {
       return handleRemoteError(new Error("Invalid login response"));
     }
-    // @ts-ignore
-    const tokenPlainText = response.data.data.payload.token;
+    const tokenPlainText = authResponse.data?.payload?.token;
+    if (!tokenPlainText) {
+      return handleRemoteError(new Error("Missing auth token from signup"));
+    }
     await createAuthCookieSession({
       token: tokenPlainText,
       userUUID: null,

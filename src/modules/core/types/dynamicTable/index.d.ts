@@ -21,8 +21,11 @@ interface OrderData {
   shipping_information: never;
   buyer_uuid: string;
   buyer_type: string;
-  items: any[];
-  buyer: any;
+  items: unknown[];
+  buyer: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
 }
 
 //TODO use existing order schemas

@@ -5,7 +5,7 @@ import {
 } from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { generateCombinations } from "@/modules/product.management/utils/generateCombinations";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 interface useVariantProps {
   variantSelections: Record<string, string[]>;
@@ -70,7 +70,7 @@ export default function useVariant({
       return next;
     });
   };
-  const combinations = useMemo(() => {
+  const combinations = (() => {
     const entries = Object.entries(variantSelections).filter(
       ([, values]) => values.length > 0,
     );
@@ -79,7 +79,7 @@ export default function useVariant({
       return entries[0][1].map((value) => [value]); // map to single-value combos
     }
     return generateCombinations(variantSelections); // default behavior for >1 attribute
-  }, [variantSelections]);
+  })();
 
   const handleVariantChange = <K extends keyof TVariant>(
     combo: string[],

@@ -13,7 +13,7 @@ import {
 import { validateImage } from "@/modules/product.management/utils/productForm";
 import { CirclePlus } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef } from "react";
 import { FaX } from "react-icons/fa6";
 import { toast } from "sonner";
 
@@ -32,13 +32,12 @@ type Props = {
 };
 
 function PreviewImage({ file }: { file: File }) {
-  const [url, setUrl] = useState<string>("");
+  const url = useMemo(() => URL.createObjectURL(file), [file]);
+
   useEffect(() => {
-    const objectUrl = URL.createObjectURL(file);
-    setUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [file]);
-  if (!url) return null;
+    return () => URL.revokeObjectURL(url);
+  }, [url]);
+
   return (
     <Image
       width={150}

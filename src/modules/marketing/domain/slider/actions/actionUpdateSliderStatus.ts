@@ -25,7 +25,7 @@ export const actionUpdateSliderStatus = async (
     console.log("success slider update: ", responseData.data.payload.order);
     return responseData.data.payload.slider;
   } catch (error) {
-    let msg = isAxiosError(error) ? error?.response?.data : error;
+    const msg = isAxiosError(error) ? error?.response?.data : error;
     console.log("error slider update: ", msg);
     return handleUnknownError(error);
   }

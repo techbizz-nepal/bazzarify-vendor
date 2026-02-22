@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // create-module.js
 const fs = require("fs");
 const path = require("path");

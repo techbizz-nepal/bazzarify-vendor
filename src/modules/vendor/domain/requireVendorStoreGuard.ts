@@ -1,0 +1,27 @@
+import "server-only";
+
+import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
+import { getCookieStore } from "@/modules/core/lib/utils.session";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+export async function requireVendorStoreGuard(): Promise<void> {
+  const host = (await headers()).get("host") || "";
+  if (!host.startsWith("vendor.")) {
+    return;
+  }
+
+  const userUUID = await getSessionUserUUID(await getCookieStore());
+  if (!userUUID) {
+    return;
+  }
+
+  const authUser = await getAuthUser(userUUID);
+  if (!authUser || "error" in authUser) {
+    return;
+  }
+
+  if (!authUser.store) {
+    redirect("/");
+  }
+}

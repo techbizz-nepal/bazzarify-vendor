@@ -40,11 +40,9 @@ export default function List({
       <CardContent>
         {isPending ? (
           <div className="flex flex-col items-center space-y-4">
-            {Array.from({ length: 15 }).map(() => (
+            {Array.from({ length: 15 }).map((_, index) => (
               <Skeleton
-                key={Math.random()
-                  .toString(36)
-                  .substring(2, 2 + 10)}
+                key={`slider-skeleton-${index}`}
                 className="h-4 w-full "
               />
             ))}
