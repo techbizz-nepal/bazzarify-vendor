@@ -9,20 +9,21 @@ import { useEffect, useState } from "react";
 
 export default function CookieConsentBanner() {
   const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+    const existing = getCookie(COOKIE_CONSENT_NAME);
+    setVisible(!existing);
   }, []);
 
   const choose = (value: CookieConsentValue) => {
     setCookie(COOKIE_CONSENT_NAME, value);
+    setVisible(false);
   };
 
-  if (!mounted) return null;
-
-  const visible = !getCookie(COOKIE_CONSENT_NAME);
-  if (!visible) return null;
+  if (!mounted || !visible) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-center p-4">
