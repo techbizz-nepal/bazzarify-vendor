@@ -33,6 +33,7 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ZodSafeParseResult } from "zod";
+import { fromZodIssues } from "@/modules/core/lib/utils.validationFeedback";
 
 export default function useUpdateProduct(
   productPayloadPromise: Promise<TEditProductPayload | IMetaData>,
@@ -297,9 +298,14 @@ export default function useUpdateProduct(
         box_items: productForm.box_items,
       });
     if (!validation.success) {
-      validation.error.issues.forEach((error) =>
-        toast.error(`${error.path} : ${error.message}`),
-      );
+      const feedback = fromZodIssues(validation.error.issues);
+      const firstFieldError = Object.entries(feedback.fieldErrors)[0];
+      if (firstFieldError) {
+        const [path, messages] = firstFieldError;
+        toast.error(`${path} : ${messages[0]}`);
+      } else {
+        toast.error(feedback.summary);
+      }
       return;
     }
     // Validate variants like create flow

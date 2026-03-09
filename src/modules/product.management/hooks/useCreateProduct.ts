@@ -20,6 +20,7 @@ import { omit } from "lodash-es";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
 import { toast } from "sonner";
+import { fromZodIssues } from "@/modules/core/lib/utils.validationFeedback";
 
 export default function useCreateProduct() {
   const router = useRouter();
@@ -107,11 +108,16 @@ export default function useCreateProduct() {
       variants: [...variants],
     });
     if (!productFormValidation.success) {
-      productFormValidation.error.issues.map((issue) =>
+      const feedback = fromZodIssues(productFormValidation.error.issues);
+      const firstFieldError = Object.entries(feedback.fieldErrors)[0];
+      if (firstFieldError) {
+        const [path, messages] = firstFieldError;
         toast.error(
-          `${toTitleCase(issue.path.join(",").replaceAll("_", " "))}: ${issue.message}`,
-        ),
-      );
+          `${toTitleCase(path.replaceAll(".", ", ").replaceAll("_", " "))}: ${messages[0]}`,
+        );
+      } else {
+        toast.error(feedback.summary);
+      }
 
       return;
     }

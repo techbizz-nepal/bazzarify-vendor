@@ -19,6 +19,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  applyValidationFeedback,
+  getValidationFeedback,
+} from "@/modules/core/lib/utils.validationFeedback";
 
 export default function LoginForm() {
   const form = useForm<LoginFormValues>({
@@ -43,12 +47,24 @@ export default function LoginForm() {
     actionLogin(loginData)
       .then((response) => {
         if (response?.metaData?.error) {
+          const feedback = getValidationFeedback(response);
+          if (feedback) {
+            applyValidationFeedback(form.setError, feedback);
+            toast.warning(feedback.summary);
+            return;
+          }
           toast.warning(response?.metaData?.error);
           return;
         }
         toast.success("Signing you in...");
       })
-      .catch(() => {
+      .catch((error) => {
+        const feedback = getValidationFeedback(error);
+        if (feedback) {
+          applyValidationFeedback(form.setError, feedback);
+          toast.error(feedback.summary);
+          return;
+        }
         toast.error("Cannot login");
       });
   }

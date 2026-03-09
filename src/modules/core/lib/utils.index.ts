@@ -3,34 +3,23 @@ import {
   SimplePaginationMeta,
   TURLSearchParams,
 } from "@/modules/core";
-import { AxiosError } from "axios";
 import { Duration, intervalToDuration } from "date-fns";
+import { normalizeRemoteFeedback } from "@/modules/core/lib/utils.feedback";
 
 export const phoneRegex = /^9\d{9}$/;
 export const handleRemoteError = (
   error: unknown,
   code: number | undefined = 500,
 ) => {
-  let message: string = "Something went wrong!";
-  let errorCode = code;
-  if (error instanceof AxiosError) {
-    message = error.response?.data?.metaData?.error;
-    errorCode = error.response?.data?.metaData?.errorCode;
-  }
-  if (error instanceof Error) {
-    console.log("error instance: ", error);
-    message = error.message;
-    errorCode = parseInt(error.name) || errorCode;
-  }
-  console.log("handling error: ", error);
+  const feedback = normalizeRemoteFeedback(error, "Something went wrong!");
   return {
     data: {
       payload: [],
       message: "",
     },
     metaData: {
-      error: message,
-      errorCode: errorCode,
+      error: feedback.error,
+      errorCode: feedback.errorCode ?? code,
     },
   };
 };
@@ -80,13 +69,7 @@ export function isValidJson(value: string) {
 }
 
 export function handleUnknownError(error: unknown): IMetaData {
-  if (error instanceof AxiosError) {
-    console.log("Axios error: ", error.response?.data || error.message);
-    return { error: error.code || "An unexpected error occurred" };
-  } else {
-    console.log("Unknown error: ", error);
-    return { error: "An unexpected error occurred" };
-  }
+  return normalizeRemoteFeedback(error, "An unexpected error occurred");
 }
 
 export function getDurationFromTimestamps(pastDate: Date) {

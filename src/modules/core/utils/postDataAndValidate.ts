@@ -1,5 +1,6 @@
 import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
+import { createRemoteFeedbackError } from "@/modules/core/lib/utils.feedback";
 import { formattedIssues } from "@/modules/core/utils/zod.util";
 import { z } from "zod";
 
@@ -19,8 +20,7 @@ export default async function postDataAndValidate<TData, TResponse>(
   try {
     upstream = await instance.post(endpoint.path, data);
   } catch (error) {
-    console.error("request error");
-    throw new Error(errorMessage);
+    throw createRemoteFeedbackError(error, errorMessage);
   }
   const parsed = ApiResponseSchema(responseSchema).safeParse(upstream.data);
 
@@ -31,12 +31,18 @@ export default async function postDataAndValidate<TData, TResponse>(
       issues,
       endpoint.path,
     );
-    throw new Error("API response schema validation failed");
+    throw createRemoteFeedbackError(
+      new Error("API response schema validation failed"),
+      "API response schema validation failed",
+    );
   }
   const { data: payloadData, metaData } = parsed.data;
 
   if (payloadData.payload === null || metaData.error) {
-    throw new Error(metaData.error.toString() || "API returned null payload");
+    throw createRemoteFeedbackError(
+      { metaData },
+      "API returned null payload",
+    );
   }
   return payloadData.payload;
 }

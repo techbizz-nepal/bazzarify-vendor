@@ -22,6 +22,10 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { BaseSyntheticEvent, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  applyValidationFeedback,
+  getValidationFeedback,
+} from "@/modules/core/lib/utils.validationFeedback";
 
 export default function useVendorRegistration(router: AppRouterInstance) {
   const sessionCtx = use(SessionContext);
@@ -72,9 +76,11 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     actionRequestRegistration({ ...data, channel })
       .then((res) => {
         if (res.data.message !== "success") {
-          // registrationRequestForm.reset();
-          console.log("response request registration: ", res.metaData.error);
-          // return toast.error(res.metaData.error);
+          const feedback = getValidationFeedback(res);
+          if (feedback) {
+            applyValidationFeedback(registrationRequestForm.setError, feedback);
+            return toast(feedback.summary, errorOptions);
+          }
           return toast(res.metaData.error || "Unknown error", errorOptions);
         }
         setRegistrationPhone(registrationRequestForm.getValues("phone"));
@@ -84,7 +90,12 @@ export default function useVendorRegistration(router: AppRouterInstance) {
         );
       })
       .catch((e) => {
-        console.log("recvd :", e);
+        const feedback = getValidationFeedback(e);
+        if (feedback) {
+          applyValidationFeedback(registrationRequestForm.setError, feedback);
+          toast.error(feedback.summary);
+          return;
+        }
         toast.error("Something went wrong on registration action!");
       });
   };
@@ -97,6 +108,15 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     actionVerifyRegistration(data)
       .then((res) => {
         if (res?.metaData?.error) {
+          const feedback = getValidationFeedback(res);
+          if (feedback) {
+            applyValidationFeedback(
+              registrationRequestVerificationForm.setError,
+              feedback,
+            );
+            toast.warning(feedback.summary);
+            return;
+          }
           toast.warning(res?.metaData?.error);
           return;
         }
@@ -109,6 +129,12 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     actionSetBusinessAndEmail(data)
       .then((r) => {
         if ("metaData" in r && r?.metaData?.error) {
+          const feedback = getValidationFeedback(r);
+          if (feedback) {
+            applyValidationFeedback(businessAndEmailForm.setError, feedback);
+            toast.error(feedback.summary);
+            return;
+          }
           toast.error(r?.metaData?.error);
           return;
         }
