@@ -1,15 +1,11 @@
 import { IMetaData } from "@/modules/core";
 import {
   TAttribute,
-  TAttributesIndexPayload,
   TCategory,
   TCategoryAncestors,
   TEditProductPayload,
   TProductForm,
-  TSpecificationsIndexPayload,
 } from "@/modules/product.management";
-import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
-import { actionViewCategorySpecifications } from "@/modules/product.management/actions/category";
 import { actionDelete as actionDeleteImage } from "@/modules/product.management/actions/image";
 import { actionUpdateProducts } from "@/modules/product.management/actions/product";
 import {
@@ -24,21 +20,18 @@ import useVariant from "@/modules/product.management/hooks/useVariant";
 import {
   fillSelectedProductVariantData,
 } from "@/modules/product.management/utils/editProductUtils";
-import {
-  appendFormDataVariants,
-  createVariantsPayload,
-  updateVariantValidity,
-} from "@/modules/product.management/utils/productForm";
 import { lexicalJsonToHtml } from "@/modules/product.management/utils/richTextEditorUtils";
 import {
   createVariantDraftKey,
   resolveVariantOptionValuesFromAttributes,
 } from "@/modules/product.management/utils/variantDraft";
+import {
+  loadProductCategoryContext,
+  prepareProductSubmission,
+} from "@/modules/product.management/utils/productAuthoring";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ZodSafeParseResult } from "zod";
-import { fromZodIssues } from "@/modules/core/lib/utils.validationFeedback";
 
 export default function useUpdateProduct(
   productPayloadPromise: Promise<TEditProductPayload | IMetaData>,
@@ -261,33 +254,15 @@ export default function useUpdateProduct(
     category: TCategory,
   ) => Promise<TAttribute[] | undefined> = async (category: TCategory) => {
     setSelectedCategories((prev) => [prev[0], prev[1], category]);
-    const promises: [
-      IMetaData | TSpecificationsIndexPayload,
-      IMetaData | TAttributesIndexPayload,
-    ] = await Promise.all([
-      actionViewCategorySpecifications(category.slug),
-      actionGetAttributes({
-        uuids: category.attributes?.join(","),
-      }),
-    ]);
-
-    // You can now destructure the responses from the promise array
-    const [specificationsResponse, attributesResponse] = promises;
-    if ("error" in specificationsResponse || "error" in attributesResponse) {
-      toast.error("Oops, something went wrong while fetching data!");
+    const categoryContext = await loadProductCategoryContext(category);
+    if ("error" in categoryContext) {
+      toast.error(categoryContext.error);
       return;
     }
 
-    const specificationsData = specificationsResponse.specifications?.data;
-    if (specificationsData) {
-      setCategorySpecifications(specificationsData);
-    }
-
-    const attributesData = attributesResponse.attributes?.data;
-    if (attributesData) {
-      setCategoryAttributes(attributesData);
-    }
-    return attributesData;
+    setCategorySpecifications(categoryContext.specifications);
+    setCategoryAttributes(categoryContext.attributes);
+    return categoryContext.attributes;
   };
 
   const router = useRouter();
@@ -301,64 +276,33 @@ export default function useUpdateProduct(
       toast.error("Please select product image.");
       return;
     }
-    // Validate base product fields
-    const validation: ZodSafeParseResult<TProductForm> =
-      UpdateProductSchema.safeParse({
+    const submission = prepareProductSubmission({
+      schema: UpdateProductSchema,
+      product: {
         type: "retail",
         uuid: productForm.uuid,
         sku: productForm.sku,
-        category: selectedCategories.at(2)?.uuid,
         name: productForm.name,
         base_price: String(productForm.base_price),
         description: productForm.description,
         highlights: productForm.highlights,
         box_items: productForm.box_items,
-      });
-    if (!validation.success) {
-      const feedback = fromZodIssues(validation.error.issues);
-      const firstFieldError = Object.entries(feedback.fieldErrors)[0];
-      if (firstFieldError) {
-        const [path, messages] = firstFieldError;
-        toast.error(`${path} : ${messages[0]}`);
-      } else {
-        toast.error(feedback.summary);
-      }
-      return;
-    }
-    // Validate variants like create flow
-    const { updated, allValid } = updateVariantValidity(
+      },
+      selectedCategoryUuid: selectedCategories.at(2)?.uuid,
       combinations,
+      columns,
       variantData,
-    );
-    if (!allValid) {
-      toast.error("Please fill stock, price, SKU, images for variants.");
+      uploadedProductImages,
+      specifications: selectedSpecifications,
+      categoryAttributes,
+    });
+    setVariantData(submission.updatedVariantData);
+    if (!submission.ok) {
+      toast.error(submission.message);
       return;
     }
-    setVariantData(updated);
-    const variants = createVariantsPayload(combinations, columns, updated);
-
-    // Build FormData (only new images will be appended)
-    const formData = new FormData();
-
-    // Append validated product fields
-    const { ...rest } = validation.data;
-
-    Object.entries(rest).forEach(([key, value]) => {
-      formData.append(key, String(value));
-    });
-
-    // Product images: append only newly uploaded files
-    uploadedProductImages.forEach((img) => formData.append("images[]", img));
-
-    // Specifications
-    Object.entries(selectedSpecifications || {}).forEach(([key, value]) => {
-      formData.append(`specifications[${key}]`, value);
-    });
-
-    // Variants + attributes (only File images are appended inside util)
-    appendFormDataVariants(formData, variants, columns, categoryAttributes);
     toast.info("Updating product...");
-    const res = await actionUpdateProducts(formData, productForm.uuid);
+    const res = await actionUpdateProducts(submission.formData, productForm.uuid);
     if ("error" in res) {
       toast.error(`${res.error}`);
       return;

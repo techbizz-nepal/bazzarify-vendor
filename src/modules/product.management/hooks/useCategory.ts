@@ -3,10 +3,9 @@ import {
   TCategory,
   TSpecification,
 } from "@/modules/product.management";
-import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
-import { actionViewCategorySpecifications } from "@/modules/product.management/actions/category";
 import { Dispatch, SetStateAction, useState } from "react";
 import { toast } from "sonner";
+import { loadProductCategoryContext } from "@/modules/product.management/utils/productAuthoring";
 
 interface useCategoryProps {
   setCategoryAttributes: Dispatch<SetStateAction<TAttribute[]>>;
@@ -46,29 +45,16 @@ export default function useCategory({
 
   const handleClickSubChild = async (category: TCategory) => {
     setSelectedCategories((prev) => [prev[0], prev[1], category]);
-    const promises = await Promise.all([
-      actionViewCategorySpecifications(category.slug),
-      actionGetAttributes({
-        uuids: category.attributes?.join(","),
-      }),
-    ]);
-    const [specificationsResponse, attributesResponse] = promises;
-    if ("error" in specificationsResponse || "error" in attributesResponse) {
-      toast.error("Oops, something went wrong while fetching data!");
+    const categoryContext = await loadProductCategoryContext(category);
+    if ("error" in categoryContext) {
+      toast.error(categoryContext.error);
       return;
     }
 
-    const specificationsData = specificationsResponse.specifications?.data;
-    if (specificationsData) {
-      setCategorySpecifications(specificationsData);
-      setSpecifications({});
-    }
-
-    const attributesData = attributesResponse.attributes?.data;
-    if (attributesData) {
-      setCategoryAttributes(attributesData);
-      setVariantSelections?.({});
-    }
+    setCategorySpecifications(categoryContext.specifications);
+    setSpecifications({});
+    setCategoryAttributes(categoryContext.attributes);
+    setVariantSelections?.({});
 
     setShowDropdown(!showDropdown);
   };

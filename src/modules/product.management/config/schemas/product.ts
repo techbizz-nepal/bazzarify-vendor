@@ -1,6 +1,18 @@
 import { isValidRichTextEditorContent } from "@/modules/core/lib/utils.index";
-import { TVariantPayload } from "@/modules/product.management";
 import { z } from "zod";
+
+const VariantDraftSchema = z.object({
+  uuid: z.uuid().optional(),
+  name: z.string().min(1, "Variant name is required"),
+  stock: z.string().min(1, "Variant stock is required"),
+  price: z.string().min(1, "Variant price is required"),
+  sku: z
+    .string()
+    .min(8, "Variant sku must be at least 8 characters long")
+    .max(64, "Variant sku must be at most 64 characters long"),
+  available: z.boolean(),
+  images: z.array(z.unknown()).optional(),
+});
 
 export const CreateProductSchema = z.object({
   type: z.string(),
@@ -16,11 +28,7 @@ export const CreateProductSchema = z.object({
   highlights: z.string().min(1, "Product highlights is required"),
   box_items: z.string().min(1, "Product box items is required"),
   category: z.uuid("Category is required"),
-  variants: z
-    .array(z.custom<TVariantPayload>())
-    .min(1, "Select at least one variant"),
-  // uploadedImages: z.array(z.any()),
-  // existingImages: z.array(z.any()),
+  variants: z.array(VariantDraftSchema).min(1, "Select at least one variant"),
 });
 export const UpdateProductSchema = z.object({
   type: z.string(),
@@ -39,4 +47,5 @@ export const UpdateProductSchema = z.object({
   }),
   highlights: z.string().min(1, "Product highlights is required"),
   box_items: z.string().min(1, "Product box items is required"),
+  variants: z.array(VariantDraftSchema).min(1, "Select at least one variant"),
 });
