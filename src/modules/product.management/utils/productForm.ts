@@ -8,6 +8,10 @@ import {
   MAX_DIMENSION,
   MIN_DIMENSION,
 } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import {
+  createVariantDraftKey,
+  createVariantName,
+} from "@/modules/product.management/utils/variantDraft";
 import slugify from "slugify";
 import { toast } from "sonner";
 
@@ -23,8 +27,7 @@ export const updateVariantValidity = (
   const updated: TVariantDataMap = { ...variantData };
 
   combinations.forEach((combo) => {
-    const key = combo.join("|");
-    console.log(key);
+    const key = createVariantDraftKey(combo);
     const variant = updated[key] || {};
     const isValid = isValidVariant(variant);
     updated[key] = { ...variant, isValid };
@@ -44,13 +47,13 @@ export const createVariantsPayload = (
       data[slugify(attr, { lower: true })] = combo[i] || "";
     });
 
-    const key = combo.join("|");
+    const key = createVariantDraftKey(combo);
     const variant = variantData[key] || {};
 
     return {
       ...data,
       uuid: variant.uuid,
-      name: key.toLowerCase(),
+      name: createVariantName(combo),
       stock: variant.stock || "0",
       price: variant.price || "",
       images: variant.images,

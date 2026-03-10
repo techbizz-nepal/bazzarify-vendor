@@ -1,6 +1,5 @@
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { toTitleCase } from "@/modules/core/utils";
 import {
   TImage,
   TVariant,
@@ -11,6 +10,7 @@ import {
   MAX_VARIANT_IMAGE_COUNT,
 } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { validateImage } from "@/modules/product.management/utils/productForm";
+import { createVariantDraftKey } from "@/modules/product.management/utils/variantDraft";
 import { CirclePlus } from "lucide-react";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useMemo, useRef } from "react";
@@ -145,9 +145,7 @@ export default function VariantGrid({
         </thead>
         <tbody>
           {combinations.map((combo, idx) => {
-            const key = combo
-              .map((v) => toTitleCase(v.toLowerCase()))
-              .join("|");
+            const key = createVariantDraftKey(combo);
             const variant = variantData[key] ?? {
               stock: "",
               price: "",
@@ -206,7 +204,7 @@ export default function VariantGrid({
                   <input
                     type="file"
                     ref={(el) => {
-                      const k = combo.join("|");
+                      const k = createVariantDraftKey(combo);
                       imageInputRefs.current[k] = el;
                     }}
                     multiple
@@ -252,7 +250,7 @@ export default function VariantGrid({
                     <div
                       onClick={() => {
                         if (variant.available === false) return;
-                        imageInputRefs.current[combo.join("|")]?.click();
+                        imageInputRefs.current[createVariantDraftKey(combo)]?.click();
                       }}
                       title={
                         variant.available === false

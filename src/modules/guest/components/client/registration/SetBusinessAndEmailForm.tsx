@@ -12,15 +12,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import useVendorRegistration from "@/modules/guest/hooks/useVendorRegistration";
+import useStoreSetupForm from "@/modules/vendor/hooks/useStoreSetupForm";
 import { useRouter } from "next/navigation";
 
-const SetBusinessAndEmail = () => {
+interface SetBusinessAndEmailProps {
+  redirectTo?: string | null;
+}
+
+const SetBusinessAndEmail = ({ redirectTo }: SetBusinessAndEmailProps) => {
   const router = useRouter();
   const {
-    businessAndEmailForm: form,
-    handleSetBusinessAndEmailSubmit: onSubmit,
-  } = useVendorRegistration(router);
+    storeSetupForm: form,
+    handleStoreSetupSubmit: onSubmit,
+  } = useStoreSetupForm(router, { redirectTo });
 
   return (
     <div className="px-3">

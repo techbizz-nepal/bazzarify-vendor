@@ -4,6 +4,10 @@ import {
   TVariantDataMap,
 } from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import {
+  createVariantDraftKey,
+  resolveVariantOptionValuesFromAttributes,
+} from "@/modules/product.management/utils/variantDraft";
 import { Dispatch, SetStateAction } from "react";
 
 interface IFillSelectedProductVariantData {
@@ -34,14 +38,6 @@ export const fillSelectedProductVariantData = (
   setVariantData(variantData);
 };
 
-export const getVariantNameWithUppercase = (variantName: string): string => {
-  const parts = variantName.split("|").map((part) => part.trim());
-  if (parts.length === 1) {
-    return `${parts[0].charAt(0).toUpperCase()}${parts[0].slice(1)}`;
-  }
-  return `${parts[0].charAt(0).toUpperCase()}${parts[0].slice(1)}|${parts[1].charAt(0).toUpperCase()}${parts[1].slice(1)}`;
-};
-
 function transformProductVariants(
   categoryAttributes: TAttribute[],
   selectedProductVariants: TVariant[],
@@ -68,7 +64,10 @@ function transformProductVariants(
         variantSelections[attributeName].push(attributeLabel);
       }
     });
-    const variantName = getVariantNameWithUppercase(variant.name);
+    const variantOptionValues = resolveVariantOptionValuesFromAttributes(
+      categoryAttributes,
+      variant,
+    );
     // Normalize images to string URLs for UI consumption while preserving other fields
     const base = (variant.image_base_url || "").replace(/\/+$/, "");
     const toFull = (file: string) =>
@@ -89,7 +88,7 @@ function transformProductVariants(
       return String(img);
     });
     const limitedImages = normalizedImages.slice(0, MAX_VARIANT_IMAGE_COUNT);
-    variantData[variantName] = {
+    variantData[createVariantDraftKey(variantOptionValues)] = {
       ...variant,
       images: limitedImages as unknown as TVariant["images"],
     };

@@ -5,7 +5,7 @@ import { Loader } from "lucide-react";
 import { Suspense } from "react";
 
 export default async function Page() {
-  await requireVendorStoreGuard();
+  await requireVendorStoreGuard("/products/create");
 
   const categoryIndexPayloadPromise = actionGetCategories({
     filter: { rootOnly: true },

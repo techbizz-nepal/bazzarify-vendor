@@ -6,8 +6,10 @@ import {
   TCategoryAncestors,
   TEditProductPayload,
   TProductForm,
+  TSpecificationsIndexPayload,
 } from "@/modules/product.management";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
+import { actionViewCategorySpecifications } from "@/modules/product.management/actions/category";
 import { actionDelete as actionDeleteImage } from "@/modules/product.management/actions/image";
 import { actionUpdateProducts } from "@/modules/product.management/actions/product";
 import {
@@ -21,7 +23,6 @@ import useProduct from "@/modules/product.management/hooks/useProduct";
 import useVariant from "@/modules/product.management/hooks/useVariant";
 import {
   fillSelectedProductVariantData,
-  getVariantNameWithUppercase,
 } from "@/modules/product.management/utils/editProductUtils";
 import {
   appendFormDataVariants,
@@ -29,6 +30,10 @@ import {
   updateVariantValidity,
 } from "@/modules/product.management/utils/productForm";
 import { lexicalJsonToHtml } from "@/modules/product.management/utils/richTextEditorUtils";
+import {
+  createVariantDraftKey,
+  resolveVariantOptionValuesFromAttributes,
+} from "@/modules/product.management/utils/variantDraft";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -63,6 +68,7 @@ export default function useUpdateProduct(
     selectedCategories,
     setSelectedCategories,
     categorySpecifications,
+    setCategorySpecifications,
     handleSpecificationChange,
   } = useCategory({
     setCategoryAttributes,
@@ -83,7 +89,7 @@ export default function useUpdateProduct(
     variantSelections,
     setVariantSelections,
     onExistingVariantImageRemove: async (combo, url) => {
-      const key = getVariantNameWithUppercase(combo.join("|"));
+      const key = createVariantDraftKey(combo);
       const uuid = variantImageIdMap[key]?.[url];
       if (!uuid) return false;
       const res = await actionDeleteImage({ uuid, storageUrl: url });
@@ -215,7 +221,9 @@ export default function useUpdateProduct(
           // Build variant image uuid map
           const map: Record<string, Record<string, string>> = {};
           (product?.variants || []).forEach((v) => {
-            const key = getVariantNameWithUppercase(v.name);
+            const key = createVariantDraftKey(
+              resolveVariantOptionValuesFromAttributes(attributes, v),
+            );
             const base = (v.image_base_url || "").replace(/\/+$/, "");
             const toFull = (file: string) =>
               /^(https?:)?\/\//.test(file)
@@ -253,17 +261,26 @@ export default function useUpdateProduct(
     category: TCategory,
   ) => Promise<TAttribute[] | undefined> = async (category: TCategory) => {
     setSelectedCategories((prev) => [prev[0], prev[1], category]);
-    const promises: [IMetaData | TAttributesIndexPayload] = await Promise.all([
+    const promises: [
+      IMetaData | TSpecificationsIndexPayload,
+      IMetaData | TAttributesIndexPayload,
+    ] = await Promise.all([
+      actionViewCategorySpecifications(category.slug),
       actionGetAttributes({
         uuids: category.attributes?.join(","),
       }),
     ]);
 
     // You can now destructure the responses from the promise array
-    const [attributesResponse] = promises;
-    if ("error" in attributesResponse) {
+    const [specificationsResponse, attributesResponse] = promises;
+    if ("error" in specificationsResponse || "error" in attributesResponse) {
       toast.error("Oops, something went wrong while fetching data!");
       return;
+    }
+
+    const specificationsData = specificationsResponse.specifications?.data;
+    if (specificationsData) {
+      setCategorySpecifications(specificationsData);
     }
 
     const attributesData = attributesResponse.attributes?.data;

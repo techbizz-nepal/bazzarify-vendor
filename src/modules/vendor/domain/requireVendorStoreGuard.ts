@@ -2,10 +2,11 @@ import "server-only";
 
 import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
+import { buildStoreRequirementPath } from "@/modules/vendor/domain/storeRequirementNavigation";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function requireVendorStoreGuard(): Promise<void> {
+export async function requireVendorStoreGuard(returnTo: string): Promise<void> {
   const host = (await headers()).get("host") || "";
   if (!host.startsWith("vendor.")) {
     return;
@@ -22,6 +23,6 @@ export async function requireVendorStoreGuard(): Promise<void> {
   }
 
   if (!authUser.store) {
-    redirect("/");
+    redirect(buildStoreRequirementPath(returnTo));
   }
 }

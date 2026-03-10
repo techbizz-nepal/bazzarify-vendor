@@ -5,6 +5,7 @@ import {
 } from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { generateCombinations } from "@/modules/product.management/utils/generateCombinations";
+import { createVariantDraftKey } from "@/modules/product.management/utils/variantDraft";
 import React, { useState } from "react";
 
 interface useVariantProps {
@@ -86,7 +87,7 @@ export default function useVariant({
     field: K,
     value: TVariant[K],
   ) => {
-    const key = combo.join("|");
+    const key = createVariantDraftKey(combo);
     setVariantData((prev) => ({
       ...prev,
       [key]: { ...(prev[key] || {}), [field]: value },
@@ -94,7 +95,7 @@ export default function useVariant({
   };
 
   const handleImageUpload = (combo: string[], files: FileList) => {
-    const key = combo.join("|");
+    const key = createVariantDraftKey(combo);
     const fileList = Array.from(files).filter((file) => file instanceof File);
     setVariantData((prev) => {
       const existingAll = prev[key]?.images || [];
@@ -121,7 +122,7 @@ export default function useVariant({
     combo: string[],
     image: File | string | TImage,
   ) => {
-    const key = combo.join("|");
+    const key = createVariantDraftKey(combo);
     if (typeof image === "string" && onExistingVariantImageRemove) {
       const ok = await onExistingVariantImageRemove(combo, image);
       if (!ok) return; // abort removal if API fails
