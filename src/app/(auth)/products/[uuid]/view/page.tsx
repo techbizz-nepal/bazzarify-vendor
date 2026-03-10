@@ -4,13 +4,13 @@ import PageContainer from "@/modules/core/components/server/PageContainer";
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ uuid: string }>;
 }) {
-  const { slug } = await params;
+  const { uuid } = await params;
   return (
-    <PageContainer pageTitle={`View ${slug}`}>
+    <PageContainer pageTitle={`View ${uuid}`}>
       <Card>
-        <CardHeader>{slug}</CardHeader>
+        <CardHeader>{uuid}</CardHeader>
       </Card>
     </PageContainer>
   );

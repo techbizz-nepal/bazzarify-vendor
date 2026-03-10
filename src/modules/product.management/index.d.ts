@@ -142,8 +142,8 @@ export interface IDataTableProps<TEntity> {
   onNextAction: () => void;
   onPreviousAction: () => void;
   rowsCount: number;
-  onViewAction: (slug: string) => void;
-  onEditAction: (slug: string) => void;
+  onViewAction: (identifier: string) => void;
+  onEditAction: (identifier: string) => void;
   onFilterChangeAction: (e: ChangeEvent<HTMLInputElement>) => void;
   onOnlyLastChildrenAction?: () => void;
 }

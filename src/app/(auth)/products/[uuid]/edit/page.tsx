@@ -7,9 +7,9 @@ import { Loader } from "lucide-react";
 import { Suspense } from "react";
 
 export default async function Page({ params }: IPageParams) {
-  const { slug } = await params;
-  await requireVendorStoreGuard(`/products/${slug}/edit`);
-  const productPayloadPromise = actionEditProduct(slug);
+  const { uuid } = await params;
+  await requireVendorStoreGuard(`/products/${uuid}/edit`);
+  const productPayloadPromise = actionEditProduct(uuid);
   const categoryIndexPayloadPromise = actionGetCategories({
     filter: { rootOnly: true },
     sort: "name",

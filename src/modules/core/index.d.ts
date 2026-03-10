@@ -24,7 +24,7 @@ export interface UseDataTableControllerOptions {
 
 export interface Entity {
   uuid: string;
-  slug: string;
+  slug?: string;
 
   [key: string]: string | number | boolean | null;
 }
@@ -76,5 +76,5 @@ export type IRoute = {
 };
 
 export type IPageParams = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ uuid: string }>;
 };

@@ -8,6 +8,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+const resolveEntityRouteIdentifier = (entityKey: string, item: Entity) => {
+  if (entityKey === "products") {
+    return item.uuid;
+  }
+
+  return item.slug || item.uuid;
+};
+
 export function useDataTableController({
   entityKey,
   fetchAction,
@@ -103,14 +111,13 @@ export function useDataTableController({
   };
 
   const onView = (item: Entity) => {
-    router.push(`/${entityKey}/${item.slug || item.uuid}/view`);
+    router.push(`/${entityKey}/${resolveEntityRouteIdentifier(entityKey, item)}/view`);
   };
 
   const onEdit = (item: Entity) => {
-    const identifier =
-      entityKey === "products" ? item.uuid : item.slug || item.uuid;
-
-    router.push(`/${entityKey}/${identifier}/edit`);
+    router.push(
+      `/${entityKey}/${resolveEntityRouteIdentifier(entityKey, item)}/edit`,
+    );
   };
 
   const onDelete = (item: Entity) => {
