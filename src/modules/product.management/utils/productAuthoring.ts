@@ -51,6 +51,7 @@ export interface ProductSubmissionSuccess<TValidatedData> {
 interface PrepareProductSubmissionInput<TSchema extends z.ZodTypeAny> {
   schema: TSchema;
   product: Record<string, unknown>;
+  productSku: string;
   selectedCategoryUuid?: string;
   combinations: string[][];
   columns: string[];
@@ -91,6 +92,7 @@ export const loadProductCategoryContext = async (
 export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
   schema,
   product,
+  productSku,
   selectedCategoryUuid,
   combinations,
   columns,
@@ -116,7 +118,12 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
     };
   }
 
-  const variants = createVariantsPayload(combinations, columns, updated);
+  const variants = createVariantsPayload(
+    productSku,
+    combinations,
+    columns,
+    updated,
+  );
   const validationResult = schema.safeParse({
     ...product,
     category: selectedCategoryUuid,

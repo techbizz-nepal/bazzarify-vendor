@@ -15,6 +15,26 @@ import {
 import slugify from "slugify";
 import { toast } from "sonner";
 
+const normalizeVariantSkuSegment = (value: string) =>
+  slugify(value, {
+    lower: false,
+    strict: true,
+    replacement: "-",
+    trim: true,
+  });
+
+export const deriveVariantSku = (
+  productSku: string,
+  variantName: string,
+): string => {
+  const normalizedProductSku = normalizeVariantSkuSegment(productSku);
+  const normalizedVariantName = normalizeVariantSkuSegment(variantName);
+
+  return [normalizedProductSku, normalizedVariantName]
+    .filter(Boolean)
+    .join("-");
+};
+
 export const isValidVariant = (variant: TVariant): boolean => {
   return !!(variant.stock && variant.price && variant.images?.length);
 };
@@ -37,6 +57,7 @@ export const updateVariantValidity = (
 };
 
 export const createVariantsPayload = (
+  productSku: string,
   combinations: string[][],
   columns: string[],
   variantData: TVariantDataMap,
@@ -49,13 +70,15 @@ export const createVariantsPayload = (
 
     const key = createVariantDraftKey(combo);
     const variant = variantData[key] || {};
+    const variantName = createVariantName(combo);
 
     return {
       ...data,
       uuid: variant.uuid,
-      name: createVariantName(combo),
+      name: variantName,
       stock: variant.stock || "0",
       price: variant.price || "",
+      sku: deriveVariantSku(productSku, variantName),
       images: variant.images,
       available: variant.available ?? true,
     };
@@ -93,6 +116,7 @@ export const appendFormDataVariants = (
       formData.append(`variants[${index}][uuid]`, variant.uuid);
     }
     formData.append(`variants[${index}][name]`, variant.name);
+    formData.append(`variants[${index}][sku]`, String(variant.sku || ""));
     formData.append(`variants[${index}][stock]`, variant.stock || "0");
     formData.append(`variants[${index}][price]`, variant.price || "0");
     formData.append(

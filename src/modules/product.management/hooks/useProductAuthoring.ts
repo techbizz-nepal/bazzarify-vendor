@@ -241,6 +241,7 @@ export default function useProductAuthoring({
         ? prepareProductSubmission({
             schema: CreateProductSchema,
             product: omit(product.productForm, "uuid"),
+            productSku: product.productForm.sku,
             selectedCategoryUuid: category.selectedCategories.at(2)?.uuid,
             combinations: variant.combinations,
             columns: variant.columns,
@@ -261,6 +262,7 @@ export default function useProductAuthoring({
               highlights: product.productForm.highlights,
               box_items: product.productForm.box_items,
             },
+            productSku: product.productForm.sku,
             selectedCategoryUuid: category.selectedCategories.at(2)?.uuid,
             combinations: variant.combinations,
             columns: variant.columns,
