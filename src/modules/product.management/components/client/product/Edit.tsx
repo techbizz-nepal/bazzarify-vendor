@@ -28,28 +28,13 @@ export default function Edit({
   categoryIndexPayloadPromise,
 }: EditProps) {
   const {
-    showCategoryDropdown,
-    handleCategoryDropdownChange,
-    filters,
-    subCategories,
-    subChildCategories,
-    handleClickRoot,
-    handleClickSub,
-    handleClickSubChild,
-    updateFilter,
-    selectedCategories,
-    categorySpecifications,
-    handleSpecificationChange,
-    selectedSpecifications,
+    basicState,
+    categoryState,
+    mediaState,
+    specificationState,
     selectorState,
     variantState,
-    handleProductImageUpload,
-    existingProductImages,
-    handleUpdate,
-    productForm,
-    onProductFormInputChange,
-    handleExistingProductImagesChange,
-    handleRemoveExistingProductImage,
+    submissionState,
   } = useUpdateProduct(productPayloadPromise);
   const categoryIndexPayload = use(categoryIndexPayloadPromise);
   if ("error" in categoryIndexPayload) {
@@ -62,8 +47,8 @@ export default function Edit({
         <div className="w-full max-w-6xl flex-col items-center space-y-4">
           <Label htmlFor="name">Name</Label>
           <Input
-            value={productForm.name}
-            onChange={onProductFormInputChange}
+            value={basicState.productForm.name}
+            onChange={basicState.onProductFormInputChange}
             name="name"
             className="focus-visible:ring-primary"
             type="text"
@@ -72,8 +57,8 @@ export default function Edit({
           />
           <Label>Base Price</Label>
           <Input
-            value={productForm.base_price}
-            onChange={onProductFormInputChange}
+            value={basicState.productForm.base_price}
+            onChange={basicState.onProductFormInputChange}
             className="focus-visible:ring-primary"
             type="number"
             id="base_price"
@@ -83,8 +68,8 @@ export default function Edit({
           <Label htmlFor="name">SKU</Label>
           <Input
             disabled={true}
-            value={productForm.sku}
-            onChange={onProductFormInputChange}
+            value={basicState.productForm.sku}
+            onChange={basicState.onProductFormInputChange}
             name="sku"
             className="focus-visible:ring-primary"
             type="text"
@@ -92,32 +77,38 @@ export default function Edit({
             placeholder="NCADC"
           />
           <ProductDetail
-            productForm={productForm}
-            onChange={onProductFormInputChange}
+            productForm={basicState.productForm}
+            onChange={basicState.onProductFormInputChange}
           />
         </div>
       </ProductCard>
       <ProductCard title="Category">
         <CategoryDropdown
-          selectedCategories={selectedCategories}
-          open={showCategoryDropdown}
-          onOpenChangeAction={handleCategoryDropdownChange}
+          selectedCategories={categoryState.selectedCategories}
+          open={categoryState.showDropdown}
+          onOpenChangeAction={categoryState.handleShowDropdownChange}
           rootCategories={rootCategories.filter((cat) =>
-            cat.name.toLowerCase().includes(filters.root.toLowerCase()),
+            cat.name
+              .toLowerCase()
+              .includes(categoryState.filters.root.toLowerCase()),
           )}
-          subCategories={subCategories.filter((cat) =>
-            cat.name.toLowerCase().includes(filters.sub.toLowerCase()),
+          subCategories={categoryState.subCategories.filter((cat) =>
+            cat.name
+              .toLowerCase()
+              .includes(categoryState.filters.sub.toLowerCase()),
           )}
-          subChildCategories={subChildCategories.filter((cat) =>
-            cat.name.toLowerCase().includes(filters.subchild.toLowerCase()),
+          subChildCategories={categoryState.subChildCategories.filter((cat) =>
+            cat.name
+              .toLowerCase()
+              .includes(categoryState.filters.subchild.toLowerCase()),
           )}
-          onClickRoot={handleClickRoot}
-          onClickSub={handleClickSub}
-          onClickSubChild={handleClickSubChild}
-          onFilterChange={updateFilter}
+          onClickRoot={categoryState.handleClickRoot}
+          onClickSub={categoryState.handleClickSub}
+          onClickSubChild={categoryState.handleClickSubChild}
+          onFilterChange={categoryState.updateFilter}
         />
       </ProductCard>
-      {selectedCategories?.length === 3 && (
+      {categoryState.selectedCategories.length === 3 && (
         <>
           {/*** Product Image Start ***/}
           <ProductCard
@@ -132,24 +123,22 @@ export default function Edit({
             }}
           >
             <ImageUploader
-              onImageSelect={handleProductImageUpload}
-              initialImages={existingProductImages}
+              onImageSelect={mediaState.handleProductImageUpload}
+              initialImages={mediaState.existingProductImages}
               onRemoveExisting={async (url) => {
-                // Delegate to hook to remove existing image via API then update state
-                // useUpdateProduct exposes handleExistingProductImagesChange to sync state; handled in hook
-                return await handleRemoveExistingProductImage(url);
+                return await mediaState.handleRemoveExistingProductImage!(url);
               }}
               onExistingListChange={(urls) =>
-                handleExistingProductImagesChange(urls)
+                mediaState.handleExistingProductImagesChange(urls)
               }
             />
           </ProductCard>
           {/*** Product Image ends ***/}
           {/*** Product Specifications starts ***/}
-          {categorySpecifications.length > 0 && (
+          {specificationState.categorySpecifications.length > 0 && (
             <ProductCard title="Product Specifications">
               <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-                {categorySpecifications.map((specification) => (
+                {specificationState.categorySpecifications.map((specification) => (
                   <div className="flex-col space-y-3" key={specification.uuid}>
                     <Label
                       htmlFor={`specification-value-`.concat(specification.key)}
@@ -163,11 +152,13 @@ export default function Edit({
                         type={specification.type}
                         required={true}
                         className="focus-visible:ring-primary"
-                        defaultValue={
-                          selectedSpecifications[specification.key] || ""
+                        value={
+                          specificationState.specificationValues[
+                            specification.key
+                          ] || ""
                         }
                         onChange={(e) =>
-                          handleSpecificationChange(
+                          specificationState.handleSpecificationChange(
                             specification.key,
                             e.target.value,
                           )
@@ -193,7 +184,10 @@ export default function Edit({
           {/*** Product description ends ***/}
 
           <div className="pb-10">
-            <ThemedButton onClick={handleUpdate} className="w-full">
+            <ThemedButton
+              onClick={submissionState.handleSubmit}
+              className="w-full"
+            >
               Submit
             </ThemedButton>
           </div>

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
 import { actionViewCategorySpecifications } from "@/modules/product.management/actions/category";
 import {
+  ProductSubmissionFeedback,
   TAttribute,
   TAttributesIndexPayload,
   TCategory,
@@ -28,12 +29,14 @@ export type ProductSubmissionFailure =
       ok: false;
       kind: "variants";
       message: string;
+      feedback: ProductSubmissionFeedback;
       updatedVariantData: TVariantDataMap;
     }
   | {
       ok: false;
       kind: "fields";
       message: string;
+      feedback: ProductSubmissionFeedback;
       updatedVariantData: TVariantDataMap;
     };
 
@@ -105,6 +108,10 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
       ok: false,
       kind: "variants",
       message: "Please fill stock, price, SKU, images for variants.",
+      feedback: {
+        summary: "Please complete the required variant fields before submitting.",
+        fieldErrors: {},
+      },
       updatedVariantData: updated,
     };
   }
@@ -126,6 +133,7 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
       message: firstFieldError
         ? `${firstFieldError[0]}: ${firstFieldError[1][0]}`
         : feedback.summary,
+      feedback,
       updatedVariantData: updated,
     };
   }

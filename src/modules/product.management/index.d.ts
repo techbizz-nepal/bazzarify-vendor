@@ -168,6 +168,59 @@ export interface VariantState {
   handleReorderColumns?: (newOrder: string[]) => void;
 }
 
+export interface ProductSubmissionFeedback {
+  summary: string;
+  fieldErrors: Record<string, string[]>;
+}
+
+export interface ProductAuthoringBasicState {
+  productForm: TProductForm;
+  onProductFormInputChange: (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
+}
+
+export interface ProductAuthoringCategoryState {
+  showDropdown: boolean;
+  selectedCategories: TCategory[];
+  subCategories: TCategory[];
+  subChildCategories: TCategory[];
+  filters: { root: string; sub: string; subchild: string };
+  handleShowDropdownChange: () => void;
+  handleClickRoot: (category: TCategory) => void;
+  handleClickSub: (category: TCategory) => void;
+  handleClickSubChild: (category: TCategory) => Promise<void>;
+  updateFilter: (level: "root" | "sub" | "subchild", value: string) => void;
+}
+
+export interface ProductAuthoringMediaState {
+  existingProductImages: string[];
+  handleProductImageUpload: (files: File[]) => void;
+  handleExistingProductImagesChange: (images: string[]) => void;
+  handleRemoveExistingProductImage?: (url: string) => Promise<boolean>;
+}
+
+export interface ProductAuthoringSpecificationState {
+  categorySpecifications: TSpecification[];
+  specificationValues: Record<string, string>;
+  handleSpecificationChange: (key: string, value: string) => void;
+}
+
+export interface ProductAuthoringSubmissionState {
+  feedback: ProductSubmissionFeedback | null;
+  handleSubmit: () => Promise<void>;
+}
+
+export interface ProductAuthoringController {
+  basicState: ProductAuthoringBasicState;
+  categoryState: ProductAuthoringCategoryState;
+  mediaState: ProductAuthoringMediaState;
+  specificationState: ProductAuthoringSpecificationState;
+  selectorState: VariantSelectorState;
+  variantState: VariantState;
+  submissionState: ProductAuthoringSubmissionState;
+}
+
 export interface IProductCard {
   title: string;
   children?: ReactNode;

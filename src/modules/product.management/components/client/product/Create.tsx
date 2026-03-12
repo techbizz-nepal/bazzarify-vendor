@@ -20,26 +20,13 @@ interface CreateProps {
 }
 export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
   const {
-    showDropdown,
-    existingProductImages,
-    selectedCategories,
-    subChildCategories,
-    subCategories,
-    filters,
-    specifications,
-    categorySpecifications,
-    handleSpecificationChange,
+    basicState,
+    categoryState,
+    mediaState,
+    specificationState,
     selectorState,
     variantState,
-    handleClickRoot,
-    handleShowDropdownChange,
-    handleClickSubChild,
-    handleClickSub,
-    updateFilter,
-    handleSubmit,
-    handleProductImageUpload,
-    productForm,
-    onProductFormInputChange,
+    submissionState,
   } = useCreateProduct();
 
   const categoryIndexPayload = use(categoryIndexPayloadPromise);
@@ -54,8 +41,8 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
         <div className="w-full max-w-6xl flex-col items-center space-y-4">
           <Label htmlFor="name">Name</Label>
           <Input
-            value={productForm.name}
-            onChange={onProductFormInputChange}
+            value={basicState.productForm.name}
+            onChange={basicState.onProductFormInputChange}
             name="name"
             className="focus-visible:ring-primary"
             type="text"
@@ -64,8 +51,8 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
           />
           <Label>Base Price</Label>
           <Input
-            value={productForm.base_price}
-            onChange={onProductFormInputChange}
+            value={basicState.productForm.base_price}
+            onChange={basicState.onProductFormInputChange}
             className="focus-visible:ring-primary"
             type="number"
             id="base_price"
@@ -74,8 +61,8 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
           />
           <Label htmlFor="name">SKU</Label>
           <Input
-            value={productForm.sku}
-            onChange={onProductFormInputChange}
+            value={basicState.productForm.sku}
+            onChange={basicState.onProductFormInputChange}
             name="sku"
             className="focus-visible:ring-primary"
             type="text"
@@ -83,33 +70,39 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
             placeholder="min 8 character alphabets or number"
           />
           <ProductDetail
-            productForm={productForm}
-            onChange={onProductFormInputChange}
+            productForm={basicState.productForm}
+            onChange={basicState.onProductFormInputChange}
           />
         </div>
       </ProductCard>
       {/*** Product Basic information ends ***/}
       <ProductCard title="Category">
         <CategoryDropdown
-          selectedCategories={selectedCategories}
-          open={showDropdown}
-          onOpenChangeAction={handleShowDropdownChange}
+          selectedCategories={categoryState.selectedCategories}
+          open={categoryState.showDropdown}
+          onOpenChangeAction={categoryState.handleShowDropdownChange}
           rootCategories={rootCategories.filter((cat) =>
-            cat.name.toLowerCase().includes(filters.root.toLowerCase()),
+            cat.name
+              .toLowerCase()
+              .includes(categoryState.filters.root.toLowerCase()),
           )}
-          subCategories={subCategories.filter((cat) =>
-            cat.name.toLowerCase().includes(filters.sub.toLowerCase()),
+          subCategories={categoryState.subCategories.filter((cat) =>
+            cat.name
+              .toLowerCase()
+              .includes(categoryState.filters.sub.toLowerCase()),
           )}
-          subChildCategories={subChildCategories.filter((cat) =>
-            cat.name.toLowerCase().includes(filters.subchild.toLowerCase()),
+          subChildCategories={categoryState.subChildCategories.filter((cat) =>
+            cat.name
+              .toLowerCase()
+              .includes(categoryState.filters.subchild.toLowerCase()),
           )}
-          onClickRoot={handleClickRoot}
-          onClickSub={handleClickSub}
-          onClickSubChild={handleClickSubChild}
-          onFilterChange={updateFilter}
+          onClickRoot={categoryState.handleClickRoot}
+          onClickSub={categoryState.handleClickSub}
+          onClickSubChild={categoryState.handleClickSubChild}
+          onFilterChange={categoryState.updateFilter}
         />
       </ProductCard>
-      {selectedCategories?.length === 3 && (
+      {categoryState.selectedCategories.length === 3 && (
         <>
           {/*** Product Image Start ***/}
           <ProductCard
@@ -124,16 +117,16 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
             }}
           >
             <ImageUploader
-              onImageSelect={handleProductImageUpload}
-              initialImages={existingProductImages}
+              onImageSelect={mediaState.handleProductImageUpload}
+              initialImages={mediaState.existingProductImages}
             />
           </ProductCard>
           {/*** Product Image ends ***/}
           {/*** Product Specifications starts ***/}
-          {categorySpecifications.length > 0 && (
+          {specificationState.categorySpecifications.length > 0 && (
             <ProductCard title="Specifications">
               <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-                {categorySpecifications.map((specification) => (
+                {specificationState.categorySpecifications.map((specification) => (
                   <div className="flex-col space-y-3" key={specification.uuid}>
                     <Label
                       htmlFor={`specification-value-`.concat(specification.key)}
@@ -147,9 +140,13 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
                         type={specification.type}
                         required={true}
                         className="focus-visible:ring-primary"
-                        defaultValue={specifications[specification.key] || ""}
+                        value={
+                          specificationState.specificationValues[
+                            specification.key
+                          ] || ""
+                        }
                         onChange={(e) =>
-                          handleSpecificationChange(
+                          specificationState.handleSpecificationChange(
                             specification.key,
                             e.target.value,
                           )
@@ -182,7 +179,10 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
           )}
           {/*** Product variants ends ***/}
           <div className="pb-10">
-            <ThemedButton onClick={handleSubmit} className="w-full">
+            <ThemedButton
+              onClick={submissionState.handleSubmit}
+              className="w-full"
+            >
               Submit
             </ThemedButton>
           </div>
