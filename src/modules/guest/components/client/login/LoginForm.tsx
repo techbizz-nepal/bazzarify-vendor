@@ -33,7 +33,7 @@ export default function LoginForm() {
     },
   });
 
-  function runLogin(data: LoginFormValues) {
+  async function runLogin(data: LoginFormValues) {
     toast.info("Signing In...");
     return actionLogin(data)
       .then((response) => {
