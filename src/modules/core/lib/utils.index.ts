@@ -3,23 +3,26 @@ import {
   SimplePaginationMeta,
   TURLSearchParams,
 } from "@/modules/core";
+import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { Duration, intervalToDuration } from "date-fns";
-import { normalizeRemoteFeedback } from "@/modules/core/lib/utils.feedback";
 
 export const phoneRegex = /^9\d{9}$/;
 export const handleRemoteError = (
   error: unknown,
   code: number | undefined = 500,
 ) => {
-  const feedback = normalizeRemoteFeedback(error, "Something went wrong!");
+  const feedback = extractRemoteErrorFeedback(
+    error,
+    "Something went wrong!",
+  );
   return {
     data: {
       payload: [],
       message: "",
     },
     metaData: {
-      error: feedback.error,
-      errorCode: feedback.errorCode ?? code,
+      error: feedback?.error ?? "Something went wrong!",
+      errorCode: feedback?.errorCode ?? code,
     },
   };
 };
@@ -69,7 +72,14 @@ export function isValidJson(value: string) {
 }
 
 export function handleUnknownError(error: unknown): IMetaData {
-  return normalizeRemoteFeedback(error, "An unexpected error occurred");
+  const feedback = extractRemoteErrorFeedback(
+    error,
+    "An unexpected error occurred",
+  );
+  return {
+    error: feedback?.error ?? "An unexpected error occurred",
+    errorCode: feedback?.errorCode,
+  };
 }
 
 export function getDurationFromTimestamps(pastDate: Date) {

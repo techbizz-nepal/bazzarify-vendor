@@ -1,5 +1,5 @@
-import { AxiosError } from "axios";
 import { IMetaData } from "@/modules/core";
+import { AxiosError } from "axios";
 
 type EnvelopeMeta = {
   error?: unknown;
@@ -51,18 +51,21 @@ const getEnvelopeMeta = (value: unknown): EnvelopeMeta | null => {
   return value.metaData as EnvelopeMeta;
 };
 
-export const normalizeRemoteFeedback = (
+export const extractRemoteErrorFeedback = (
   value: unknown,
   fallbackMessage = "Something went wrong!",
-): IMetaData => {
+): IMetaData | null => {
   const envelope = getEnvelopeMeta(value);
   if (envelope) {
+    const error = flattenMessage(envelope.error);
+    if (!error) {
+      return null;
+    }
     return {
-      error: flattenMessage(envelope.error) ?? fallbackMessage,
+      error,
       errorCode: parseErrorCode(envelope.errorCode),
     };
   }
-
   if (value instanceof AxiosError) {
     const nested = getEnvelopeMeta(value.response?.data);
     if (nested) {
@@ -84,7 +87,9 @@ export const normalizeRemoteFeedback = (
   if (value instanceof Error) {
     return {
       error: flattenMessage(value.message) ?? fallbackMessage,
-      errorCode: parseErrorCode((value as Error & { errorCode?: unknown }).errorCode),
+      errorCode: parseErrorCode(
+        (value as Error & { errorCode?: unknown }).errorCode,
+      ),
     };
   }
 
@@ -98,13 +103,13 @@ export const createRemoteFeedbackError = (
   value: unknown,
   fallbackMessage = "Something went wrong!",
 ) => {
-  const feedback = normalizeRemoteFeedback(value, fallbackMessage);
-  const error = new Error(feedback.error ?? fallbackMessage);
+  const feedback = extractRemoteErrorFeedback(value, fallbackMessage);
+  const error = new Error(feedback?.error ?? fallbackMessage);
   (error as Error & { details?: unknown }).details =
     isRecord(value) && "metaData" in value && isRecord(value.metaData)
       ? value.metaData.error
       : value;
-  if (typeof feedback.errorCode === "number") {
+  if (typeof feedback?.errorCode === "number") {
     error.name = String(feedback.errorCode);
   }
   return error;

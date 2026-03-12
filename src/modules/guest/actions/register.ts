@@ -4,7 +4,7 @@ import { setAuthUser } from "@/modules/auth/data/lib/auth-lib";
 import { actionGetUser } from "@/modules/auth/domain/auth-actions";
 import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
-import { normalizeRemoteFeedback } from "@/modules/core/lib/utils.feedback";
+import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import { createAuthCookieSession } from "@/modules/core/lib/utils.session";
 import { AUTH_ROUTES } from "@/modules/guest/config/routes";
@@ -28,8 +28,8 @@ export const actionRequestRegistration = async (
       AUTH_ROUTES.register.signup.path,
       data,
     );
-    const feedback = normalizeRemoteFeedback(response.data);
-    if (feedback.error) {
+    const remoteError = extractRemoteErrorFeedback(response.data);
+    if (remoteError) {
       return handleRemoteError(response.data);
     }
     return response.data;
@@ -46,8 +46,8 @@ export const actionVerifyRegistration = async (
       AUTH_ROUTES.register.verifySignup.path,
       data,
     );
-    const feedback = normalizeRemoteFeedback(response.data);
-    if (feedback.error) {
+    const remoteError = extractRemoteErrorFeedback(response.data);
+    if (remoteError) {
       return handleRemoteError(response.data);
     }
     const authResponse = response.data as AuthSuccessResponse;

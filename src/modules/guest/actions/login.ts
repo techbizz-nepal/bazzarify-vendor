@@ -7,7 +7,7 @@ import {
 import { actionGetUser } from "@/modules/auth/domain/auth-actions";
 import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
-import { normalizeRemoteFeedback } from "@/modules/core/lib/utils.feedback";
+import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import {
   createAuthCookieSession,
@@ -33,8 +33,8 @@ export const actionLogin = async (data: LoginFormValues) => {
       AUTH_ROUTES.login.loginCredentials.path,
       data,
     );
-    const feedback = normalizeRemoteFeedback(apiResponse.data);
-    if (feedback.error) {
+    const remoteError = extractRemoteErrorFeedback(apiResponse.data);
+    if (remoteError) {
       return handleRemoteError(apiResponse.data);
     }
     const authResponse = apiResponse.data as AuthSuccessResponse;
