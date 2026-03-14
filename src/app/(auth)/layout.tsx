@@ -16,15 +16,17 @@ export default async function AuthLayout({
     redirect("/login");
   }
   return (
-    <div className="flex-col">
-      <SidebarProvider className="flex-row">
+    <div className="flex min-h-svh flex-col">
+      <SidebarProvider className="flex min-h-svh flex-row">
         <AppSidebar className="flex-none" />
-        <main className="flex-1 space-y-3 bg-slate-200">
-          <div className="flex h-16 items-center bg-white flex-row justify-between px-4">
+        <main className="flex min-w-0 flex-1 flex-col space-y-3 bg-slate-200">
+          <div className="flex h-16 items-center justify-between bg-white px-4">
             <SidebarTrigger />
             <AccountActions />
           </div>
-          <div className="flex-col space-y-5 px-4">{children}</div>
+          <div className="flex min-w-0 flex-1 flex-col space-y-5 px-4">
+            {children}
+          </div>
         </main>
       </SidebarProvider>
     </div>
