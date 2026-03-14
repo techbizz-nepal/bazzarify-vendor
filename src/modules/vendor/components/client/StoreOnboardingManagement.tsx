@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
@@ -8,10 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { TCategoryIndexPayload } from "@/modules/product.management";
 import {
   actionApplyAdminStoreOnboardingBulk,
@@ -22,6 +32,7 @@ import {
   TStoreOnboardingBulkApplyPreview,
   TStoreTypeOption,
 } from "@/modules/vendor/domain/schemas/storeOnboarding";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { startTransition, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -64,6 +75,7 @@ export default function StoreOnboardingManagement({
     useState<TStoreOnboardingBulkApplyPreview | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isApplyingBulk, setIsApplyingBulk] = useState(false);
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
 
   const selectedStoreType = useMemo(
     () =>
@@ -91,6 +103,21 @@ export default function StoreOnboardingManagement({
           .map((category) => category.name),
       ),
     [leafCategories, selectedCategoryUuids],
+  );
+
+  const selectedCategoryNames = useMemo(
+    () => [...selectedCategoryNameSet].sort((left, right) => left.localeCompare(right)),
+    [selectedCategoryNameSet],
+  );
+
+  const selectedCategoryPreviewNames = useMemo(
+    () => selectedCategoryNames.slice(0, 8),
+    [selectedCategoryNames],
+  );
+
+  const remainingSelectedCategoryCount = Math.max(
+    0,
+    selectedCategoryNames.length - selectedCategoryPreviewNames.length,
   );
 
   const handleToggleCategory = (categoryUuid: string, checked: boolean) => {
@@ -323,62 +350,131 @@ export default function StoreOnboardingManagement({
                 </div>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
-                {leafCategories.map((category) => {
-                  const isChecked = selectedCategoryUuids.includes(
-                    category.uuid,
-                  );
-
-                  return (
-                    <label
-                      key={category.uuid}
-                      className="flex cursor-pointer items-start gap-3 rounded-md border p-3"
-                    >
-                      <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={(checked) =>
-                          handleToggleCategory(category.uuid, checked === true)
-                        }
-                      />
-                      <div>
-                        <div className="font-medium text-slate-900">
-                          {category.name}
-                        </div>
-                        <div className="text-sm text-slate-500">
-                          {category.slug}
-                        </div>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-
-              <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
-                <div className="font-medium text-slate-900">
-                  Selected categories
-                </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedCategoryNameSet.size > 0 ? (
-                    [...selectedCategoryNameSet].map((name) => (
-                      <span
-                        key={name}
-                        className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 ring-1 ring-slate-200"
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="font-medium text-slate-900">
+                      Starter categories
+                    </div>
+                    <div className="text-sm text-slate-600">
+                      Search and select leaf categories for new stores of this
+                      type.
+                    </div>
+                  </div>
+                  <Popover
+                    open={isCategoryPickerOpen}
+                    onOpenChange={setIsCategoryPickerOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-w-[240px] justify-between"
                       >
-                        {name}
+                        <span className="truncate">
+                          {selectedCategoryUuids.length > 0
+                            ? `${selectedCategoryUuids.length} categories selected`
+                            : "Select starter categories"}
+                        </span>
+                        <ChevronsUpDown className="opacity-60" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[360px] p-0" align="end">
+                      <Command>
+                        <CommandInput placeholder="Search leaf categories..." />
+                        <CommandList>
+                          <CommandEmpty>No matching categories.</CommandEmpty>
+                          <CommandGroup>
+                            <ScrollArea className="h-72">
+                              <div className="p-1">
+                                {leafCategories.map((category) => {
+                                  const isChecked = selectedCategoryUuids.includes(
+                                    category.uuid,
+                                  );
+
+                                  return (
+                                    <CommandItem
+                                      key={category.uuid}
+                                      value={`${category.name} ${category.slug}`}
+                                      onSelect={() =>
+                                        handleToggleCategory(
+                                          category.uuid,
+                                          !isChecked,
+                                        )
+                                      }
+                                      className="items-start gap-3 py-2"
+                                    >
+                                      <Checkbox
+                                        checked={isChecked}
+                                        onCheckedChange={(checked) =>
+                                          handleToggleCategory(
+                                            category.uuid,
+                                            checked === true,
+                                          )
+                                        }
+                                      />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="truncate font-medium text-slate-900">
+                                          {category.name}
+                                        </div>
+                                        <div className="truncate text-xs text-slate-500">
+                                          {category.slug}
+                                        </div>
+                                      </div>
+                                      {isChecked ? (
+                                        <Check className="mt-0.5 text-slate-900" />
+                                      ) : null}
+                                    </CommandItem>
+                                  );
+                                })}
+                              </div>
+                            </ScrollArea>
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="font-medium text-slate-900">
+                      Selected categories
+                    </div>
+                    <div className="text-xs uppercase tracking-wide text-slate-500">
+                      {selectedCategoryUuids.length} selected
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {selectedCategoryPreviewNames.length > 0 ? (
+                      <>
+                        {selectedCategoryPreviewNames.map((name) => (
+                          <span
+                            key={name}
+                            className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 ring-1 ring-slate-200"
+                          >
+                            {name}
+                          </span>
+                        ))}
+                        {remainingSelectedCategoryCount > 0 ? (
+                          <span className="rounded-full bg-slate-200 px-3 py-1 text-xs text-slate-700">
+                            +{remainingSelectedCategoryCount} more
+                          </span>
+                        ) : null}
+                      </>
+                    ) : (
+                      <span className="text-slate-500">
+                        No categories selected yet.
                       </span>
-                    ))
-                  ) : (
-                    <span className="text-slate-500">
-                      No categories selected yet.
-                    </span>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <ThemedButton onClick={handleSave} disabled={isSaving}>
+                <Button onClick={handleSave} disabled={isSaving}>
                   {isSaving ? "Saving..." : "Save onboarding set"}
-                </ThemedButton>
+                </Button>
               </div>
 
               <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -393,14 +489,14 @@ export default function StoreOnboardingManagement({
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <ThemedButton
+                    <Button
                       variant="outline"
                       onClick={() => void loadBulkPreview(selectedStoreType.uuid)}
                       disabled={isLoadingPreview}
                     >
                       {isLoadingPreview ? "Refreshing..." : "Refresh preview"}
-                    </ThemedButton>
-                    <ThemedButton
+                    </Button>
+                    <Button
                       onClick={handleBulkApply}
                       disabled={
                         isApplyingBulk ||
@@ -409,7 +505,7 @@ export default function StoreOnboardingManagement({
                       }
                     >
                       {isApplyingBulk ? "Applying..." : "Apply to stores"}
-                    </ThemedButton>
+                    </Button>
                   </div>
                 </div>
 

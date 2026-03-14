@@ -1,8 +1,11 @@
-import PageContainer from "@/modules/core/components/server/PageContainer";
-import { actionGetAdminLeafCategories, actionGetAdminStoreOnboardingStoreTypes } from "@/modules/vendor/domain/store-actions";
 import StoreOnboardingManagement from "@/modules/vendor/components/client/StoreOnboardingManagement";
+import PageContainer from "@/modules/core/components/server/PageContainer";
+import {
+  actionGetAdminLeafCategories,
+  actionGetAdminStoreOnboardingStoreTypes,
+} from "@/modules/vendor/domain/store-actions";
 
-export default async function VendorOnboardingManagementPage() {
+export default async function StoreOnboardingSettingsPage() {
   const [storeTypes, leafCategoryResponse] = await Promise.all([
     actionGetAdminStoreOnboardingStoreTypes(),
     actionGetAdminLeafCategories(),
@@ -14,7 +17,7 @@ export default async function VendorOnboardingManagementPage() {
       : [];
 
   return (
-    <PageContainer pageTitle="Vendor Onboarding">
+    <PageContainer pageTitle="Store Onboarding Settings">
       <StoreOnboardingManagement
         storeTypes={storeTypes}
         leafCategories={leafCategories}

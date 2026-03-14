@@ -54,8 +54,8 @@ const adminNavigations: TMenuItem[] = [
     icon: FaUsers,
   },
   {
-    title: "Vendors",
-    path: "/vendors/onboarding",
+    title: "Store Onboarding",
+    path: "/settings/store-onboarding",
     icon: Settings,
   },
 ];
