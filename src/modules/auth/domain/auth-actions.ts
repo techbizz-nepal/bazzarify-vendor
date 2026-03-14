@@ -1,11 +1,15 @@
 import users from "@/modules/auth/domain/routes/user";
 import {
+  AdminUserDetailPayloadSchema,
+  TAdminUserDetailPayload,
+} from "@/modules/auth/domain/schemas/payloads/AdminUserDetailPayloadSchema";
+import {
   AdminUserIndexPayloadSchema,
   TAdminUserIndexPayload,
 } from "@/modules/auth/domain/schemas/payloads/AdminUserIndexPayloadSchema";
 import SessionUserPayloadSchema from "@/modules/auth/domain/schemas/payloads/SessionUserPayloadSchema";
 import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
-import { ApiResponse, Entity, TURLSearchParams } from "@/modules/core";
+import { TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { IApiMetaData } from "@/modules/core/schemas/response";
 import { fetchAuthDataAndValidate } from "@/modules/core/utils/fetchAuthDataAndValidate";
@@ -72,7 +76,7 @@ export const actionGetUsers = async (
 export const actionGetUserByUuid = async (
   userUuid: string,
   params?: TURLSearchParams,
-): Promise<ApiResponse<{ data: Entity[] }>> => {
+): Promise<TAdminUserDetailPayload | IApiMetaData> => {
   try {
     const axios = await authAxiosInstance();
     const response = await axios.get(
@@ -81,10 +85,24 @@ export const actionGetUserByUuid = async (
         params,
       },
     );
-    console.log("response ", response.data.data);
-    return response.data;
+    const parsed = ApiResponseSchema(AdminUserDetailPayloadSchema).safeParse(
+      response.data,
+    );
+
+    if (!parsed.success) {
+      console.log(
+        "schema error on fetch admin user detail:",
+        formattedIssues(parsed.error.issues),
+      );
+      throw new Error("Admin user detail schema validation failed.");
+    }
+
+    if (parsed.data.data.payload === null) {
+      throw new Error("Admin user detail payload was null.");
+    }
+
+    return parsed.data.data.payload;
   } catch (error) {
-    console.error("Failed to fetch products", error);
-    throw error;
+    return handleError(error);
   }
 };

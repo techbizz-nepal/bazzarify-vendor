@@ -1,11 +1,13 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TAdminUserListItem } from "@/modules/auth/domain/schemas/payloads/AdminUserIndexPayloadSchema";
 import DynamicTable, {
   TableColumn,
 } from "@/modules/core/components/client/DynamicTable";
 import TableFilterToolbar from "@/modules/core/components/client/TableFilterToolbar";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -20,6 +22,16 @@ const columns: TableColumn<TAdminUserListItem>[] = [
     render: (_, record) => record.roles.join(", ") || "-",
   },
   { key: "created_at", title: "Created At" },
+  {
+    key: "uuid",
+    title: "Action",
+    render: (_, record) => (
+      <Button asChild size="sm" variant="outline">
+        <Link href={`/consumers/${record.uuid}`}>View</Link>
+      </Button>
+    ),
+    align: "right",
+  },
 ];
 
 interface UsersVisibilityTableProps {

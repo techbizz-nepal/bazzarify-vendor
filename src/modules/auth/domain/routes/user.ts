@@ -5,7 +5,7 @@ const users: IRoute["user"] = {
     path: "/auth/consumers",
   },
   getByKey: {
-    path: "/auth/consumers/:uuid",
+    path: "auth/admin/users/:uuid",
   },
 };
 
