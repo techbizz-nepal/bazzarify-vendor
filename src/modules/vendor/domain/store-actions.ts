@@ -12,8 +12,13 @@ import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import postDataAndValidate from "@/modules/core/utils/postDataAndValidate";
 import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
-import { StoreTypeIndexPayloadSchema } from "@/modules/vendor/domain/schemas/storeOnboarding";
+import {
+  StoreTypeIndexPayloadSchema,
+  StoreTypeOptionSchema,
+} from "@/modules/vendor/domain/schemas/storeOnboarding";
 import { formattedIssues } from "@/modules/core/utils/zod.util";
+import { actionGetCategories } from "@/modules/product.management/actions/category";
+import { z } from "zod";
 
 export const actionSetBusinessAndEmail = async (
   data: BusinessAndEmailFormValues,
@@ -57,7 +62,7 @@ export const actionGetStoreTypeOptions = async () => {
       throw new Error("Authentication error.");
     }
 
-    const response = await instance.get("vendor/v1/store-types");
+    const response = await instance.get("vendor/store-types");
     const parsed = ApiResponseSchema(StoreTypeIndexPayloadSchema).safeParse(
       response.data,
     );
@@ -83,4 +88,84 @@ export const actionGetStoreTypeOptions = async () => {
     console.error(error);
     return [];
   }
+};
+
+export const actionGetAdminStoreOnboardingStoreTypes = async () => {
+  try {
+    const instance = await authAxiosInstance();
+    const response = await instance.get("vendor/admin/store-onboarding/store-types");
+    const parsed = ApiResponseSchema(StoreTypeIndexPayloadSchema).safeParse(
+      response.data,
+    );
+
+    if (!parsed.success) {
+      throw new Error("Admin store onboarding schema validation failed.");
+    }
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      throw new Error(
+        typeof parsed.data.metaData.error === "string"
+          ? parsed.data.metaData.error
+          : "Unable to load onboarding store types.",
+      );
+    }
+
+    return parsed.data.data.payload.store_types;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+export const actionUpdateAdminStoreOnboardingSet = async ({
+  storeTypeUuid,
+  name,
+  description,
+  categoryUuids,
+}: {
+  storeTypeUuid: string;
+  name?: string;
+  description?: string | null;
+  categoryUuids: string[];
+}) => {
+  try {
+    const instance = await authAxiosInstance();
+    const response = await instance.put(
+      `vendor/admin/store-onboarding/store-types/${storeTypeUuid}`,
+      {
+        name,
+        description,
+        category_uuids: categoryUuids,
+      },
+    );
+    const parsed = ApiResponseSchema(
+      z.object({
+        store_type: StoreTypeOptionSchema,
+      }),
+    ).safeParse(response.data);
+
+    if (!parsed.success) {
+      throw new Error("Admin onboarding update schema validation failed.");
+    }
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      throw new Error(
+        typeof parsed.data.metaData.error === "string"
+          ? parsed.data.metaData.error
+          : "Unable to update onboarding set.",
+      );
+    }
+
+    return parsed.data.data.payload.store_type;
+  } catch (error) {
+    return handleRemoteError(error);
+  }
+};
+
+export const actionGetAdminLeafCategories = async () => {
+  return actionGetCategories({
+    filter: { leafOnly: true },
+    perPage: "500",
+    sort: "name",
+  });
 };

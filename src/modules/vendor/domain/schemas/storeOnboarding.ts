@@ -25,7 +25,7 @@ export const StoreTypeOptionSchema = z
     name: z.string(),
     slug: z.string(),
     description: z.string().nullable(),
-    onboarding_category_set: StoreOnboardingCategorySetSchema,
+    onboarding_category_set: StoreOnboardingCategorySetSchema.nullable(),
   })
   .strip();
 
@@ -37,6 +37,9 @@ export const StoreTypeIndexPayloadSchema = z
 
 export type TStoreOnboardingCategory = z.infer<
   typeof StoreOnboardingCategorySchema
+>;
+export type TStoreOnboardingCategorySet = z.infer<
+  typeof StoreOnboardingCategorySetSchema
 >;
 export type TStoreTypeOption = z.infer<typeof StoreTypeOptionSchema>;
 export type TStoreTypeIndexPayload = z.infer<

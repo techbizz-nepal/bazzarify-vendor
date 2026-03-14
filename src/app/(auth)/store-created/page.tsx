@@ -36,6 +36,8 @@ export default async function StoreCreatedPage() {
   const selectedStoreType = storeTypeOptions.find(
     (option) => option.uuid === authUser.store?.store_type_uuid,
   );
+  const starterCategories =
+    selectedStoreType?.onboarding_category_set?.categories ?? [];
 
   return (
     <PageContainer pageTitle="Store Created">
@@ -50,7 +52,7 @@ export default async function StoreCreatedPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {selectedStoreType ? (
+            {selectedStoreType && selectedStoreType.onboarding_category_set ? (
               <div className="space-y-3 rounded-md border bg-slate-50 p-4">
                 <div>
                   <p className="font-semibold text-slate-900">
@@ -67,16 +69,14 @@ export default async function StoreCreatedPage() {
                     Assigned starter categories
                   </p>
                   <ul className="mt-2 flex flex-wrap gap-2">
-                    {selectedStoreType.onboarding_category_set.categories.map(
-                      (category) => (
-                        <li
-                          key={category.uuid}
-                          className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 shadow-sm ring-1 ring-slate-200"
-                        >
-                          {category.name}
-                        </li>
-                      ),
-                    )}
+                    {starterCategories.map((category) => (
+                      <li
+                        key={category.uuid}
+                        className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 shadow-sm ring-1 ring-slate-200"
+                      >
+                        {category.name}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>

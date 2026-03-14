@@ -45,6 +45,8 @@ const SetBusinessAndEmail = ({
   const selectedStoreType = storeTypeOptions.find(
     (option) => option.uuid === selectedStoreTypeUuid,
   );
+  const starterCategories =
+    selectedStoreType?.onboarding_category_set?.categories ?? [];
 
   return (
     <div className="px-3">
@@ -83,7 +85,7 @@ const SetBusinessAndEmail = ({
               </FormItem>
             )}
           />
-          {selectedStoreType ? (
+          {selectedStoreType && selectedStoreType.onboarding_category_set ? (
             <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
               <p className="font-semibold text-slate-900">
                 {selectedStoreType.name}
@@ -95,16 +97,14 @@ const SetBusinessAndEmail = ({
                 Assigned starter categories
               </p>
               <ul className="mt-2 flex flex-wrap gap-2">
-                {selectedStoreType.onboarding_category_set.categories.map(
-                  (category) => (
-                    <li
-                      key={category.uuid}
-                      className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 shadow-sm ring-1 ring-slate-200"
-                    >
-                      {category.name}
-                    </li>
-                  ),
-                )}
+                {starterCategories.map((category) => (
+                  <li
+                    key={category.uuid}
+                    className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 shadow-sm ring-1 ring-slate-200"
+                  >
+                    {category.name}
+                  </li>
+                ))}
               </ul>
             </div>
           ) : (
