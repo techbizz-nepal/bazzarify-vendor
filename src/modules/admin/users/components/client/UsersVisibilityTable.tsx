@@ -27,7 +27,7 @@ const columns: TableColumn<TAdminUserListItem>[] = [
     title: "Action",
     render: (_, record) => (
       <Button asChild size="sm" variant="outline">
-        <Link href={`/consumers/${record.uuid}`}>View</Link>
+        <Link href={`/users/${record.uuid}`}>View</Link>
       </Button>
     ),
     align: "right",
@@ -55,7 +55,7 @@ export default function UsersVisibilityTable({
     }
 
     const query = searchParams.toString();
-    router.push(query.length > 0 ? `/consumers?${query}` : "/consumers");
+    router.push(query.length > 0 ? `/users?${query}` : "/users");
   };
 
   const handleSearchSubmit = () => {
@@ -100,7 +100,7 @@ export default function UsersVisibilityTable({
       <DynamicTable
         columns={columns}
         data={rows}
-        emptyMessage="No consumers found for the current filters."
+        emptyMessage="No users found for the current filters."
       />
     </Card>
   );

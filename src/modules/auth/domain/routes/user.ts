@@ -2,7 +2,7 @@ import { IRoute } from "@/modules/core";
 
 const users: IRoute["user"] = {
   index: {
-    path: "/auth/consumers",
+    path: "/auth/users",
   },
   getByKey: {
     path: "auth/admin/users/:uuid",

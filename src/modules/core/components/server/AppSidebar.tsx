@@ -54,8 +54,8 @@ const adminNavigations: TMenuItem[] = [
     icon: AiFillProduct,
   },
   {
-    title: "Consumers",
-    path: "/consumers",
+    title: "Users",
+    path: "/users",
     icon: FaUsers,
   },
   {
@@ -106,7 +106,7 @@ export async function AppSidebar({ className }: { className?: string }) {
   const items = isVendor
     ? vendorNavigations
     : adminNavigations.filter((item) =>
-        item.path === "/consumers" ? isSuperAdmin : true,
+        item.path === "/users" ? isSuperAdmin : true,
       );
   return (
     <Sidebar className={className}>
