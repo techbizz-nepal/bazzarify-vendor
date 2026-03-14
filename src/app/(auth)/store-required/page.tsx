@@ -17,6 +17,7 @@ import SetBusinessAndEmailForm from "@/modules/guest/components/client/registrat
 import { actionGetStoreTypeOptions } from "@/modules/vendor/domain/store-actions";
 import {
   DEFAULT_STORE_REQUIREMENT_RETURN_PATH,
+  buildStoreRemediationPath,
   sanitizeVendorReturnPath,
 } from "@/modules/vendor/domain/storeRequirementNavigation";
 import { redirect } from "next/navigation";
@@ -42,6 +43,10 @@ export default async function StoreRequiredPage({
   if (userUuid) {
     const authUser = await getAuthUser(userUuid);
     if (authUser && !("error" in authUser) && authUser.store) {
+      if (authUser.store.product_authoring_ready === false) {
+        redirect(buildStoreRemediationPath(safeReturnTo));
+      }
+
       redirect(safeReturnTo ?? "/store-created");
     }
   }

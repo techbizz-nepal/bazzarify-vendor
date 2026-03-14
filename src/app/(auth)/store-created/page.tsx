@@ -14,6 +14,7 @@ import PageContainer from "@/modules/core/components/server/PageContainer";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { actionGetStoreTypeOptions } from "@/modules/vendor/domain/store-actions";
+import { buildStoreRemediationPath } from "@/modules/vendor/domain/storeRequirementNavigation";
 import { redirect } from "next/navigation";
 
 export default async function StoreCreatedPage() {
@@ -25,6 +26,10 @@ export default async function StoreCreatedPage() {
   const authUser = await getAuthUser(userUuid);
   if (!authUser || "error" in authUser || !authUser.store) {
     redirect("/store-required");
+  }
+
+  if (authUser.store.product_authoring_ready === false) {
+    redirect(buildStoreRemediationPath());
   }
 
   const storeTypeOptions = await actionGetStoreTypeOptions();

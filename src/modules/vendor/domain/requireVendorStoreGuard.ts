@@ -2,7 +2,10 @@ import "server-only";
 
 import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
-import { buildStoreRequirementPath } from "@/modules/vendor/domain/storeRequirementNavigation";
+import {
+  buildStoreRemediationPath,
+  buildStoreRequirementPath,
+} from "@/modules/vendor/domain/storeRequirementNavigation";
 import { redirect } from "next/navigation";
 
 export async function requireVendorStoreGuard(returnTo: string): Promise<void> {
@@ -18,5 +21,9 @@ export async function requireVendorStoreGuard(returnTo: string): Promise<void> {
 
   if (!authUser.store) {
     redirect(buildStoreRequirementPath(returnTo));
+  }
+
+  if (authUser.store.product_authoring_ready === false) {
+    redirect(buildStoreRemediationPath(returnTo));
   }
 }

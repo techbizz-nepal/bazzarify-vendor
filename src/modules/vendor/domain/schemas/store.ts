@@ -17,6 +17,8 @@ export const StoreSchema = z
     created_at: z.string().optional(),
     updated_at: z.string().nullable().optional(),
     deleted_at: z.string().optional().nullable(),
+    category_count: z.number().int().nonnegative().optional(),
+    product_authoring_ready: z.boolean().optional(),
   })
   .strip();
 export const SessionStoreSchema = StoreSchema.pick({
@@ -30,6 +32,8 @@ export const SessionStoreSchema = StoreSchema.pick({
   city: true,
   province: true,
   country: true,
+  category_count: true,
+  product_authoring_ready: true,
 }).strip();
 
 export default StoreSchema;
