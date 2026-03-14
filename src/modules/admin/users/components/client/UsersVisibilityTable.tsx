@@ -5,69 +5,21 @@ import { TAdminUserListItem } from "@/modules/auth/domain/schemas/payloads/Admin
 import DynamicTable, {
   TableColumn,
 } from "@/modules/core/components/client/DynamicTable";
-import TableFilterToolbar, {
-  FilterDefinition,
-} from "@/modules/core/components/client/TableFilterToolbar";
+import TableFilterToolbar from "@/modules/core/components/client/TableFilterToolbar";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-const filterDefinitions: FilterDefinition[] = [
-  {
-    key: "has_store",
-    label: "Store",
-    options: [
-      { label: "Has store", value: "yes" },
-      { label: "No store", value: "no" },
-    ],
-  },
-  {
-    key: "store_status",
-    label: "Store Status",
-    options: [
-      { label: "No store", value: "no_store" },
-      { label: "Needs categories", value: "needs_categories" },
-      { label: "Ready", value: "ready" },
-    ],
-  },
-];
-
-const statusLabels: Record<TAdminUserListItem["store_status"], string> = {
-  no_store: "No store",
-  needs_categories: "Needs categories",
-  ready: "Ready",
-};
 
 const columns: TableColumn<TAdminUserListItem>[] = [
   { key: "name", title: "Name" },
   { key: "email", title: "Email" },
   { key: "phone", title: "Phone" },
+  { key: "authType", title: "Auth Type" },
   {
     key: "roles",
     title: "Roles",
-    render: (_, record) =>
-      record.roles.map((role) => role.name).filter(Boolean).join(", ") || "-",
+    render: (_, record) => record.roles.join(", ") || "-",
   },
-  {
-    key: "store.name",
-    title: "Store",
-  },
-  {
-    key: "store.store_type_name",
-    title: "Store Type",
-  },
-  {
-    key: "store.category_count",
-    title: "Categories",
-    align: "center",
-  },
-  {
-    key: "store_status",
-    title: "Onboarding Status",
-    render: (value) =>
-      typeof value === "string" && value in statusLabels
-        ? statusLabels[value as TAdminUserListItem["store_status"]]
-        : "-",
-  },
+  { key: "created_at", title: "Created At" },
 ];
 
 interface UsersVisibilityTableProps {
@@ -88,14 +40,6 @@ export default function UsersVisibilityTable({
 
     if (nextFilters.name) {
       searchParams.set("name", nextFilters.name);
-    }
-
-    if (nextFilters.has_store) {
-      searchParams.set("has_store", nextFilters.has_store);
-    }
-
-    if (nextFilters.store_status) {
-      searchParams.set("store_status", nextFilters.store_status);
     }
 
     const query = searchParams.toString();
@@ -137,7 +81,7 @@ export default function UsersVisibilityTable({
         onSearchValueChange={setSearchDraft}
         onSearchSubmit={handleSearchSubmit}
         filters={filters}
-        filterDefinitions={filterDefinitions}
+        filterDefinitions={[]}
         onFilterChange={handleFilterChange}
         onFilterClear={handleFilterClear}
       />

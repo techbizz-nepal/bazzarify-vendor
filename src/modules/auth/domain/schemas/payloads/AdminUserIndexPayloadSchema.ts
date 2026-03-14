@@ -1,15 +1,28 @@
-import { SessionUserSchema } from "@/modules/auth/domain/schemas/UserSchema";
-import StoreSchema from "@/modules/vendor/domain/schemas/store";
 import { z } from "zod";
 
-export const AdminUserListItemSchema = SessionUserSchema.extend({
-  email_verified_at: z.string().nullable().optional(),
-  phone_verified_at: z.string().nullable().optional(),
-  store_status: z.enum(["no_store", "needs_categories", "ready"]),
-  store: StoreSchema.extend({
+export const AdminUserStoreSummarySchema = z
+  .object({
+    uuid: z.uuid(),
+    name: z.string().nullable(),
+    category_count: z.number().int().nonnegative(),
     store_type_name: z.string().nullable().optional(),
-  }).nullable(),
-});
+  })
+  .strip();
+
+export const AdminUserListItemSchema = z
+  .object({
+    uuid: z.uuid(),
+    authType: z.string(),
+    name: z.string().nullable(),
+    email: z.string().nullable(),
+    phone: z.string().nullable(),
+    created_at: z.string().nullable(),
+    roles: z.array(z.string()),
+    has_store: z.boolean(),
+  store_status: z.enum(["no_store", "needs_categories", "ready"]),
+    store: AdminUserStoreSummarySchema.nullable(),
+  })
+  .strip();
 
 export const AdminUserIndexPayloadSchema = z
   .object({

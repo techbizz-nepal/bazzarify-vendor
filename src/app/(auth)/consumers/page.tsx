@@ -13,8 +13,6 @@ export default async function ConsumersPage({
 }: {
   searchParams: Promise<{
     name?: string;
-    has_store?: string;
-    store_status?: string;
   }>;
 }) {
   const userUuid = await getSessionUserUUID(await getCookieStore());
@@ -36,8 +34,6 @@ export default async function ConsumersPage({
   const resolvedSearchParams = await searchParams;
   const initialFilters = {
     name: resolvedSearchParams.name ?? "",
-    has_store: resolvedSearchParams.has_store ?? "",
-    store_status: resolvedSearchParams.store_status ?? "",
   };
   const usersResponse = await actionGetUsers({
     filter: {
