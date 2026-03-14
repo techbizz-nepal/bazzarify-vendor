@@ -35,6 +35,39 @@ export const StoreTypeIndexPayloadSchema = z
   })
   .strip();
 
+export const StoreOnboardingBulkApplyPreviewStoreSchema = z
+  .object({
+    uuid: z.uuid(),
+    name: z.string(),
+    slug: z.string(),
+    current_category_count: z.number().int().nonnegative(),
+    missing_category_count: z.number().int().nonnegative(),
+    will_change: z.boolean(),
+  })
+  .strip();
+
+export const StoreOnboardingBulkApplyPreviewSchema = z
+  .object({
+    store_type_uuid: z.uuid(),
+    store_type_name: z.string(),
+    category_uuids: z.array(z.uuid()),
+    category_count: z.number().int().nonnegative(),
+    store_count: z.number().int().nonnegative(),
+    stores_needing_apply_count: z.number().int().nonnegative(),
+    stores_already_aligned_count: z.number().int().nonnegative(),
+    stores: z.array(StoreOnboardingBulkApplyPreviewStoreSchema),
+  })
+  .strip();
+
+export const StoreOnboardingBulkApplyResultSchema = z
+  .object({
+    store_type_uuid: z.uuid(),
+    applied_store_count: z.number().int().nonnegative(),
+    added_category_assignments: z.number().int().nonnegative(),
+    unchanged_store_count: z.number().int().nonnegative(),
+  })
+  .strip();
+
 export type TStoreOnboardingCategory = z.infer<
   typeof StoreOnboardingCategorySchema
 >;
@@ -44,4 +77,10 @@ export type TStoreOnboardingCategorySet = z.infer<
 export type TStoreTypeOption = z.infer<typeof StoreTypeOptionSchema>;
 export type TStoreTypeIndexPayload = z.infer<
   typeof StoreTypeIndexPayloadSchema
+>;
+export type TStoreOnboardingBulkApplyPreview = z.infer<
+  typeof StoreOnboardingBulkApplyPreviewSchema
+>;
+export type TStoreOnboardingBulkApplyResult = z.infer<
+  typeof StoreOnboardingBulkApplyResultSchema
 >;

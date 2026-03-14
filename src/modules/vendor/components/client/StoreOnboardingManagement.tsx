@@ -14,12 +14,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { TCategoryIndexPayload } from "@/modules/product.management";
 import {
+  actionApplyAdminStoreOnboardingBulk,
+  actionPreviewAdminStoreOnboardingBulkApply,
   actionUpdateAdminStoreOnboardingSet,
 } from "@/modules/vendor/domain/store-actions";
 import {
+  TStoreOnboardingBulkApplyPreview,
   TStoreTypeOption,
 } from "@/modules/vendor/domain/schemas/storeOnboarding";
-import { startTransition, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type LeafCategory = TCategoryIndexPayload["categories"]["data"][number];
@@ -57,6 +60,10 @@ export default function StoreOnboardingManagement({
     initialDraftState.selectedCategoryUuids,
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [bulkPreview, setBulkPreview] =
+    useState<TStoreOnboardingBulkApplyPreview | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [isApplyingBulk, setIsApplyingBulk] = useState(false);
 
   const selectedStoreType = useMemo(
     () =>
@@ -129,6 +136,7 @@ export default function StoreOnboardingManagement({
             ),
           );
           applyStoreTypeSelection(response);
+          void loadBulkPreview(response.uuid);
           toast.success("Onboarding categories updated for future stores.");
         })
         .catch((error) => {
@@ -140,6 +148,78 @@ export default function StoreOnboardingManagement({
         })
         .finally(() => {
           setIsSaving(false);
+        });
+    });
+  };
+
+  const loadBulkPreview = async (storeTypeUuid: string) => {
+    setIsLoadingPreview(true);
+
+    try {
+      const response = await actionPreviewAdminStoreOnboardingBulkApply(
+        storeTypeUuid,
+      );
+
+      if ("metaData" in response) {
+        setBulkPreview(null);
+        if (response.metaData.error) {
+          toast.error(response.metaData.error);
+        }
+        return;
+      }
+
+      setBulkPreview(response);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to preview bulk apply.";
+      toast.error(message);
+      setBulkPreview(null);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedStoreTypeUuid) {
+      setBulkPreview(null);
+      return;
+    }
+
+    void loadBulkPreview(selectedStoreTypeUuid);
+  }, [selectedStoreTypeUuid]);
+
+  const handleBulkApply = () => {
+    if (!selectedStoreType || !bulkPreview) {
+      toast.error("Select a store type with a valid onboarding set first.");
+      return;
+    }
+
+    setIsApplyingBulk(true);
+
+    startTransition(() => {
+      void actionApplyAdminStoreOnboardingBulk(selectedStoreType.uuid)
+        .then((response) => {
+          if ("metaData" in response) {
+            toast.error(response.metaData.error);
+            return;
+          }
+
+          toast.success(
+            `Applied onboarding defaults to ${response.applied_store_count} stores.`,
+          );
+          void loadBulkPreview(selectedStoreType.uuid);
+        })
+        .catch((error) => {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Unable to apply onboarding defaults.";
+          toast.error(message);
+        })
+        .finally(() => {
+          setIsApplyingBulk(false);
         });
     });
   };
@@ -299,6 +379,114 @@ export default function StoreOnboardingManagement({
                 <ThemedButton onClick={handleSave} disabled={isSaving}>
                   {isSaving ? "Saving..." : "Save onboarding set"}
                 </ThemedButton>
+              </div>
+
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="font-medium text-slate-900">
+                      Apply to Existing Stores
+                    </div>
+                    <div className="mt-1 text-sm text-slate-600">
+                      Add any missing onboarding categories to stores of this
+                      type. Existing store categories are preserved.
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <ThemedButton
+                      variant="outline"
+                      onClick={() => void loadBulkPreview(selectedStoreType.uuid)}
+                      disabled={isLoadingPreview}
+                    >
+                      {isLoadingPreview ? "Refreshing..." : "Refresh preview"}
+                    </ThemedButton>
+                    <ThemedButton
+                      onClick={handleBulkApply}
+                      disabled={
+                        isApplyingBulk ||
+                        !bulkPreview ||
+                        bulkPreview.stores_needing_apply_count === 0
+                      }
+                    >
+                      {isApplyingBulk ? "Applying..." : "Apply to stores"}
+                    </ThemedButton>
+                  </div>
+                </div>
+
+                {bulkPreview ? (
+                  <>
+                    <div className="grid gap-3 md:grid-cols-4">
+                      <div className="rounded-md border bg-white p-3">
+                        <div className="text-xs uppercase tracking-wide text-slate-500">
+                          Stores
+                        </div>
+                        <div className="mt-1 text-lg font-semibold text-slate-900">
+                          {bulkPreview.store_count}
+                        </div>
+                      </div>
+                      <div className="rounded-md border bg-white p-3">
+                        <div className="text-xs uppercase tracking-wide text-slate-500">
+                          Need Apply
+                        </div>
+                        <div className="mt-1 text-lg font-semibold text-slate-900">
+                          {bulkPreview.stores_needing_apply_count}
+                        </div>
+                      </div>
+                      <div className="rounded-md border bg-white p-3">
+                        <div className="text-xs uppercase tracking-wide text-slate-500">
+                          Already Aligned
+                        </div>
+                        <div className="mt-1 text-lg font-semibold text-slate-900">
+                          {bulkPreview.stores_already_aligned_count}
+                        </div>
+                      </div>
+                      <div className="rounded-md border bg-white p-3">
+                        <div className="text-xs uppercase tracking-wide text-slate-500">
+                          Default Categories
+                        </div>
+                        <div className="mt-1 text-lg font-semibold text-slate-900">
+                          {bulkPreview.category_count}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border bg-white p-4">
+                      <div className="font-medium text-slate-900">
+                        Stores affected
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {bulkPreview.stores.slice(0, 8).map((store) => (
+                          <div
+                            key={store.uuid}
+                            className="flex items-center justify-between gap-4 rounded-md border p-3 text-sm"
+                          >
+                            <div>
+                              <div className="font-medium text-slate-900">
+                                {store.name}
+                              </div>
+                              <div className="text-slate-500">{store.slug}</div>
+                            </div>
+                            <div className="text-right text-slate-600">
+                              <div>{store.current_category_count} current</div>
+                              <div>
+                                {store.missing_category_count} missing
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {bulkPreview.stores.length === 0 ? (
+                          <div className="text-sm text-slate-500">
+                            No stores found for this store type yet.
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-md border bg-white p-4 text-sm text-slate-500">
+                    Preview unavailable for the selected store type.
+                  </div>
+                )}
               </div>
             </>
           ) : (

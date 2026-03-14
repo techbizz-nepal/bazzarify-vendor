@@ -13,6 +13,8 @@ import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import postDataAndValidate from "@/modules/core/utils/postDataAndValidate";
 import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
 import {
+  StoreOnboardingBulkApplyPreviewSchema,
+  StoreOnboardingBulkApplyResultSchema,
   StoreTypeIndexPayloadSchema,
   StoreTypeOptionSchema,
 } from "@/modules/vendor/domain/schemas/storeOnboarding";
@@ -168,4 +170,68 @@ export const actionGetAdminLeafCategories = async () => {
     perPage: "500",
     sort: "name",
   });
+};
+
+export const actionPreviewAdminStoreOnboardingBulkApply = async (
+  storeTypeUuid: string,
+) => {
+  try {
+    const instance = await authAxiosInstance();
+    const response = await instance.get(
+      `vendor/admin/store-onboarding/store-types/${storeTypeUuid}/bulk-apply-preview`,
+    );
+    const parsed = ApiResponseSchema(
+      z.object({
+        preview: StoreOnboardingBulkApplyPreviewSchema,
+      }),
+    ).safeParse(response.data);
+
+    if (!parsed.success) {
+      throw new Error("Admin onboarding bulk preview schema validation failed.");
+    }
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      throw new Error(
+        typeof parsed.data.metaData.error === "string"
+          ? parsed.data.metaData.error
+          : "Unable to preview onboarding bulk apply.",
+      );
+    }
+
+    return parsed.data.data.payload.preview;
+  } catch (error) {
+    return handleRemoteError(error);
+  }
+};
+
+export const actionApplyAdminStoreOnboardingBulk = async (
+  storeTypeUuid: string,
+) => {
+  try {
+    const instance = await authAxiosInstance();
+    const response = await instance.post(
+      `vendor/admin/store-onboarding/store-types/${storeTypeUuid}/bulk-apply`,
+    );
+    const parsed = ApiResponseSchema(
+      z.object({
+        result: StoreOnboardingBulkApplyResultSchema,
+      }),
+    ).safeParse(response.data);
+
+    if (!parsed.success) {
+      throw new Error("Admin onboarding bulk apply schema validation failed.");
+    }
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      throw new Error(
+        typeof parsed.data.metaData.error === "string"
+          ? parsed.data.metaData.error
+          : "Unable to apply onboarding defaults to stores.",
+      );
+    }
+
+    return parsed.data.data.payload.result;
+  } catch (error) {
+    return handleRemoteError(error);
+  }
 };
