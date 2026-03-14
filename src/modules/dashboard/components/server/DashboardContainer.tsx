@@ -20,6 +20,7 @@ import {
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
 import SetBusinessAndEmailForm from "@/modules/guest/components/client/registration/SetBusinessAndEmailForm";
+import { actionGetStoreTypeOptions } from "@/modules/vendor/domain/store-actions";
 import { Loader } from "lucide-react";
 import { headers } from "next/headers";
 import { Suspense } from "react";
@@ -36,6 +37,7 @@ export default async function DashboardContainer() {
     console.log("auth user: ", authUser);
     return null;
   }
+  const storeTypeOptions = await actionGetStoreTypeOptions();
   return (
     <Suspense fallback={<Loader />}>
       <PageContainer pageTitle={"Dashboard"}>
@@ -62,7 +64,9 @@ export default async function DashboardContainer() {
                       Store Information
                     </SheetTitle>
                   </SheetHeader>
-                  <SetBusinessAndEmailForm />
+                  <SetBusinessAndEmailForm
+                    storeTypeOptions={storeTypeOptions}
+                  />
                 </SheetContent>
               </Sheet>
             </CardContent>

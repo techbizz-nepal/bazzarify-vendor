@@ -18,6 +18,7 @@ export const SetBusinessAndEmailSchema = z.object({
     .regex(phoneRegex, {
       message: "Phone number is not valid",
     }),
+  store_type_uuid: z.uuid({ message: "Store type is required." }),
 });
 export type BusinessAndEmailFormValues = z.infer<
   typeof SetBusinessAndEmailSchema

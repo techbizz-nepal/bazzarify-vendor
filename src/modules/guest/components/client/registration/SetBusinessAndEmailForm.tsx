@@ -10,21 +10,41 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import useStoreSetupForm from "@/modules/vendor/hooks/useStoreSetupForm";
+import { TStoreTypeOption } from "@/modules/vendor/domain/schemas/storeOnboarding";
 import { useRouter } from "next/navigation";
 
 interface SetBusinessAndEmailProps {
   redirectTo?: string | null;
+  storeTypeOptions?: TStoreTypeOption[];
 }
 
-const SetBusinessAndEmail = ({ redirectTo }: SetBusinessAndEmailProps) => {
+const SetBusinessAndEmail = ({
+  redirectTo,
+  storeTypeOptions = [],
+}: SetBusinessAndEmailProps) => {
   const router = useRouter();
   const {
     storeSetupForm: form,
     handleStoreSetupSubmit: onSubmit,
-  } = useStoreSetupForm(router, { redirectTo });
+  } = useStoreSetupForm(router, {
+    redirectTo,
+    hasStoreTypeOptions: storeTypeOptions.length > 0,
+  });
+
+  const selectedStoreTypeUuid = form.watch("store_type_uuid");
+  const selectedStoreType = storeTypeOptions.find(
+    (option) => option.uuid === selectedStoreTypeUuid,
+  );
 
   return (
     <div className="px-3">
@@ -33,6 +53,67 @@ const SetBusinessAndEmail = ({ redirectTo }: SetBusinessAndEmailProps) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex-col space-y-6"
         >
+          <FormField
+            name="store_type_uuid"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-y-2">
+                <FormLabel className="text-lg font-bold">Store Type</FormLabel>
+                <FormDescription className="text-xs">
+                  Choose the starter catalog that best fits your store.
+                </FormDescription>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={storeTypeOptions.length === 0}
+                  >
+                    <SelectTrigger className="w-full border border-slate-300">
+                      <SelectValue placeholder="Select your store type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {storeTypeOptions.map((option) => (
+                        <SelectItem key={option.uuid} value={option.uuid}>
+                          {option.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {selectedStoreType ? (
+            <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
+              <p className="font-semibold text-slate-900">
+                {selectedStoreType.name}
+              </p>
+              {selectedStoreType.description ? (
+                <p className="mt-1">{selectedStoreType.description}</p>
+              ) : null}
+              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
+                Assigned starter categories
+              </p>
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {selectedStoreType.onboarding_category_set.categories.map(
+                  (category) => (
+                    <li
+                      key={category.uuid}
+                      className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 shadow-sm ring-1 ring-slate-200"
+                    >
+                      {category.name}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          ) : (
+            <div className="rounded-md border border-dashed bg-slate-50 p-4 text-sm text-slate-600">
+              {storeTypeOptions.length === 0
+                ? "Store types are being configured. Please ask an administrator to prepare onboarding defaults."
+                : "Select a store type to preview the starter categories your store will receive."}
+            </div>
+          )}
           <FormField
             name="name"
             render={({ field }) => (
@@ -97,7 +178,7 @@ const SetBusinessAndEmail = ({ redirectTo }: SetBusinessAndEmailProps) => {
           />
           <ThemedButton
             className={cn(`text-md w-full cursor-pointer py-6`)}
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || storeTypeOptions.length === 0}
           >
             Submit
           </ThemedButton>

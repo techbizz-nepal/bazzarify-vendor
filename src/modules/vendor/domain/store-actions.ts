@@ -6,10 +6,14 @@ import {
   setAuthUser,
 } from "@/modules/auth/data/lib/auth-lib";
 import StoreCreatePayloadSchema from "@/modules/auth/domain/schemas/payloads/StoreCreatePayloadSchema";
+import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
+import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import postDataAndValidate from "@/modules/core/utils/postDataAndValidate";
 import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
+import { StoreTypeIndexPayloadSchema } from "@/modules/vendor/domain/schemas/storeOnboarding";
+import { formattedIssues } from "@/modules/core/utils/zod.util";
 
 export const actionSetBusinessAndEmail = async (
   data: BusinessAndEmailFormValues,
@@ -43,5 +47,40 @@ export const actionSetBusinessAndEmail = async (
     }
   } catch (e) {
     return handleRemoteError(e);
+  }
+};
+
+export const actionGetStoreTypeOptions = async () => {
+  try {
+    const instance = await authAxiosInstance();
+    if (!instance) {
+      throw new Error("Authentication error.");
+    }
+
+    const response = await instance.get("vendor/v1/store-types");
+    const parsed = ApiResponseSchema(StoreTypeIndexPayloadSchema).safeParse(
+      response.data,
+    );
+
+    if (!parsed.success) {
+      console.log(
+        "schema validation error on store type options:",
+        formattedIssues(parsed.error.issues),
+      );
+      throw new Error("Store type options schema validation failed.");
+    }
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      throw new Error(
+        typeof parsed.data.metaData.error === "string"
+          ? parsed.data.metaData.error
+          : "Unable to load store type options.",
+      );
+    }
+
+    return parsed.data.data.payload.store_types;
+  } catch (error) {
+    console.error(error);
+    return [];
   }
 };

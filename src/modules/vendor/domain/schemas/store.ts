@@ -4,6 +4,7 @@ export const StoreSchema = z
   .object({
     uuid: z.uuid(),
     user_uuid: z.uuid(),
+    store_type_uuid: z.uuid().nullable().optional(),
     name: z.string(),
     slug: z.string(),
     short_name: z.string().nullable(),
@@ -22,6 +23,7 @@ export const SessionStoreSchema = StoreSchema.pick({
   name: true,
   slug: true,
   user_uuid: true,
+  store_type_uuid: true,
   email: true,
   phone: true,
   short_description: true,

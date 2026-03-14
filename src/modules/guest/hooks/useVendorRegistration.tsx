@@ -63,6 +63,7 @@ export default function useVendorRegistration(router: AppRouterInstance) {
       email: "",
       name: "",
       phone: "",
+      store_type_uuid: "",
     },
   });
   const handleRequestRegistration = (
@@ -138,7 +139,9 @@ export default function useVendorRegistration(router: AppRouterInstance) {
           toast.error(r?.metaData?.error);
           return;
         }
-        r !== undefined && r !== null && router.replace("/");
+        if (r !== undefined && r !== null) {
+          router.replace("/");
+        }
       })
       .catch((error) => console.log(error));
   return {

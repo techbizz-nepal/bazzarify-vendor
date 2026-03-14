@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 interface UseStoreSetupFormOptions {
   redirectTo?: string | null;
+  hasStoreTypeOptions?: boolean;
 }
 
 export default function useStoreSetupForm(
@@ -24,6 +25,7 @@ export default function useStoreSetupForm(
   options: UseStoreSetupFormOptions = {},
 ) {
   const redirectTo = sanitizeVendorReturnPath(options.redirectTo);
+  const hasStoreTypeOptions = options.hasStoreTypeOptions ?? true;
 
   const storeSetupForm = useForm<BusinessAndEmailFormValues>({
     resolver: zodResolver(SetBusinessAndEmailSchema),
@@ -31,10 +33,14 @@ export default function useStoreSetupForm(
       email: "",
       name: "",
       phone: "",
+      store_type_uuid: "",
     },
   });
 
   const handleStoreSetupSubmit = (data: BusinessAndEmailFormValues) =>
+    !hasStoreTypeOptions
+      ? Promise.resolve(toast.error("Store types are not configured right now."))
+      :
     actionSetBusinessAndEmail(data)
       .then((response) => {
         if ("metaData" in response && response.metaData?.error) {
