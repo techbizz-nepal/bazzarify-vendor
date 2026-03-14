@@ -31,16 +31,18 @@ export default async function StoreRequiredPage({
   searchParams,
 }: StoreRequiredPageProps) {
   const { returnTo } = await searchParams;
-  const safeReturnTo = sanitizeVendorReturnPath(
-    returnTo,
-    DEFAULT_STORE_REQUIREMENT_RETURN_PATH,
-  );
+  const safeReturnTo = returnTo
+    ? sanitizeVendorReturnPath(
+        returnTo,
+        DEFAULT_STORE_REQUIREMENT_RETURN_PATH,
+      )
+    : null;
 
   const userUuid = await getSessionUserUUID(await getCookieStore());
   if (userUuid) {
     const authUser = await getAuthUser(userUuid);
     if (authUser && !("error" in authUser) && authUser.store) {
-      redirect(safeReturnTo);
+      redirect(safeReturnTo ?? "/store-created");
     }
   }
 
@@ -61,7 +63,8 @@ export default async function StoreRequiredPage({
             <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
               Pick the store type that fits your business. Bazarify will assign
               the starter categories for that type as part of store creation,
-              then return you to your intended product flow.
+              then continue either to your intended product flow or to the next
+              onboarding step.
             </div>
             <SetBusinessAndEmailForm
               redirectTo={safeReturnTo}

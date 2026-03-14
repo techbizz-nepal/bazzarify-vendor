@@ -1,4 +1,5 @@
 const DEFAULT_VENDOR_PRODUCT_PATH = "/products";
+export const STORE_CREATED_SUCCESS_PATH = "/store-created";
 
 export const sanitizeVendorReturnPath = (
   value: string | null | undefined,
@@ -25,3 +26,13 @@ export const buildStoreRequirementPath = (returnTo: string) => {
 
 export const DEFAULT_STORE_REQUIREMENT_RETURN_PATH =
   DEFAULT_VENDOR_PRODUCT_PATH;
+
+export const resolvePostStoreCreationPath = (
+  returnTo?: string | null,
+) => {
+  if (!returnTo) {
+    return STORE_CREATED_SUCCESS_PATH;
+  }
+
+  return sanitizeVendorReturnPath(returnTo);
+};

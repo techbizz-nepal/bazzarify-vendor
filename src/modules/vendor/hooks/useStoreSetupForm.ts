@@ -1,7 +1,9 @@
 "use client";
 
 import { actionSetBusinessAndEmail } from "@/modules/vendor/domain/store-actions";
-import { sanitizeVendorReturnPath } from "@/modules/vendor/domain/storeRequirementNavigation";
+import {
+  resolvePostStoreCreationPath,
+} from "@/modules/vendor/domain/storeRequirementNavigation";
 import {
   BusinessAndEmailFormValues,
   SetBusinessAndEmailSchema,
@@ -24,8 +26,8 @@ export default function useStoreSetupForm(
   router: AppRouterInstance,
   options: UseStoreSetupFormOptions = {},
 ) {
-  const redirectTo = sanitizeVendorReturnPath(options.redirectTo);
   const hasStoreTypeOptions = options.hasStoreTypeOptions ?? true;
+  const postCreatePath = resolvePostStoreCreationPath(options.redirectTo);
 
   const storeSetupForm = useForm<BusinessAndEmailFormValues>({
     resolver: zodResolver(SetBusinessAndEmailSchema),
@@ -57,7 +59,7 @@ export default function useStoreSetupForm(
 
         if (response) {
           toast.success("Store created.");
-          router.replace(redirectTo);
+          router.replace(postCreatePath);
         }
       })
       .catch((error) => {

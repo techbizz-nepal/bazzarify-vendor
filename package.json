@@ -7,6 +7,8 @@
     "build": "bun --bun next build",
     "start": "bun --bun next start",
     "lint": "bunx eslint .",
+    "auth:session": "bun scripts/vendor-auth-session.ts",
+    "verify:browser:auth": "bun scripts/vendor-browser-auth-check.ts",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
     "create-module": "bun run module-generator.js"
@@ -86,6 +88,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "module-generator": "^3.0.0",
+    "playwright": "^1.58.2",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
