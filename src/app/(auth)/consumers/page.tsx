@@ -2,7 +2,7 @@ import PageContainer from "@/modules/core/components/server/PageContainer";
 import { actionGetUsers } from "@/modules/auth/domain/auth-actions";
 import UsersVisibilityTable from "@/modules/admin/users/components/client/UsersVisibilityTable";
 
-export default async function UsersPage({
+export default async function ConsumersPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -26,7 +26,7 @@ export default async function UsersPage({
       : [];
 
   return (
-    <PageContainer pageTitle="Manage Users">
+    <PageContainer pageTitle="Manage Consumers">
       <UsersVisibilityTable rows={rows} initialFilters={initialFilters} />
     </PageContainer>
   );

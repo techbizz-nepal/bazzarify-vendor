@@ -49,8 +49,8 @@ const adminNavigations: TMenuItem[] = [
     icon: AiFillProduct,
   },
   {
-    title: "Users",
-    path: "/users",
+    title: "Consumers",
+    path: "/consumers",
     icon: FaUsers,
   },
   {

@@ -99,7 +99,7 @@ export default function UsersVisibilityTable({
     }
 
     const query = searchParams.toString();
-    router.push(query.length > 0 ? `/users?${query}` : "/users");
+    router.push(query.length > 0 ? `/consumers?${query}` : "/consumers");
   };
 
   const handleSearchSubmit = () => {
@@ -144,7 +144,7 @@ export default function UsersVisibilityTable({
       <DynamicTable
         columns={columns}
         data={rows}
-        emptyMessage="No users found for the current filters."
+        emptyMessage="No consumers found for the current filters."
       />
     </Card>
   );
