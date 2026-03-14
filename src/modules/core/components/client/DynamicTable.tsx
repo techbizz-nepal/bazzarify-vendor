@@ -89,57 +89,61 @@ export default function DynamicTable<T = unknown>({
     );
   }
   return (
-    <Table className={className}>
-      <TableHeader>
-        <TableRow>
-          {columns.map((column) => (
-            <TableHead
-              key={column.key}
-              style={{ width: column.width }}
-              className={
-                column.align === "center"
-                  ? "text-center"
-                  : column.align === "right"
-                    ? "text-right"
-                    : "text-left"
-              }
-            >
-              {column.title}
-            </TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.length === 0 ? (
+    <div className="w-full overflow-x-auto">
+      <Table className={className}>
+        <TableHeader>
           <TableRow>
-            <TableCell
-              colSpan={columns.length}
-              className="text-center py-8 text-muted-foreground"
-            >
-              {emptyMessage}
-            </TableCell>
+            {columns.map((column) => (
+              <TableHead
+                key={column.key}
+                style={{ width: column.width }}
+                className={[
+                  "whitespace-nowrap",
+                  column.align === "center"
+                    ? "text-center"
+                    : column.align === "right"
+                      ? "text-right"
+                      : "text-left",
+                ].join(" ")}
+              >
+                {column.title}
+              </TableHead>
+            ))}
           </TableRow>
-        ) : (
-          data.map((record, index) => (
-            <TableRow key={index}>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.key}
-                  className={
-                    column.align === "center"
-                      ? "text-center"
-                      : column.align === "right"
-                        ? "text-right"
-                        : "text-left"
-                  }
-                >
-                  {renderCellValue(column, record, index)}
-                </TableCell>
-              ))}
+        </TableHeader>
+        <TableBody>
+          {data.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="text-center py-8 text-muted-foreground"
+              >
+                {emptyMessage}
+              </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ) : (
+            data.map((record, index) => (
+              <TableRow key={index}>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.key}
+                    className={[
+                      "whitespace-nowrap align-top",
+                      column.align === "center"
+                        ? "text-center"
+                        : column.align === "right"
+                          ? "text-right"
+                          : "text-left",
+                    ].join(" ")}
+                  >
+                    {renderCellValue(column, record, index)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
