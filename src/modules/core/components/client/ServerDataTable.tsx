@@ -8,6 +8,7 @@ import DynamicTable, {
 import TableFilterToolbar, {
   FilterDefinition,
 } from "@/modules/core/components/client/TableFilterToolbar";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useMemo, useState, useTransition } from "react";
 
@@ -37,6 +38,47 @@ interface ServerDataTableProps<T> {
   filters?: FilterDefinition[];
   initialFilters: Record<string, string>;
   pagination: ServerDataTablePagination;
+  rowActions?: Array<{
+    label: string;
+    hrefTemplate: string;
+    variant?: "default" | "outline" | "secondary" | "ghost" | "link";
+  }>;
+}
+
+interface PaginationControlsProps {
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  isPending: boolean;
+  onNavigateToPage: (nextPage: number) => void;
+}
+
+function PaginationControls({
+  currentPage,
+  hasNextPage,
+  hasPreviousPage,
+  isPending,
+  onNavigateToPage,
+}: PaginationControlsProps) {
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        onClick={() => onNavigateToPage(currentPage - 1)}
+        disabled={isPending || !hasPreviousPage}
+      >
+        Previous
+      </Button>
+      <span className="text-sm text-muted-foreground">Page {currentPage}</span>
+      <Button
+        variant="outline"
+        onClick={() => onNavigateToPage(currentPage + 1)}
+        disabled={isPending || !hasNextPage}
+      >
+        Next
+      </Button>
+    </div>
+  );
 }
 
 const buildNextSearchParams = (
@@ -60,6 +102,21 @@ const buildNextSearchParams = (
   return searchParams;
 };
 
+const resolveRowActionHref = <T,>(record: T, hrefTemplate: string) => {
+  return hrefTemplate.replace(/:([A-Za-z0-9_]+)/g, (_, key: string) => {
+    const value =
+      record &&
+      typeof record === "object" &&
+      key in (record as Record<string, unknown>)
+        ? (record as Record<string, unknown>)[key]
+        : "";
+
+    return typeof value === "string" || typeof value === "number"
+      ? String(value)
+      : "";
+  });
+};
+
 export default function ServerDataTable<T>({
   title,
   description,
@@ -71,13 +128,14 @@ export default function ServerDataTable<T>({
   filters = [],
   initialFilters,
   pagination,
+  rowActions = [],
 }: ServerDataTableProps<T>) {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const [searchDraft, setSearchDraft] = useState(initialFilters[search.queryKey] ?? "");
-  const [activeFilters, setActiveFilters] =
-    useState<Record<string, string>>(initialFilters);
+  const [draftFilters, setDraftFilters] = useState<Record<string, string>>(
+    initialFilters,
+  );
 
   const paginationSummary = useMemo(() => {
     if (pagination.from == null || pagination.to == null) {
@@ -86,6 +144,38 @@ export default function ServerDataTable<T>({
 
     return `Showing ${pagination.from}-${pagination.to}`;
   }, [pagination.from, pagination.to]);
+
+  const columnsWithActions = useMemo(() => {
+    if (rowActions.length === 0) {
+      return columns;
+    }
+
+    const actionColumn: TableColumn<T> = {
+      key: "__actions",
+      title: "Actions",
+      align: "right",
+      render: (_, record) => (
+        <div className="flex justify-end gap-2">
+          {rowActions.map((action) => (
+            <Button
+              key={`${action.label}-${action.hrefTemplate}`}
+              asChild
+              size="sm"
+              variant={action.variant ?? "outline"}
+            >
+              <Link href={resolveRowActionHref(record, action.hrefTemplate)}>
+                {action.label}
+              </Link>
+            </Button>
+          ))}
+        </div>
+      ),
+    };
+
+    return [...columns, actionColumn];
+  }, [columns, rowActions]);
+
+  const appliedFilters = initialFilters;
 
   const navigateWithFilters = (nextFilters: Record<string, string>) => {
     const searchParams = buildNextSearchParams(nextFilters, search.queryKey);
@@ -99,7 +189,7 @@ export default function ServerDataTable<T>({
   };
 
   const navigateToPage = (nextPage: number) => {
-    const searchParams = buildNextSearchParams(activeFilters, search.queryKey);
+    const searchParams = buildNextSearchParams(appliedFilters, search.queryKey);
     searchParams.set("page", String(nextPage));
 
     startTransition(() => {
@@ -107,34 +197,36 @@ export default function ServerDataTable<T>({
     });
   };
 
-  const handleSearchSubmit = () => {
-    const nextFilters = {
-      ...activeFilters,
-      [search.queryKey]: searchDraft.trim(),
-    };
-    setActiveFilters(nextFilters);
-    navigateWithFilters(nextFilters);
+  const handleSearchValueChange = (value: string) => {
+    setDraftFilters((currentFilters) => ({
+      ...currentFilters,
+      [search.queryKey]: value,
+    }));
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    const nextFilters = {
-      ...activeFilters,
+    setDraftFilters((currentFilters) => ({
+      ...currentFilters,
       [key]: value,
-    };
-    setActiveFilters(nextFilters);
+    }));
+  };
+
+  const handleFilterSubmit = () => {
+    const nextFilters = Object.fromEntries(
+      Object.entries(draftFilters).map(([key, value]) => [
+        key,
+        key === search.queryKey ? value.trim() : value,
+      ]),
+    );
+
+    setDraftFilters(nextFilters);
     navigateWithFilters(nextFilters);
   };
 
   const handleFilterClear = (key: string) => {
-    const nextFilters = { ...activeFilters };
+    const nextFilters = { ...draftFilters };
     delete nextFilters[key];
-
-    if (key === search.queryKey) {
-      setSearchDraft("");
-    }
-
-    setActiveFilters(nextFilters);
-    navigateWithFilters(nextFilters);
+    setDraftFilters(nextFilters);
   };
 
   return (
@@ -147,48 +239,46 @@ export default function ServerDataTable<T>({
               <p className="text-sm text-muted-foreground">{description}</p>
             ) : null}
           </div>
-          {toolbarAction}
+          <div className="flex flex-col items-start gap-3 md:items-end">
+            {toolbarAction}
+            <PaginationControls
+              currentPage={pagination.currentPage}
+              hasNextPage={pagination.hasNextPage}
+              hasPreviousPage={pagination.hasPreviousPage}
+              isPending={isPending}
+              onNavigateToPage={navigateToPage}
+            />
+          </div>
         </CardHeader>
       )}
       <CardContent className="space-y-4">
         <TableFilterToolbar
-          searchValue={searchDraft}
+          searchValue={draftFilters[search.queryKey] ?? ""}
           searchPlaceholder={search.placeholder}
-          onSearchValueChange={setSearchDraft}
-          onSearchSubmit={handleSearchSubmit}
-          filters={activeFilters}
+          onSearchValueChange={handleSearchValueChange}
+          onSearchSubmit={handleFilterSubmit}
+          filters={draftFilters}
           filterDefinitions={filters}
           onFilterChange={handleFilterChange}
           onFilterClear={handleFilterClear}
           isPending={isPending}
+          submitLabel="Apply Filters"
         />
         <DynamicTable
-          columns={columns}
+          columns={columnsWithActions}
           data={rows}
           loading={isPending}
           emptyMessage={emptyMessage}
         />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">{paginationSummary}</p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigateToPage(pagination.currentPage - 1)}
-              disabled={isPending || !pagination.hasPreviousPage}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {pagination.currentPage}
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => navigateToPage(pagination.currentPage + 1)}
-              disabled={isPending || !pagination.hasNextPage}
-            >
-              Next
-            </Button>
-          </div>
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            isPending={isPending}
+            onNavigateToPage={navigateToPage}
+          />
         </div>
       </CardContent>
     </Card>

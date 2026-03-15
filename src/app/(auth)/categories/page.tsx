@@ -16,16 +16,19 @@ const categoryColumns: TableColumn<TCategory>[] = [
 
 const categoryFilterDefinitions: FilterDefinition[] = [
   {
+    type: "select",
     key: "rootOnly",
     label: "Category scope",
     options: [{ label: "Root only", value: "true" }],
   },
   {
+    type: "select",
     key: "leafOnly",
     label: "Leaf scope",
     options: [{ label: "Leaf only", value: "true" }],
   },
   {
+    type: "select",
     key: "trashed",
     label: "Trash state",
     options: [{ label: "Only trashed", value: "only" }],
