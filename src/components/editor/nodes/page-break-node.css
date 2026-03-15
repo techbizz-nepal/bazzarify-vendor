@@ -1,4 +1,4 @@
-[type='page-break'] {
+.editor-page-break[type='page-break'] {
   position: relative;
   display: block;
   width: calc(100% + var(--editor-input-padding, 28px) * 2);
@@ -13,7 +13,7 @@
   background-color: var(--editor-color-secondary, #eeeeee);
 }
 
-[type='page-break']::before {
+.editor-page-break[type='page-break']::before {
   content: '';
 
   position: absolute;
@@ -28,7 +28,7 @@
   height: 16px;
 }
 
-[type='page-break']::after {
+.editor-page-break[type='page-break']::after {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -45,10 +45,14 @@
   font-weight: 600;
 }
 
-.selected[type='page-break'] {
+.editor-page-break.selected[type='page-break'] {
   border-color: var(--editor-color-primary, #4766cb);
 }
 
-.selected[type='page-break']::before {
+.editor-page-break.selected[type='page-break']::before {
   opacity: 1;
+}
+
+.editor-page-break.selected[type='page-break']::after {
+  color: var(--editor-color-primary, #4766cb);
 }

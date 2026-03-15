@@ -79,19 +79,9 @@ function PageBreakComponent({ nodeKey }: { nodeKey: NodeKey }) {
     const pbElem = editor.getElementByKey(nodeKey);
     if (pbElem !== null) {
       if (isSelected) {
-        pbElem.classList.add("!border-[var(--editor-color-primary,#4766cb)]");
-        pbElem.classList.add(
-          "!after:text-[var(--editor-color-primary,#4766cb)]",
-        );
-        pbElem.classList.add("!before:opacity-100");
+        pbElem.classList.add("selected");
       } else {
-        pbElem.classList.remove(
-          "!border-[var(--editor-color-primary,#4766cb)]",
-        );
-        pbElem.classList.remove(
-          "!after:text-[var(--editor-color-primary,#4766cb)]",
-        );
-        pbElem.classList.remove("!before:opacity-100");
+        pbElem.classList.remove("selected");
       }
     }
   }, [editor, isSelected, nodeKey]);
@@ -139,22 +129,7 @@ export class PageBreakNode extends DecoratorNode<JSX.Element> {
     const el = document.createElement("figure");
     el.setAttribute("type", this.getType());
     el.style.pageBreakAfter = "always";
-    el.className = `
-      relative block w-[calc(100%+56px)] overflow-visible 
-      -ml-[28px] mt-7 mb-7
-      border-0 border-t border-b border-dashed border-[var(--editor-color-secondary,#eee)]
-      bg-[var(--editor-color-secondary,#eee)]
-      before:content-[''] 
-      before:absolute before:top-1/2 before:-translate-y-1/2
-      before:left-10 before:opacity-50
-      before:bg-cover before:w-4 before:h-4
-      after:content-['PAGE_BREAK']
-      after:absolute after:top-1/2 after:left-1/2 
-      after:-translate-x-1/2 after:-translate-y-1/2
-      after:block after:py-0.5 after:px-1.5
-      after:border after:border-solid after:border-[#ccc]
-      after:bg-white after:text-xs after:text-black after:font-semibold
-    `;
+    el.className = "editor-page-break";
     return el;
   }
 
