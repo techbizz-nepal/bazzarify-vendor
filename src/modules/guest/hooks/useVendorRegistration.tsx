@@ -108,7 +108,7 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     if (!phone) return alert("Invalid request");
     actionVerifyRegistration(data)
       .then((res) => {
-        if (res?.metaData?.error) {
+        if (hasErrorMeta(res)) {
           const feedback = getValidationFeedback(res);
           if (feedback) {
             applyValidationFeedback(
@@ -118,10 +118,10 @@ export default function useVendorRegistration(router: AppRouterInstance) {
             toast.warning(feedback.summary);
             return;
           }
-          toast.warning(res?.metaData?.error);
+          toast.warning(res.metaData.error);
           return;
         }
-        toast.success("Signing you in...");
+        toast.success(getSuccessMessage(res));
       })
       .catch((err) => console.log(err));
   };
@@ -154,3 +154,35 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     handleSetBusinessAndEmailSubmit,
   };
 }
+  const hasErrorMeta = (
+    response: Awaited<ReturnType<typeof actionVerifyRegistration>>,
+  ): response is Extract<
+    Awaited<ReturnType<typeof actionVerifyRegistration>>,
+    { metaData: { error: string } }
+  > =>
+    typeof response === "object" &&
+    response !== null &&
+    "metaData" in response &&
+    typeof response.metaData?.error === "string" &&
+    response.metaData.error.length > 0;
+
+  const getSuccessMessage = (
+    response: Awaited<ReturnType<typeof actionVerifyRegistration>>,
+  ) => {
+    if (
+      typeof response === "object" &&
+      response !== null &&
+      "data" in response &&
+      response.data &&
+      typeof response.data === "object" &&
+      "payload" in response.data &&
+      response.data.payload &&
+      !Array.isArray(response.data.payload) &&
+      "messageText" in response.data.payload &&
+      typeof response.data.payload.messageText === "string"
+    ) {
+      return response.data.payload.messageText;
+    }
+
+    return "Signing you in...";
+  };

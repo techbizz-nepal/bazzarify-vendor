@@ -16,7 +16,19 @@ type AuthSuccessResponse = {
     message?: string;
     payload?: {
       token?: string;
+      messageText?: string;
     };
+  };
+};
+
+type AuthErrorResponse = {
+  data: {
+    payload: never[];
+    message: string;
+  };
+  metaData: {
+    error: string;
+    errorCode?: number;
   };
 };
 
@@ -40,7 +52,7 @@ export const actionRequestRegistration = async (
 
 export const actionVerifyRegistration = async (
   data: RegistrationVerificationFormValues,
-) => {
+): Promise<AuthSuccessResponse | AuthErrorResponse> => {
   try {
     const response = await defaultAxiosInstance.post(
       AUTH_ROUTES.register.verifySignup.path,
@@ -72,6 +84,7 @@ export const actionVerifyRegistration = async (
       userUUID: sessionUser.uuid,
     });
     await setAuthUser(sessionUser.uuid, sessionUser);
+    return response.data as AuthSuccessResponse;
   } catch (error: unknown) {
     return handleRemoteError(error);
   }
