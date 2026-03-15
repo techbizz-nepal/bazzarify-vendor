@@ -1,12 +1,9 @@
-import { Button } from "@/components/ui/button";
 import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import { TCategory } from "@/modules/product.management";
 import { FilterDefinition } from "@/modules/core/components/client/TableFilterToolbar";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
-import Link from "next/link";
-import { FaPlus } from "react-icons/fa6";
 
 const categoryColumns: TableColumn<TCategory>[] = [
   { key: "name", title: "Name" },
@@ -83,14 +80,6 @@ export default async function CategoriesPage({
       <ServerDataTable
         title="Manage Categories"
         description="Manage categories with server-driven filters, pagination, and backend-owned query behavior."
-        toolbarAction={
-          <Button asChild size="sm">
-            <Link href="/categories/create">
-              <FaPlus className="mr-2" />
-              New Category
-            </Link>
-          </Button>
-        }
         columns={categoryColumns}
         rows={categories?.data ?? []}
         emptyMessage="No categories found for the current filters."

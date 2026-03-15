@@ -55,7 +55,7 @@ function useSidebar() {
 }
 
 function SidebarProvider({
-  defaultOpen = true,
+  defaultOpen = false,
   open: openProp,
   onOpenChange: setOpenProp,
   className,
@@ -164,7 +164,8 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
 }) {
-  const { isMobile, state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, open, setOpen, openMobile, setOpenMobile } =
+    useSidebar();
 
   if (collapsible === "none") {
     return (
@@ -219,7 +220,9 @@ function Sidebar({
         aria-hidden={!open}
         className={cn(
           "fixed inset-0 z-30 hidden bg-slate-950/20 transition-opacity duration-200 md:block",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+          open
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0",
         )}
         onClick={() => setOpen(false)}
       />
@@ -252,7 +255,9 @@ function Sidebar({
         className={cn(
           "fixed inset-y-0 z-30 hidden w-3 bg-transparent transition-opacity duration-200 md:block",
           side === "left" ? "left-0" : "right-0",
-          open ? "pointer-events-none opacity-0" : "pointer-events-auto opacity-100",
+          open
+            ? "pointer-events-none opacity-0"
+            : "pointer-events-auto opacity-100",
         )}
         onClick={() => setOpen(true)}
       />

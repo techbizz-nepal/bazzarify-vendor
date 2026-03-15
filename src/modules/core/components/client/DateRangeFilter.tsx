@@ -74,10 +74,11 @@ export default function DateRangeFilter({
         <Button
           variant="outline"
           className={cn(
-            "w-[280px] justify-start text-left font-normal",
+            "w-[280px] justify-start text-left font-normal data-[state=open]:border-primary data-[state=open]:bg-accent/70",
             !selectedRange?.from && "text-muted-foreground",
           )}
           disabled={disabled}
+          aria-busy={disabled}
         >
           <CalendarDays className="mr-2 h-4 w-4" />
           {buttonLabel}

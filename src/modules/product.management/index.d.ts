@@ -136,17 +136,6 @@ export interface IPaginatedData<T> {
   to: 15;
 }
 
-export interface IDataTableProps<TEntity> {
-  page: number;
-  data: IPaginatedData<TEntity[]> | null;
-  onNextAction: () => void;
-  onPreviousAction: () => void;
-  rowsCount: number;
-  onViewAction: (identifier: string) => void;
-  onEditAction: (identifier: string) => void;
-  onFilterChangeAction: (e: ChangeEvent<HTMLInputElement>) => void;
-  onOnlyLastChildrenAction?: () => void;
-}
 export interface VariantSelectorState {
   attributes: TAttribute[];
   variantSelections: Record<string, string[]>;

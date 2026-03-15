@@ -144,6 +144,7 @@ export default function TableFilterToolbar({
                   onFilterClear(filterDefinition.key);
                 }}
                 disabled={isPending}
+                aria-busy={isPending}
               >
                 Clear
               </Button>

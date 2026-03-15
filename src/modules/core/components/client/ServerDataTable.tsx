@@ -66,6 +66,7 @@ function PaginationControls({
         variant="default"
         onClick={() => onNavigateToPage(currentPage - 1)}
         disabled={isPending || !hasPreviousPage}
+        aria-busy={isPending}
       >
         Previous
       </Button>
@@ -74,6 +75,7 @@ function PaginationControls({
         variant="default"
         onClick={() => onNavigateToPage(currentPage + 1)}
         disabled={isPending || !hasNextPage}
+        aria-busy={isPending}
       >
         Next
       </Button>
