@@ -23,22 +23,26 @@ export type FilterDefinition = {
 
 interface TableFilterToolbarProps {
   searchValue: string;
+  searchPlaceholder?: string;
   onSearchValueChange: (value: string) => void;
   onSearchSubmit: () => void;
   filters: Record<string, string>;
   filterDefinitions: FilterDefinition[];
   onFilterChange: (key: string, value: string) => void;
   onFilterClear: (key: string) => void;
+  isPending?: boolean;
 }
 
 export default function TableFilterToolbar({
   searchValue,
+  searchPlaceholder = "Search by name, email, or phone...",
   onSearchValueChange,
   onSearchSubmit,
   filters,
   filterDefinitions,
   onFilterChange,
   onFilterClear,
+  isPending = false,
 }: TableFilterToolbarProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -47,10 +51,12 @@ export default function TableFilterToolbar({
           <Input
             value={searchValue}
             onChange={(event) => onSearchValueChange(event.target.value)}
-            placeholder="Search by name, email, or phone..."
+            placeholder={searchPlaceholder}
             className="max-w-xs"
           />
-          <Button onClick={onSearchSubmit}>Search</Button>
+          <Button onClick={onSearchSubmit} disabled={isPending}>
+            {isPending ? "Loading..." : "Search"}
+          </Button>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {filterDefinitions.map((filterDefinition) => (
@@ -86,6 +92,7 @@ export default function TableFilterToolbar({
               <Button
                 variant="outline"
                 onClick={() => onFilterClear(filterDefinition.key)}
+                disabled={isPending}
               >
                 Clear
               </Button>

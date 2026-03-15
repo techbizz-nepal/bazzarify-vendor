@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ReactNode } from "react";
 
 type BivariantCallback<Args extends unknown[], Return> = {
@@ -31,6 +32,7 @@ export interface DynamicTableProps<T = unknown> {
   loading?: boolean;
   emptyMessage?: string;
   className?: string;
+  skeletonRowCount?: number;
 }
 
 export default function DynamicTable<T = unknown>({
@@ -39,6 +41,7 @@ export default function DynamicTable<T = unknown>({
   loading = false,
   emptyMessage = "No data available",
   className,
+  skeletonRowCount = 8,
 }: DynamicTableProps<T>) {
   const renderCellValue = (
     column: TableColumn<T>,
@@ -81,13 +84,6 @@ export default function DynamicTable<T = unknown>({
     return JSON.stringify(value);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
   return (
     <div className="w-full overflow-x-auto">
       <Table className={className}>
@@ -112,7 +108,20 @@ export default function DynamicTable<T = unknown>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.length === 0 ? (
+          {loading ? (
+            Array.from({ length: skeletonRowCount }).map((_, rowIndex) => (
+              <TableRow key={`skeleton-row-${rowIndex}`}>
+                {columns.map((column) => (
+                  <TableCell
+                    key={`${column.key}-skeleton-${rowIndex}`}
+                    className="align-top"
+                  >
+                    <Skeleton className="h-4 min-w-24 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : data.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={columns.length}
