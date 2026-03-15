@@ -1,15 +1,7 @@
-import { Button } from "@/components/ui/button";
-import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
-import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { actionGetSliders } from "@/modules/marketing/domain/slider/actions/actionGetSliders";
-import { sliderIndexColumns } from "@/modules/marketing/domain/slider/consts/SliderIndexColumns";
-import { TSliderWithImages } from "@/modules/marketing/domain/slider/schemas/Slider";
-import Link from "next/link";
-import { FaPlus } from "react-icons/fa6";
-
-const columns = sliderIndexColumns as TableColumn<TSliderWithImages>[];
+import SlidersServerTable from "@/modules/marketing/presentation/slider/components/client/SlidersServerTable";
 
 export default async function SlidersPage({
   searchParams,
@@ -41,20 +33,8 @@ export default async function SlidersPage({
 
   return (
     <PageContainer pageTitle="Manage Sliders">
-      <ServerDataTable
-        title="Manage Sliders"
-        description="Manage sliders with server-driven filters, pagination, and backend-owned query behavior."
-        toolbarAction={
-          <Button asChild size="sm">
-            <Link href="/sliders/create">
-              <FaPlus className="mr-2" />
-              New Slider
-            </Link>
-          </Button>
-        }
-        columns={columns}
+      <SlidersServerTable
         rows={sliders?.data ?? []}
-        emptyMessage="No sliders found for the current filters."
         table={
           table ?? {
             search: {
