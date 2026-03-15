@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SimplePaginatedSchema } from "@/modules/product.management/schemas/SimplePaginated";
 
 export const AdminUserStoreSummarySchema = z
   .object({
@@ -26,7 +27,7 @@ export const AdminUserListItemSchema = z
 
 export const AdminUserIndexPayloadSchema = z
   .object({
-    users: z.array(AdminUserListItemSchema),
+    users: SimplePaginatedSchema(AdminUserListItemSchema),
   })
   .strip();
 

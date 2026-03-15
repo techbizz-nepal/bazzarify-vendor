@@ -40,13 +40,18 @@ export const actionGetUsers = async (
         ? new URLSearchParams(params as unknown as Record<string, string>)
         : new URLSearchParams(
             Object.entries(params ?? {}).flatMap(([key, value]) => {
-              if (key !== "filter" || typeof value !== "object" || value === null) {
+              if (key === "filter" && typeof value === "object" && value !== null) {
+                return Object.entries(value as Record<string, string>).flatMap(
+                  ([filterKey, filterValue]) =>
+                    filterValue ? [[`filter[${filterKey}]`, filterValue]] : [],
+                );
+              }
+
+              if (value === undefined || value === null || value === "") {
                 return [];
               }
 
-              return Object.entries(value as Record<string, string>).map(
-                ([filterKey, filterValue]) => [`filter[${filterKey}]`, filterValue],
-              );
+              return [[key, String(value)]];
             }),
           );
     const response = await axios.get(["auth/admin/users", searchParams].join("?"), {
