@@ -2,14 +2,38 @@
 
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
+import { TURLSearchParams } from "@/modules/core";
 import { ORDER_MANAGEMENT_ROUTES } from "@/modules/order.management/routes";
 import { isAxiosError } from "axios";
 
-export const actionGetOrders = async (formData: FormData) => {
+const buildOrderSearchParams = (
+  params?: FormData | TURLSearchParams,
+): URLSearchParams => {
+  if (params instanceof FormData) {
+    return new URLSearchParams(params as unknown as Record<string, string>);
+  }
+
+  return new URLSearchParams(
+    Object.entries(params ?? {}).flatMap(([key, value]) => {
+      if (value === undefined || value === null) {
+        return [];
+      }
+
+      if (key === "filter" && typeof value === "object") {
+        return Object.entries(value as Record<string, string>).flatMap(
+          ([filterKey, filterValue]) =>
+            filterValue ? [[`filter[${filterKey}]`, filterValue]] : [],
+        );
+      }
+
+      return [[key, String(value)]];
+    }),
+  );
+};
+
+export const actionGetOrders = async (params?: FormData | TURLSearchParams) => {
   try {
-    const searchParams = new URLSearchParams(
-      formData as unknown as Record<string, string>,
-    );
+    const searchParams = buildOrderSearchParams(params);
     const client = await authAxiosInstance();
     const response = await client.get(
       [ORDER_MANAGEMENT_ROUTES.order.index.path, searchParams].join("?"),

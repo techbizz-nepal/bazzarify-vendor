@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import DateRangeFilter from "@/modules/core/components/client/DateRangeFilter";
 import {
   Select,
   SelectContent,
@@ -15,13 +16,22 @@ export type FilterOption = {
   value: string;
 };
 
-export type FilterDefinition = {
-  type?: "select" | "text";
-  key: string;
-  label: string;
-  placeholder?: string;
-  options?: FilterOption[];
-};
+export type FilterDefinition =
+  | {
+      type?: "select" | "text";
+      key: string;
+      label: string;
+      placeholder?: string;
+      options?: FilterOption[];
+    }
+  | {
+      type: "date-range";
+      key: string;
+      label: string;
+      fromKey: string;
+      toKey: string;
+      maxMonths?: number;
+    };
 
 interface TableFilterToolbarProps {
   searchValue: string;
@@ -68,7 +78,19 @@ export default function TableFilterToolbar({
               key={filterDefinition.key}
               className="flex items-center gap-2"
             >
-              {filterDefinition.type === "text" ? (
+              {filterDefinition.type === "date-range" ? (
+                <DateRangeFilter
+                  label={filterDefinition.label}
+                  fromValue={filters[filterDefinition.fromKey] ?? ""}
+                  toValue={filters[filterDefinition.toKey] ?? ""}
+                  onChange={({ from, to }) => {
+                    onFilterChange(filterDefinition.fromKey, from);
+                    onFilterChange(filterDefinition.toKey, to);
+                  }}
+                  maxMonths={filterDefinition.maxMonths}
+                  disabled={isPending}
+                />
+              ) : filterDefinition.type === "text" ? (
                 <Input
                   value={filters[filterDefinition.key] ?? ""}
                   onChange={(event) =>
@@ -112,7 +134,15 @@ export default function TableFilterToolbar({
               )}
               <Button
                 variant="outline"
-                onClick={() => onFilterClear(filterDefinition.key)}
+                onClick={() => {
+                  if (filterDefinition.type === "date-range") {
+                    onFilterClear(filterDefinition.fromKey);
+                    onFilterClear(filterDefinition.toKey);
+                    return;
+                  }
+
+                  onFilterClear(filterDefinition.key);
+                }}
                 disabled={isPending}
               >
                 Clear

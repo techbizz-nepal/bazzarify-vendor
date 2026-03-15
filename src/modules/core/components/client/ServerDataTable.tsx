@@ -63,7 +63,7 @@ function PaginationControls({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant="outline"
+        variant="default"
         onClick={() => onNavigateToPage(currentPage - 1)}
         disabled={isPending || !hasPreviousPage}
       >
@@ -71,7 +71,7 @@ function PaginationControls({
       </Button>
       <span className="text-sm text-muted-foreground">Page {currentPage}</span>
       <Button
-        variant="outline"
+        variant="default"
         onClick={() => onNavigateToPage(currentPage + 1)}
         disabled={isPending || !hasNextPage}
       >
@@ -224,9 +224,11 @@ export default function ServerDataTable<T>({
   };
 
   const handleFilterClear = (key: string) => {
-    const nextFilters = { ...draftFilters };
-    delete nextFilters[key];
-    setDraftFilters(nextFilters);
+    setDraftFilters((currentFilters) => {
+      const nextFilters = { ...currentFilters };
+      delete nextFilters[key];
+      return nextFilters;
+    });
   };
 
   return (
