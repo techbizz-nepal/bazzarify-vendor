@@ -1,53 +1,22 @@
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import OrdersServerTable from "@/modules/order.management/components/client/order/OrdersServerTable";
 import { actionGetOrders } from "@/modules/order.management/actions/actionGetOrders";
 import { actionGetOrderStatuses } from "@/modules/order.management/actions/actionGetOrderStatuses";
 
-const normalizeSingleValue = (
-  value: string | string[] | undefined,
-): string | undefined => {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-
-  return value;
-};
-
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    search?: string | string[];
-    page?: string | string[];
-    payment_method?: string | string[];
-    status?: string | string[];
-    from?: string | string[];
-    to?: string | string[];
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const search = normalizeSingleValue(resolvedSearchParams.search) ?? "";
-  const page = Number(normalizeSingleValue(resolvedSearchParams.page) ?? "1");
-  const paymentMethod =
-    normalizeSingleValue(resolvedSearchParams.payment_method) ?? "";
-  const status = normalizeSingleValue(resolvedSearchParams.status) ?? "";
-  const from = normalizeSingleValue(resolvedSearchParams.from) ?? "";
-  const to = normalizeSingleValue(resolvedSearchParams.to) ?? "";
+  const flattenedParams = flattenSearchParams(resolvedSearchParams);
+  const page = Number(flattenedParams.page ?? "1");
 
   const [ordersResponse, statusOptionsResponse] = await Promise.all([
     actionGetOrders({
+      ...flattenedParams,
       page: Number.isFinite(page) && page > 0 ? page : 1,
-      filter: {
-        ...(search ? { order_number: search } : {}),
-        ...(paymentMethod ? { payment_method: paymentMethod } : {}),
-        ...(status ? { status } : {}),
-        ...(from && to
-          ? { placed_between: `${from},${to}` }
-          : {
-              ...(from ? { placed_after: from } : {}),
-              ...(to ? { placed_before: to } : {}),
-            }),
-      },
     }),
     actionGetOrderStatuses(),
   ]);
@@ -56,6 +25,12 @@ export default async function OrdersPage({
     ordersResponse && typeof ordersResponse === "object" && "orders" in ordersResponse
       ? ordersResponse.orders
       : null;
+  const table =
+    ordersResponse &&
+    typeof ordersResponse === "object" &&
+    "table" in ordersResponse
+      ? ordersResponse.table
+      : null;
   const statusOptions =
     Array.isArray(statusOptionsResponse) ? statusOptionsResponse : [];
 
@@ -63,13 +38,18 @@ export default async function OrdersPage({
     <PageContainer pageTitle="Manage Orders">
       <OrdersServerTable
         rows={orders?.data ?? []}
-        initialFilters={{
-          search,
-          ...(paymentMethod ? { payment_method: paymentMethod } : {}),
-          ...(status ? { status } : {}),
-          ...(from ? { from } : {}),
-          ...(to ? { to } : {}),
-        }}
+        table={
+          table ?? {
+            search: {
+              queryKey: "filter[order_number]",
+              placeholder: "Search orders by order number...",
+            },
+            filters: [],
+          }
+        }
+        initialFilters={Object.fromEntries(
+          Object.entries(flattenedParams).filter(([key]) => key !== "page"),
+        )}
         pagination={{
           currentPage: Number(orders?.current_page ?? 1),
           perPage: orders?.per_page ? Number(orders.per_page) : null,

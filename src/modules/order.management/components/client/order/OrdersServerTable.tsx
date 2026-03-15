@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/popover";
 import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
-import { FilterDefinition } from "@/modules/core/components/client/TableFilterToolbar";
+import { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 import { actionUpdateOrderStatus } from "@/modules/order.management/actions/actionUpdateOrderStatus";
 import { TOrderStatusOption } from "@/modules/order.management/actions/actionGetOrderStatuses";
 import { TOrderList } from "@/modules/order.management/schemas/orderSchema";
@@ -25,33 +25,9 @@ type OrderListCountFields = {
   item_count?: number | null;
 };
 
-const orderFilterDefinitions: FilterDefinition[] = [
-  {
-    type: "select",
-    key: "payment_method",
-    label: "Payment Method",
-    options: [
-      { label: "COD", value: "cod" },
-      { label: "Wallet", value: "wallet" },
-    ],
-  },
-  {
-    type: "select",
-    key: "status",
-    label: "Status",
-  },
-  {
-    type: "date-range",
-    key: "placed_between",
-    label: "Placed Between",
-    fromKey: "from",
-    toKey: "to",
-    maxMonths: 1,
-  },
-];
-
 interface OrdersServerTableProps {
   rows: OrderListItem[];
+  table: TServerDataTableMeta;
   initialFilters: Record<string, string>;
   pagination: {
     currentPage: number;
@@ -66,6 +42,7 @@ interface OrdersServerTableProps {
 
 export default function OrdersServerTable({
   rows,
+  table,
   initialFilters,
   pagination,
   statusOptions,
@@ -163,18 +140,6 @@ export default function OrdersServerTable({
     },
   ];
 
-  const filters = orderFilterDefinitions.map((filterDefinition) =>
-    filterDefinition.key === "status"
-      ? {
-          ...filterDefinition,
-          options: statusOptions.map((statusOption) => ({
-            label: statusOption.label,
-            value: statusOption.code,
-          })),
-        }
-      : filterDefinition,
-  );
-
   return (
     <ServerDataTable
       title="Manage Orders"
@@ -182,12 +147,7 @@ export default function OrdersServerTable({
       columns={columns}
       rows={rows}
       emptyMessage="No orders found for the current filters."
-      search={{
-        queryKey: "search",
-        value: initialFilters.search ?? "",
-        placeholder: "Search orders by order number...",
-      }}
-      filters={filters}
+      table={table}
       initialFilters={initialFilters}
       pagination={pagination}
       rowActions={[

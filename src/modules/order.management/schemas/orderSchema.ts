@@ -122,25 +122,24 @@ export const OrderTotalsSchema = OrderSchema.pick({
   grand_total: true,
   payment_fee: true,
 }).strict();
-export const OrderListSchema = z.array(
-  OrderSchema.pick({
-    uuid: true,
-    order_number: true,
-    placed_at: true,
-    status: true,
-    grand_total: true,
-    shipping_total: true,
-    buyer_uuid: true,
-    buyer_type: true,
-    items: true,
-  }).extend(
-    z.object({
-      buyer: z.object({
-        name: z.string(),
-      }),
+export const OrderListItemSchema = OrderSchema.pick({
+  uuid: true,
+  order_number: true,
+  placed_at: true,
+  status: true,
+  grand_total: true,
+  shipping_total: true,
+  buyer_uuid: true,
+  buyer_type: true,
+  items: true,
+}).extend(
+  z.object({
+    buyer: z.object({
+      name: z.string(),
     }),
-  ),
+  }),
 );
+export const OrderListSchema = z.array(OrderListItemSchema);
 export type TOrder = z.infer<typeof OrderSchema>;
 export type TOrderItem = z.infer<typeof OrderItemSchema>;
 export type TCart = z.infer<typeof Cart>;
@@ -150,4 +149,5 @@ export type TCartItemToUpdateQuantity = z.infer<
   typeof CartItemToUpdateQuantitySchema
 >;
 export type TOrderTotals = z.infer<typeof OrderTotalsSchema>;
+export type TOrderListItem = z.infer<typeof OrderListItemSchema>;
 export type TOrderList = z.infer<typeof OrderListSchema>;

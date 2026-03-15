@@ -8,6 +8,10 @@ import DynamicTable, {
 import TableFilterToolbar, {
   FilterDefinition,
 } from "@/modules/core/components/client/TableFilterToolbar";
+import {
+  TServerDataTableMeta,
+  TServerDataTableSearch,
+} from "@/modules/core/domain/schemas/ServerDataTableMeta";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useMemo, useState, useTransition } from "react";
@@ -21,12 +25,6 @@ export interface ServerDataTablePagination {
   hasPreviousPage: boolean;
 }
 
-interface ServerDataTableSearch {
-  queryKey: string;
-  value: string;
-  placeholder: string;
-}
-
 interface ServerDataTableProps<T> {
   title?: string;
   description?: string;
@@ -34,8 +32,7 @@ interface ServerDataTableProps<T> {
   columns: TableColumn<T>[];
   rows: T[];
   emptyMessage: string;
-  search: ServerDataTableSearch;
-  filters?: FilterDefinition[];
+  table: TServerDataTableMeta;
   initialFilters: Record<string, string>;
   pagination: ServerDataTablePagination;
   rowActions?: Array<{
@@ -126,8 +123,7 @@ export default function ServerDataTable<T>({
   columns,
   rows,
   emptyMessage,
-  search,
-  filters = [],
+  table,
   initialFilters,
   pagination,
   rowActions = [],
@@ -178,6 +174,8 @@ export default function ServerDataTable<T>({
   }, [columns, rowActions]);
 
   const appliedFilters = initialFilters;
+  const search: TServerDataTableSearch = table.search;
+  const filters: FilterDefinition[] = table.filters;
 
   const navigateWithFilters = (nextFilters: Record<string, string>) => {
     const searchParams = buildNextSearchParams(nextFilters, search.queryKey);

@@ -1,4 +1,5 @@
 import type { SerializedEditorState } from "lexical";
+import type { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction } from "react";
 
 export type TSpecification = {
@@ -95,9 +96,11 @@ export type TVariantPayload = {
 export type TCategoryIndexPayload = {
   categories: IPaginatedData<TCategory[]>;
   totalCount: number;
+  table: TServerDataTableMeta;
 };
 export type TProductIndexPayload = {
   categories: IPaginatedData<TProduct[]>;
+  table: TServerDataTableMeta;
 };
 
 export type TSpecificationsIndexPayload = {

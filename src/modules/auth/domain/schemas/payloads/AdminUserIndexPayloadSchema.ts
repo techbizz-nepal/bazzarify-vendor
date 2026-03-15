@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SimplePaginatedSchema } from "@/modules/product.management/schemas/SimplePaginated";
+import { ServerDataTableMetaSchema } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 
 export const AdminUserStoreSummarySchema = z
   .object({
@@ -28,6 +29,7 @@ export const AdminUserListItemSchema = z
 export const AdminUserIndexPayloadSchema = z
   .object({
     users: SimplePaginatedSchema(AdminUserListItemSchema),
+    table: ServerDataTableMetaSchema,
   })
   .strip();
 

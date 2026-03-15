@@ -1,9 +1,11 @@
 "use server";
 
+import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
 import { TURLSearchParams } from "@/modules/core";
 import { ORDER_MANAGEMENT_ROUTES } from "@/modules/order.management/routes";
+import { OrderListPayloadSchema } from "@/modules/order.management/schemas/responsePayloads/OrderListPayloadSchema";
 import { isAxiosError } from "axios";
 
 const buildOrderSearchParams = (
@@ -39,11 +41,19 @@ export const actionGetOrders = async (params?: FormData | TURLSearchParams) => {
       [ORDER_MANAGEMENT_ROUTES.order.index.path, searchParams].join("?"),
     );
 
-    const responseData = response.data; //as ApiResponse<TOrderListPayloadSchema>;
-    if (responseData.metaData.error) {
-      return { error: responseData.metaData.error };
+    const parsed = ApiResponseSchema(OrderListPayloadSchema).safeParse(
+      response.data,
+    );
+
+    if (!parsed.success) {
+      throw new Error("Order list schema validation failed.");
     }
-    return responseData.data.payload;
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      return { error: parsed.data.metaData.error ?? "Unable to fetch orders." };
+    }
+
+    return parsed.data.data.payload;
   } catch (error) {
     if (isAxiosError(error)) {
       console.log("error fetch orders: ", error?.response?.data);

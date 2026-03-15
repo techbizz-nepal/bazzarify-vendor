@@ -4,34 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DateRangeFilter from "@/modules/core/components/client/DateRangeFilter";
 import {
+  TServerDataTableFilterDefinition as FilterDefinition,
+} from "@/modules/core/domain/schemas/ServerDataTableMeta";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-export type FilterOption = {
-  label: string;
-  value: string;
-};
-
-export type FilterDefinition =
-  | {
-      type?: "select" | "text";
-      key: string;
-      label: string;
-      placeholder?: string;
-      options?: FilterOption[];
-    }
-  | {
-      type: "date-range";
-      key: string;
-      label: string;
-      fromKey: string;
-      toKey: string;
-      maxMonths?: number;
-    };
+export type { FilterDefinition };
 
 interface TableFilterToolbarProps {
   searchValue: string;

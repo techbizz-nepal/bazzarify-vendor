@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
-import { FilterDefinition } from "@/modules/core/components/client/TableFilterToolbar";
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { actionGetProducts } from "@/modules/product.management/actions/product";
 import { TProduct } from "@/modules/product.management";
-import { ProductStatus } from "@/modules/product.management/config/enums/ProductStatus";
 import { requireVendorStoreGuard } from "@/modules/vendor/domain/requireVendorStoreGuard";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa6";
@@ -41,59 +40,20 @@ const productColumns: TableColumn<TProduct>[] = [
   },
 ];
 
-const productFilterDefinitions: FilterDefinition[] = [
-  {
-    type: "text",
-    key: "sku",
-    label: "SKU",
-    placeholder: "Filter by SKU...",
-  },
-  {
-    type: "select",
-    key: "status",
-    label: "Status",
-    options: Object.entries(ProductStatus).map(([label, value]) => ({
-      label,
-      value: String(value),
-    })),
-  },
-];
-
-const normalizeSingleValue = (
-  value: string | string[] | undefined,
-): string | undefined => {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-
-  return value;
-};
-
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    search?: string | string[];
-    page?: string | string[];
-    sku?: string | string[];
-    status?: string | string[];
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireVendorStoreGuard("/products");
 
   const resolvedSearchParams = await searchParams;
-  const search = normalizeSingleValue(resolvedSearchParams.search) ?? "";
-  const page = Number(normalizeSingleValue(resolvedSearchParams.page) ?? "1");
-  const sku = normalizeSingleValue(resolvedSearchParams.sku) ?? "";
-  const status = normalizeSingleValue(resolvedSearchParams.status) ?? "";
+  const flattenedParams = flattenSearchParams(resolvedSearchParams);
+  const page = Number(flattenedParams.page ?? "1");
 
   const productResponse = await actionGetProducts({
+    ...flattenedParams,
     page: Number.isFinite(page) && page > 0 ? page : 1,
-    filter: {
-      ...(search ? { name: search } : {}),
-      ...(sku ? { sku } : {}),
-      ...(status ? { status } : {}),
-    },
   });
 
   const products =
@@ -101,6 +61,12 @@ export default async function ProductsPage({
     typeof productResponse === "object" &&
     "categories" in productResponse
       ? productResponse.categories
+      : null;
+  const table =
+    productResponse &&
+    typeof productResponse === "object" &&
+    "table" in productResponse
+      ? productResponse.table
       : null;
 
   return (
@@ -119,17 +85,18 @@ export default async function ProductsPage({
         columns={productColumns}
         rows={products?.data ?? []}
         emptyMessage="No products found for the current filters."
-        search={{
-          queryKey: "search",
-          value: search,
-          placeholder: "Search products by name...",
-        }}
-        filters={productFilterDefinitions}
-        initialFilters={{
-          search,
-          ...(sku ? { sku } : {}),
-          ...(status ? { status } : {}),
-        }}
+        table={
+          table ?? {
+            search: {
+              queryKey: "filter[name]",
+              placeholder: "Search products by name...",
+            },
+            filters: [],
+          }
+        }
+        initialFilters={Object.fromEntries(
+          Object.entries(flattenedParams).filter(([key]) => key !== "page"),
+        )}
         pagination={{
           currentPage: Number(products?.current_page ?? 1),
           perPage: products?.per_page ? Number(products.per_page) : null,
