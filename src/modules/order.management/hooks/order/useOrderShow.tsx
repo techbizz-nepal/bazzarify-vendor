@@ -12,7 +12,13 @@ import {
   useTransition,
 } from "react";
 
-export default function useOrderShow({ order }: { order: TOrder }) {
+export default function useOrderShow({
+  order,
+  canManageWholeOrder,
+}: {
+  order: TOrder;
+  canManageWholeOrder: boolean;
+}) {
   const [orderStatus, setOrderStatus] = useState(order.status);
   const [statusOptions, setStatusOptions] = useState<TOrderStatusOption[]>([]);
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(
@@ -22,6 +28,10 @@ export default function useOrderShow({ order }: { order: TOrder }) {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    if (!canManageWholeOrder) {
+      return;
+    }
+
     startTransition(async () => {
       const result = await actionGetOrderStatuses();
       if ("error" in result || !Array.isArray(result) || !result.length) {
@@ -29,7 +39,7 @@ export default function useOrderShow({ order }: { order: TOrder }) {
       }
       setStatusOptions(result);
     });
-  }, []);
+  }, [canManageWholeOrder]);
 
   const handleOrderStatusChange = (e: SyntheticEvent<HTMLButtonElement>) => {
     const updatedStatus = e.currentTarget.value;

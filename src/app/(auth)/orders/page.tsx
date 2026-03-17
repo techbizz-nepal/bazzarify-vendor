@@ -1,4 +1,5 @@
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import { getSessionUser } from "@/modules/auth/data/auth-service";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import OrdersServerTable from "@/modules/order.management/components/client/order/OrdersServerTable";
 import { actionGetOrders } from "@/modules/order.management/actions/actionGetOrders";
@@ -12,13 +13,16 @@ export default async function OrdersPage({
   const resolvedSearchParams = await searchParams;
   const flattenedParams = flattenSearchParams(resolvedSearchParams);
   const page = Number(flattenedParams.page ?? "1");
+  const sessionUser = await getSessionUser();
+  const canManageWholeOrder =
+    sessionUser?.roles.some((role) => role.name === "super-admin") ?? false;
 
   const [ordersResponse, statusOptionsResponse] = await Promise.all([
     actionGetOrders({
       ...flattenedParams,
       page: Number.isFinite(page) && page > 0 ? page : 1,
     }),
-    actionGetOrderStatuses(),
+    canManageWholeOrder ? actionGetOrderStatuses() : Promise.resolve([]),
   ]);
 
   const orders =
@@ -59,6 +63,7 @@ export default async function OrdersPage({
           hasPreviousPage: Boolean(orders?.prev_page_url),
         }}
         statusOptions={statusOptions}
+        canManageWholeOrder={canManageWholeOrder}
       />
     </PageContainer>
   );

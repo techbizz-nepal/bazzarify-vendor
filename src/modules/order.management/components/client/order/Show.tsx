@@ -34,61 +34,104 @@ import ItemCell from "@/modules/order.management/components/client/orderItem/Ite
 import useOrderShow from "@/modules/order.management/hooks/order/useOrderShow";
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
 
-export default function Show({ order }: { order: TOrder }) {
+export default function Show({
+  order,
+  canManageWholeOrder,
+}: {
+  order: TOrder;
+  canManageWholeOrder: boolean;
+}) {
   const {
     isPending,
     optimisticStatus,
     statusOptions,
     handleOrderStatusChange,
-  } = useOrderShow({ order });
+  } = useOrderShow({ order, canManageWholeOrder });
+
+  const scopedItemCount = order.items.length;
+  const scopedQuantity = order.items.reduce(
+    (total, item) => total + item.qty_ordered,
+    0,
+  );
+  const scopedSubtotal = order.items.reduce(
+    (total, item) => total + item.row_total,
+    0,
+  );
+  const scopedDiscount = order.items.reduce(
+    (total, item) => total + item.row_discount,
+    0,
+  );
+  const scopedTax = order.items.reduce((total, item) => total + item.row_tax, 0);
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-2xl">Order Details</CardTitle>
-        <CardDescription>Manage order information and status.</CardDescription>
+        <CardDescription>
+          {canManageWholeOrder
+            ? "Manage full order information and platform-level status."
+            : "Review the items in this order that belong to your store."}
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Basic information</CardTitle>
             <CardDescription>
-              View order details and manage order status.
+              {canManageWholeOrder
+                ? "View full order details and manage order status."
+                : "View the platform order identifier and your scoped fulfillment slice."}
             </CardDescription>
-            <CardAction>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="default" disabled={!statusOptions.length}>
-                    Update Status
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full flex flex-col space-y-3">
-                  {statusOptions.length ? (
-                    statusOptions.map((status) => (
-                      <Button
-                        key={status.code}
-                        value={status.code}
-                        data-note={`Order marked as ${status.label.toLowerCase()} by vendor.`}
-                        onClick={handleOrderStatusChange}
-                        variant="outline"
-                      >
-                        {status.label}
-                      </Button>
-                    ))
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      No statuses available.
-                    </p>
-                  )}
-                </PopoverContent>
-              </Popover>
-            </CardAction>
+            {canManageWholeOrder ? (
+              <CardAction>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="default" disabled={!statusOptions.length}>
+                      Update Status
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full flex flex-col space-y-3">
+                    {statusOptions.length ? (
+                      statusOptions.map((status) => (
+                        <Button
+                          key={status.code}
+                          value={status.code}
+                          data-note={`Order marked as ${status.label.toLowerCase()} by super admin.`}
+                          onClick={handleOrderStatusChange}
+                          variant="outline"
+                        >
+                          {status.label}
+                        </Button>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        No statuses available.
+                      </p>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              </CardAction>
+            ) : null}
           </CardHeader>
           <CardContent>
             <p>Order Number: {order.order_number}</p>
             <p>Status: {isPending ? "Updating status..." : optimisticStatus}</p>
-            <p>Total Items: {order.item_count}</p>
-            <p>Total Ordered Quantity: {order.item_quantity}</p>
+            <p>
+              {canManageWholeOrder ? "Total Items" : "Your Store Items"}:{" "}
+              {canManageWholeOrder ? order.item_count : scopedItemCount}
+            </p>
+            <p>
+              {canManageWholeOrder
+                ? "Total Ordered Quantity"
+                : "Your Store Quantity"}
+              : {canManageWholeOrder ? order.item_quantity : scopedQuantity}
+            </p>
             <p>Placed At: {order.placed_at}</p>
+            {!canManageWholeOrder ? (
+              <p className="text-sm text-muted-foreground">
+                Whole-order status is platform-managed. You are only viewing the
+                items assigned to your store.
+              </p>
+            ) : null}
           </CardContent>
         </Card>
         <Card>
@@ -121,17 +164,29 @@ export default function Show({ order }: { order: TOrder }) {
         )}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Payment information</CardTitle>
-            <CardDescription>View payment details</CardDescription>
+            <CardTitle className="text-lg">
+              {canManageWholeOrder ? "Payment information" : "Your Store Totals"}
+            </CardTitle>
+            <CardDescription>
+              {canManageWholeOrder
+                ? "View payment details"
+                : "These totals are calculated from the items visible to your store."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p>Sub Total: {order.sub_total}</p>
-            <p>Discount: {order.discount_total}</p>
-            <p>Tax: {order.tax_total}</p>
-            <p>Shipping: {order.shipping_total}</p>
-            <p>Method: {order.payment_method}</p>
-            <p>Type: {order.payment_status}</p>
-            <p>Fee: {order.payment_fee}</p>
+            <p>Sub Total: {canManageWholeOrder ? order.sub_total : scopedSubtotal}</p>
+            <p>
+              Discount: {canManageWholeOrder ? order.discount_total : scopedDiscount}
+            </p>
+            <p>Tax: {canManageWholeOrder ? order.tax_total : scopedTax}</p>
+            {canManageWholeOrder ? (
+              <>
+                <p>Shipping: {order.shipping_total}</p>
+                <p>Method: {order.payment_method}</p>
+                <p>Type: {order.payment_status}</p>
+                <p>Fee: {order.payment_fee}</p>
+              </>
+            ) : null}
           </CardContent>
         </Card>
         <Card className="grid md:col-span-2 grid-cols-1">
@@ -195,28 +250,38 @@ export default function Show({ order }: { order: TOrder }) {
               <TableFooter className="text-end bg-transparent">
                 <TableRow>
                   <TableCell className="text-left">Sub Total</TableCell>
-                  <TableCell colSpan={5}>{order.sub_total}</TableCell>
+                  <TableCell colSpan={5}>
+                    {canManageWholeOrder ? order.sub_total : scopedSubtotal}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Discount</TableCell>
-                  <TableCell colSpan={5}>{order.discount_total}</TableCell>
+                  <TableCell colSpan={5}>
+                    {canManageWholeOrder ? order.discount_total : scopedDiscount}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Tax</TableCell>
-                  <TableCell colSpan={5}>{order.tax_total}</TableCell>
+                  <TableCell colSpan={5}>
+                    {canManageWholeOrder ? order.tax_total : scopedTax}
+                  </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell className="text-left">Shipping</TableCell>
-                  <TableCell colSpan={5}>{order.shipping_total}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left">Payment Fee</TableCell>
-                  <TableCell colSpan={5}>{order.payment_fee}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left">Grand Total</TableCell>
-                  <TableCell colSpan={5}>{order.grand_total}</TableCell>
-                </TableRow>
+                {canManageWholeOrder ? (
+                  <>
+                    <TableRow>
+                      <TableCell className="text-left">Shipping</TableCell>
+                      <TableCell colSpan={5}>{order.shipping_total}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-left">Payment Fee</TableCell>
+                      <TableCell colSpan={5}>{order.payment_fee}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-left">Grand Total</TableCell>
+                      <TableCell colSpan={5}>{order.grand_total}</TableCell>
+                    </TableRow>
+                  </>
+                ) : null}
               </TableFooter>
             </Table>
           </CardContent>
