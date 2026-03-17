@@ -1,4 +1,5 @@
 import type { SerializedEditorState } from "lexical";
+import type { TUser } from "@/modules/auth/domain/schemas/UserSchema";
 import type { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction } from "react";
 
@@ -23,6 +24,8 @@ export type TCategory = {
 export type TProduct = {
   type: "retail" | "wholesale";
   uuid: string;
+  created_by_user_uuid?: string | null;
+  updated_by_user_uuid?: string | null;
   sku: string;
   image_base_path?: string;
   image_base_url?: string;
@@ -33,10 +36,17 @@ export type TProduct = {
   description?: string;
   highlights?: string;
   box_items?: string;
-  category: TCategory;
+  category?: TCategory;
+  categories?: TCategory[];
+  createdBy?: Pick<TUser, "uuid" | "name"> | null;
+  updatedBy?: Pick<TUser, "uuid" | "name"> | null;
   images: TImage[];
   specifications: Record<string, string>;
   variants: TVariant[];
+  status_text?: string;
+  status?: number;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 export type TImage = {
   uuid: string;
@@ -99,7 +109,7 @@ export type TCategoryIndexPayload = {
   table: TServerDataTableMeta;
 };
 export type TProductIndexPayload = {
-  categories: IPaginatedData<TProduct[]>;
+  products: IPaginatedData<TProduct[]>;
   table: TServerDataTableMeta;
 };
 

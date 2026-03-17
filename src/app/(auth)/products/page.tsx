@@ -23,7 +23,7 @@ const productColumns: TableColumn<TProduct>[] = [
     title: "SKU",
   },
   {
-    key: "user.name",
+    key: "createdBy.name",
     title: "Created By",
   },
   {
@@ -59,8 +59,8 @@ export default async function ProductsPage({
   const products =
     productResponse &&
     typeof productResponse === "object" &&
-    "categories" in productResponse
-      ? productResponse.categories
+    "products" in productResponse
+      ? productResponse.products
       : null;
   const table =
     productResponse &&

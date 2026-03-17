@@ -1,6 +1,14 @@
 import { UserSchema } from "@/modules/auth/domain/schemas/UserSchema";
 import { z } from "zod";
 
+const StoreSummarySchema = z
+  .object({
+    uuid: z.uuid(),
+    name: z.string(),
+    slug: z.string().optional(),
+  })
+  .strip();
+
 export const ShippingInformationSchema = z
   .object({
     zip: z.string(),
@@ -31,7 +39,10 @@ export const OrderItemSchema = z
     row_tax: z.float64().nonnegative().default(0),
     row_shipping: z.float64().nonnegative().default(0),
     row_total: z.float64().nonnegative().nonoptional(),
+    created_by_user_uuid: z.uuid().nullable().optional(),
+    store_uuid: z.uuid().nullable().optional(),
     vendor: UserSchema.nullable(),
+    store: StoreSummarySchema.nullable().optional(),
     meta: z.record(z.any(), z.string()).nullable(), // JSON column
     created_at: z.iso.datetime().optional(),
     updated_at: z.iso.datetime().optional(),
