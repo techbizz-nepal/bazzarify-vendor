@@ -31,8 +31,11 @@ import {
 } from "@/components/ui/table";
 import { toTitleCase } from "@/modules/core/utils";
 import ItemCell from "@/modules/order.management/components/client/orderItem/ItemCell";
+import { actionUpdateOrderItemFulfillment } from "@/modules/order.management/actions/actionUpdateOrderItemFulfillment";
 import useOrderShow from "@/modules/order.management/hooks/order/useOrderShow";
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 export default function Show({
   order,
@@ -47,6 +50,8 @@ export default function Show({
     statusOptions,
     handleOrderStatusChange,
   } = useOrderShow({ order, canManageWholeOrder });
+  const router = useRouter();
+  const [isItemActionPending, startItemAction] = useTransition();
 
   const scopedItemCount = order.items.length;
   const scopedQuantity = order.items.reduce(
@@ -62,6 +67,9 @@ export default function Show({
     0,
   );
   const scopedTax = order.items.reduce((total, item) => total + item.row_tax, 0);
+
+  const itemRemainingQuantity = (item: TOrder["items"][number]) =>
+    Math.max(0, item.qty_ordered - item.qty_canceled - item.qty_shipped);
   return (
     <Card>
       <CardHeader>
@@ -204,6 +212,7 @@ export default function Show({
                   <TableHead>Discount</TableHead>
                   <TableHead>Shipping fee</TableHead>
                   <TableHead>Total</TableHead>
+                  {!canManageWholeOrder ? <TableHead>Item Actions</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -244,25 +253,79 @@ export default function Show({
                     <TableCell className="text-right">
                       {item.row_total}
                     </TableCell>
+                    {!canManageWholeOrder ? (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            disabled={
+                              isItemActionPending || itemRemainingQuantity(item) === 0
+                            }
+                            onClick={() => {
+                              startItemAction(async () => {
+                                const result =
+                                  await actionUpdateOrderItemFulfillment(
+                                    order.uuid,
+                                    item.uuid,
+                                    "ship_remaining",
+                                    `Store item marked shipped for ${item.name}.`,
+                                  );
+
+                                if (!("error" in result)) {
+                                  router.refresh();
+                                }
+                              });
+                            }}
+                          >
+                            Ship Remaining
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={
+                              isItemActionPending || itemRemainingQuantity(item) === 0
+                            }
+                            onClick={() => {
+                              startItemAction(async () => {
+                                const result =
+                                  await actionUpdateOrderItemFulfillment(
+                                    order.uuid,
+                                    item.uuid,
+                                    "cancel_remaining",
+                                    `Store item canceled for ${item.name}.`,
+                                  );
+
+                                if (!("error" in result)) {
+                                  router.refresh();
+                                }
+                              });
+                            }}
+                          >
+                            Cancel Remaining
+                          </Button>
+                        </div>
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 ))}
               </TableBody>
               <TableFooter className="text-end bg-transparent">
                 <TableRow>
                   <TableCell className="text-left">Sub Total</TableCell>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
                     {canManageWholeOrder ? order.sub_total : scopedSubtotal}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Discount</TableCell>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
                     {canManageWholeOrder ? order.discount_total : scopedDiscount}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Tax</TableCell>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
                     {canManageWholeOrder ? order.tax_total : scopedTax}
                   </TableCell>
                 </TableRow>
