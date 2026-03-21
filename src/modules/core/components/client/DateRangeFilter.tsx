@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { addMonths, format, isAfter, parseISO } from "date-fns";
 import { CalendarDays } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 
 const DATE_FORMAT = "yyyy-MM-dd";
@@ -45,6 +45,7 @@ export default function DateRangeFilter({
   maxMonths = 1,
   disabled = false,
 }: DateRangeFilterProps) {
+  const [open, setOpen] = useState(false);
   const selectedRange = useMemo<DateRange | undefined>(() => {
     const from = parseDateValue(fromValue);
     const to = parseDateValue(toValue);
@@ -69,12 +70,13 @@ export default function DateRangeFilter({
   }, [label, selectedRange]);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           className={cn(
-            "w-[280px] justify-start text-left font-normal data-[state=open]:border-primary data-[state=open]:bg-accent/70",
+            "w-[280px] justify-start text-left font-normal",
+            open && "border-primary bg-accent/70",
             !selectedRange?.from && "text-muted-foreground",
           )}
           disabled={disabled}
