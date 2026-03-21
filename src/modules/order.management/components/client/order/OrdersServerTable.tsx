@@ -68,7 +68,7 @@ export default function OrdersServerTable({
           return counts.visible_items_count ?? counts.visible_item_quantity ?? 0;
         }
 
-        return counts.items_count ?? counts.item_count ?? record.items.length;
+        return counts.items_count ?? counts.item_count ?? 0;
       },
     },
     {
