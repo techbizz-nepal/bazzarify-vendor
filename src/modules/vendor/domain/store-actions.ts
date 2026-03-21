@@ -164,9 +164,9 @@ export const actionUpdateAdminStoreOnboardingSet = async ({
   }
 };
 
-export const actionGetAdminLeafCategories = async () => {
+export const actionGetAdminSellableCategories = async () => {
   return actionGetCategories({
-    filter: { leafOnly: true },
+    filter: { sellable: true },
     perPage: "500",
     sort: "name",
   });

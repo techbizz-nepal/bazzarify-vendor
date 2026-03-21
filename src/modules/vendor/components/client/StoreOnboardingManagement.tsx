@@ -36,16 +36,16 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { startTransition, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-type LeafCategory = TCategoryIndexPayload["categories"]["data"][number];
+type SellableCategory = TCategoryIndexPayload["categories"]["data"][number];
 
 interface StoreOnboardingManagementProps {
   storeTypes: TStoreTypeOption[];
-  leafCategories: LeafCategory[];
+  sellableCategories: SellableCategory[];
 }
 
 export default function StoreOnboardingManagement({
   storeTypes,
-  leafCategories,
+  sellableCategories,
 }: StoreOnboardingManagementProps) {
   const getDraftState = (storeType: TStoreTypeOption | null) => {
     const onboardingSet = storeType?.onboarding_category_set;
@@ -98,11 +98,11 @@ export default function StoreOnboardingManagement({
   const selectedCategoryNameSet = useMemo(
     () =>
       new Set(
-        leafCategories
+        sellableCategories
           .filter((category) => selectedCategoryUuids.includes(category.uuid))
           .map((category) => category.name),
       ),
-    [leafCategories, selectedCategoryUuids],
+    [sellableCategories, selectedCategoryUuids],
   );
 
   const selectedCategoryNames = useMemo(
@@ -135,7 +135,7 @@ export default function StoreOnboardingManagement({
     }
 
     if (selectedCategoryUuids.length === 0) {
-      toast.error("Assign at least one leaf category.");
+      toast.error("Assign at least one sellable category.");
       return;
     }
 
@@ -296,7 +296,7 @@ export default function StoreOnboardingManagement({
                     isSelected ? "text-slate-300" : "text-slate-500",
                   ].join(" ")}
                 >
-                  {categoryCount} starter categories
+                  {categoryCount} starter sellable categories
                 </div>
               </button>
             );
@@ -345,7 +345,7 @@ export default function StoreOnboardingManagement({
                   {selectedStoreType.name}
                 </span>
                 <div className="mt-2">
-                  Future stores of this type will receive the checked leaf
+                  Future stores of this type will receive the checked sellable
                   categories below. Existing stores will not be changed.
                 </div>
               </div>
@@ -357,8 +357,8 @@ export default function StoreOnboardingManagement({
                       Starter categories
                     </div>
                     <div className="text-sm text-slate-600">
-                      Search and select leaf categories for new stores of this
-                      type.
+                      Search and select sellable categories for new stores of
+                      this type.
                     </div>
                   </div>
                   <Popover
@@ -381,13 +381,13 @@ export default function StoreOnboardingManagement({
                     </PopoverTrigger>
                     <PopoverContent className="w-[360px] p-0" align="end">
                       <Command>
-                        <CommandInput placeholder="Search leaf categories..." />
+                        <CommandInput placeholder="Search sellable categories..." />
                         <CommandList>
                           <CommandEmpty>No matching categories.</CommandEmpty>
                           <CommandGroup>
                             <ScrollArea className="h-72">
                               <div className="p-1">
-                                {leafCategories.map((category) => {
+                                {sellableCategories.map((category) => {
                                   const isChecked = selectedCategoryUuids.includes(
                                     category.uuid,
                                   );
