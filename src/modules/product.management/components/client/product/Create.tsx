@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { IMetaData } from "@/modules/core";
 import { cn } from "@/lib/utils";
 import ErrorComponent from "@/modules/core/components/client/ErrorComponent";
+import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { TCategoryIndexPayload } from "@/modules/product.management";
@@ -70,7 +71,10 @@ function CreateContent({
       getSubmissionFieldError(feedback, "box_items"),
   );
   return (
-    <PageContainer pageTitle="Create Products">
+    <PageContainer
+      pageTitle="Create Products"
+      actionSlot={<BackLinkButton href="/products" label="Back to Products" />}
+    >
       {/*** Product Basic information start ***/}
       <ProductCard
         title="Basic Information"

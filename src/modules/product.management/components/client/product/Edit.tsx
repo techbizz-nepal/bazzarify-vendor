@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { IMetaData } from "@/modules/core";
 import { cn } from "@/lib/utils";
 import ErrorComponent from "@/modules/core/components/client/ErrorComponent";
+import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import {
@@ -88,7 +89,10 @@ function EditContent({
       getSubmissionFieldError(feedback, "box_items"),
   );
   return (
-    <PageContainer pageTitle="Edit Product">
+    <PageContainer
+      pageTitle="Edit Product"
+      actionSlot={<BackLinkButton href="/products" label="Back to Products" />}
+    >
       <ProductCard
         title="Basic Information"
         className={basicInfoError ? "border-destructive" : undefined}

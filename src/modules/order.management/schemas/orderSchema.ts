@@ -143,16 +143,14 @@ export const OrderListItemSchema = OrderSchema.pick({
   buyer_uuid: true,
   buyer_type: true,
   items: true,
-}).extend(
-  z.object({
-    items_count: z.number().int().nonnegative().optional(),
-    visible_items_count: z.number().int().nonnegative().optional(),
-    visible_item_quantity: z.number().int().nonnegative().optional(),
-    buyer: z.object({
-      name: z.string(),
-    }),
+}).extend({
+  items_count: z.number().int().nonnegative().optional(),
+  visible_items_count: z.number().int().nonnegative().optional(),
+  visible_item_quantity: z.number().int().nonnegative().optional(),
+  buyer: z.object({
+    name: z.string(),
   }),
-);
+});
 export const OrderListSchema = z.array(OrderListItemSchema);
 export type TOrder = z.infer<typeof OrderSchema>;
 export type TOrderItem = z.infer<typeof OrderItemSchema>;

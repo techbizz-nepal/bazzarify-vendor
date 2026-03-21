@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
@@ -7,7 +7,6 @@ import { actionGetCategories } from "@/modules/product.management/actions/catego
 import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
 import Create from "@/modules/product.management/components/client/category/Create";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 
 export default async function CreateCategoryPage() {
   const userUuid = await getSessionUserUUID(await getCookieStore());
@@ -53,9 +52,7 @@ export default async function CreateCategoryPage() {
     <PageContainer
       pageTitle="Create Category"
       actionSlot={
-        <Button asChild variant="outline" size="sm">
-          <Link href="/categories">Back to Categories</Link>
-        </Button>
+        <BackLinkButton href="/categories" label="Back to Categories" />
       }
     >
       <Create
