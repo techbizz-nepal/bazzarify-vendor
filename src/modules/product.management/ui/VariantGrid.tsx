@@ -1,10 +1,16 @@
+import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import {
+  ProductSubmissionFeedback,
   TImage,
   TVariant,
   TVariantDataMap,
 } from "@/modules/product.management";
+import {
+  getSubmissionFieldError,
+  hasSubmissionFieldPrefix,
+} from "@/modules/product.management/utils/productSubmissionFeedback";
 import {
   MAX_FILE_SIZE_MB,
   MAX_VARIANT_IMAGE_COUNT,
@@ -21,6 +27,7 @@ type Props = {
   selections: Record<string, string[]>;
   combinations: string[][];
   variantData: TVariantDataMap;
+  feedback?: ProductSubmissionFeedback | null;
   onChange: <K extends keyof TVariant>(
     combo: string[],
     field: K,
@@ -53,6 +60,7 @@ export default function VariantGrid({
   selections,
   combinations,
   variantData,
+  feedback,
   onChange,
   onUpload,
   onImageRemove,
@@ -153,6 +161,22 @@ export default function VariantGrid({
               images: [],
               isValid: false,
             };
+            const stockError = getSubmissionFieldError(
+              feedback ?? null,
+              `variants.${idx}.stock`,
+            );
+            const priceError = getSubmissionFieldError(
+              feedback ?? null,
+              `variants.${idx}.price`,
+            );
+            const imagesError = getSubmissionFieldError(
+              feedback ?? null,
+              `variants.${idx}.images`,
+            );
+            const variantHasFieldError = hasSubmissionFieldPrefix(
+              feedback ?? null,
+              `variants.${idx}`,
+            );
             const safeCombo = [...combo];
             while (safeCombo.length < columns.length) safeCombo.push("");
 
@@ -168,7 +192,11 @@ export default function VariantGrid({
             return (
               <tr
                 key={idx}
-                className={`${variant.available === false ? "bg-gray-100 opacity-60" : ""}`}
+                className={cn(
+                  variant.available === false && "bg-gray-100 opacity-60",
+                  (variant.isValid === false || variantHasFieldError) &&
+                    "bg-destructive/5",
+                )}
               >
                 {(columns.length || Object.keys(selections).length
                   ? columns.length
@@ -185,20 +213,34 @@ export default function VariantGrid({
                     type="number"
                     min="0"
                     max="9999"
-                    className="w-20 rounded border px-2 py-1"
+                    className={cn(
+                      "w-20 rounded border px-2 py-1",
+                      (stockError || variant.isValid === false) &&
+                        "border-destructive",
+                    )}
                     value={variant.stock || ""}
                     onChange={(e) => onChange(combo, "stock", e.target.value)}
                   />
+                  {stockError && (
+                    <p className="mt-1 text-xs text-destructive">{stockError}</p>
+                  )}
                 </td>
                 <td className="border px-2 py-1">
                   <input
                     type="number"
                     min="0"
                     max="1000000"
-                    className="w-20 rounded border px-2 py-1"
+                    className={cn(
+                      "w-20 rounded border px-2 py-1",
+                      (priceError || variant.isValid === false) &&
+                        "border-destructive",
+                    )}
                     value={variant.price || ""}
                     onChange={(e) => onChange(combo, "price", e.target.value)}
                   />
+                  {priceError && (
+                    <p className="mt-1 text-xs text-destructive">{priceError}</p>
+                  )}
                 </td>
                 <td className="border px-2 py-1">
                   <input
@@ -267,6 +309,9 @@ export default function VariantGrid({
                       <CirclePlus width={50} height={50} />
                     </div>
                   </div>
+                  {imagesError && (
+                    <p className="mt-1 text-xs text-destructive">{imagesError}</p>
+                  )}
                 </td>
                 <td className="border px-2 py-1 text-center">
                   <Switch

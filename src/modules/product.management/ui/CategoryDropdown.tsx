@@ -19,6 +19,8 @@ interface ICategoryDropdown {
   onClickSubChild: (category: TCategory) => void;
   onFilterChange: (level: "root" | "sub" | "subchild", value: string) => void;
   selectedCategories: TCategory[] | [];
+  invalid?: boolean;
+  errorMessage?: string;
 }
 
 export default function CategoryDropdown({
@@ -32,6 +34,8 @@ export default function CategoryDropdown({
   onClickSubChild,
   onFilterChange,
   selectedCategories,
+  invalid = false,
+  errorMessage,
 }: ICategoryDropdown) {
   const renderColumn = (
     _label: string,
@@ -64,6 +68,7 @@ export default function CategoryDropdown({
         <div
           className={cn(
             "flex h-8 w-full min-w-0 items-center justify-between rounded-md border bg-transparent px-3 py-1 text-base shadow-xs",
+            invalid && "border-destructive",
             open ? "border-primary border-2" : undefined,
           )}
         >
@@ -100,6 +105,7 @@ export default function CategoryDropdown({
           )}
         </div>
       </DropdownMenuContent>
+      {errorMessage && <p className="pt-2 text-sm text-destructive">{errorMessage}</p>}
     </DropdownMenu>
   );
 }

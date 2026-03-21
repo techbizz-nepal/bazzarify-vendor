@@ -8,6 +8,7 @@ import {
   TVariantDataMap,
 } from "@/modules/product.management";
 import { actionDelete as actionDeleteImage } from "@/modules/product.management/actions/image";
+import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
   actionStoreProducts,
   actionUpdateProducts,
@@ -286,7 +287,13 @@ export default function useProductAuthoring({
           );
 
     if ("error" in response) {
-      toast.error(response.error);
+      const feedback = getValidationFeedback(
+        "details" in response ? response.details : response.error,
+      );
+      if (feedback) {
+        setSubmissionFeedback(feedback);
+      }
+      toast.error(feedback?.summary ?? response.error);
       return;
     }
 
@@ -422,13 +429,16 @@ function hydrateEditProduct({
     highlights: lexicalJsonToHtml(product.highlights || undefined),
     base_price: product.base_price,
   });
-  setSelectedSpecifications(product.specifications);
+  setSelectedSpecifications(product.specifications ?? {});
 
   const categoryContext = editProductPayload.categoryContext;
 
   if (!categoryContext) {
     return;
   }
+
+  const categorySpecifications = categoryContext.specifications ?? [];
+  const categoryAttributes = categoryContext.attributes ?? [];
 
   setSelectedCategories([
     categoryContext.categoryAncestors.root,
@@ -437,10 +447,10 @@ function hydrateEditProduct({
   ]);
   setSubCategories(categoryContext.subCategories);
   setSubChildCategories(categoryContext.subChildCategories);
-  setCategorySpecifications(categoryContext.specifications);
-  setCategoryAttributes(categoryContext.attributes);
+  setCategorySpecifications(categorySpecifications);
+  setCategoryAttributes(categoryAttributes);
 
-  if (!categoryContext.attributes.length) {
+  if (!categoryAttributes.length) {
     return;
   }
 
@@ -449,14 +459,14 @@ function hydrateEditProduct({
     setVariantSelections,
     setColumns,
     selectedProductVariants: product.variants,
-    categoryAttributes: categoryContext.attributes,
+    categoryAttributes,
   });
 
   const nextVariantImageIdMap: Record<string, Record<string, string>> = {};
   product.variants.forEach((existingVariant) => {
     const key = createVariantDraftKey(
       resolveVariantOptionValuesFromAttributes(
-        categoryContext.attributes,
+        categoryAttributes,
         existingVariant,
       ),
     );

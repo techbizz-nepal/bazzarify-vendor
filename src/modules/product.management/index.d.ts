@@ -228,6 +228,7 @@ export interface IProductCard {
   title: string;
   children?: ReactNode;
   tooltip?: TooltipConfig;
+  className?: string;
 }
 export type TooltipTrigger = { type: "icon" } | { type: "text"; label: string };
 

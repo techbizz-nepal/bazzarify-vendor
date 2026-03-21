@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ProductSubmissionFeedback,
   VariantSelectorState,
   VariantState,
 } from "@/modules/product.management";
@@ -10,11 +11,13 @@ import VariantGrid from "@/modules/product.management/ui/VariantGrid";
 interface IProductVariant {
   variantState: VariantState;
   selectorState: VariantSelectorState;
+  feedback?: ProductSubmissionFeedback | null;
 }
 
 export default function ProductVariant({
   variantState,
   selectorState,
+  feedback,
 }: IProductVariant) {
   const {
     columns,
@@ -57,6 +60,7 @@ export default function ProductVariant({
         selections={variantSelections}
         combinations={combinations}
         variantData={variantData}
+        feedback={feedback}
         onChange={handleVariantChange}
         onUpload={handleImageUpload}
         onImageRemove={handleImageRemove}
