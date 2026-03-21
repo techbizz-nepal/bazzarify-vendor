@@ -90,6 +90,14 @@ function transformProductVariants(
     const limitedImages = normalizedImages.slice(0, MAX_VARIANT_IMAGE_COUNT);
     variantData[createVariantDraftKey(variantOptionValues)] = {
       ...variant,
+      stock:
+        variant.stock === undefined || variant.stock === null
+          ? ""
+          : String(variant.stock),
+      price:
+        variant.price === undefined || variant.price === null
+          ? ""
+          : String(variant.price),
       images: limitedImages as unknown as TVariant["images"],
     };
   });

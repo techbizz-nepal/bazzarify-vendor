@@ -427,7 +427,10 @@ function hydrateEditProduct({
     description: lexicalJsonToHtml(product.description || undefined),
     box_items: product.box_items || "",
     highlights: lexicalJsonToHtml(product.highlights || undefined),
-    base_price: product.base_price,
+    base_price:
+      product.base_price === undefined || product.base_price === null
+        ? ""
+        : String(product.base_price),
   });
   setSelectedSpecifications(product.specifications ?? {});
 
