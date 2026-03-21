@@ -1,10 +1,10 @@
-import { IMetaData } from "@/modules/core";
 import {
   ProductAuthoringController,
   TAttribute,
   TCategory,
   TEditProductPayload,
   TProductForm,
+  TSpecification,
   TVariantDataMap,
 } from "@/modules/product.management";
 import { actionDelete as actionDeleteImage } from "@/modules/product.management/actions/image";
@@ -31,7 +31,6 @@ import {
   resolveVariantOptionValuesFromAttributes,
 } from "@/modules/product.management/utils/variantDraft";
 import {
-  loadProductCategoryContext,
   prepareProductSubmission,
 } from "@/modules/product.management/utils/productAuthoring";
 import { omit } from "lodash-es";
@@ -41,6 +40,7 @@ import {
   Dispatch,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { toast } from "sonner";
@@ -49,12 +49,12 @@ type ProductAuthoringMode = "create" | "update";
 
 interface UseProductAuthoringOptions {
   mode: ProductAuthoringMode;
-  productPayloadPromise?: Promise<TEditProductPayload | IMetaData>;
+  editProductPayload?: TEditProductPayload;
 }
 
 export default function useProductAuthoring({
   mode,
-  productPayloadPromise,
+  editProductPayload,
 }: UseProductAuthoringOptions): ProductAuthoringController {
   const router = useRouter();
   const [categoryAttributes, setCategoryAttributes] = useState<TAttribute[]>(
@@ -73,6 +73,7 @@ export default function useProductAuthoring({
     summary: string;
     fieldErrors: Record<string, string[]>;
   } | null>(null);
+  const hydratedEditProductUuidRef = useRef<string | null>(null);
 
   const product = useProduct();
   const category = useCategory({
@@ -171,52 +172,46 @@ export default function useProductAuthoring({
   };
 
   useEffect(() => {
-    if (mode !== "update" || !productPayloadPromise) {
+    if (mode !== "update" || !editProductPayload) {
       return;
     }
 
-    productPayloadPromise.then((editProductPayload) => {
-      if ("error" in editProductPayload) {
-        toast.error(editProductPayload.error);
-        return;
-      }
+    if (hydratedEditProductUuidRef.current === editProductPayload.product.uuid) {
+      return;
+    }
 
-      hydrateEditProduct({
-        editProductPayload,
-        setProductForm: product.setProductForm,
-        handleExistingProductImagesChange: product.handleExistingProductImagesChange,
-        setExistingImageIdMap: product.setExistingImageIdMap,
-        setSelectedCategories: category.setSelectedCategories,
-        setSelectedSpecifications: setSpecificationValues,
-        setVariantData: variant.setVariantData,
-        setVariantSelections,
-        setColumns: variant.setColumns,
-        setVariantImageIdMap,
-        handleLoadCategoryContext: async (leafCategory) => {
-          category.setSelectedCategories((previous) => [
-            previous[0],
-            previous[1],
-            leafCategory,
-          ]);
-          const categoryContext = await loadProductCategoryContext(leafCategory);
-          if ("error" in categoryContext) {
-            toast.error(categoryContext.error);
-            return;
-          }
+    hydratedEditProductUuidRef.current = editProductPayload.product.uuid;
 
-          setCategoryAttributes(categoryContext.attributes);
-          category.setCategorySpecifications(categoryContext.specifications);
-          return categoryContext.attributes;
-        },
-      });
+    hydrateEditProduct({
+      editProductPayload,
+      setProductForm: product.setProductForm,
+      setExistingProductImages: product.setExistingProductImages,
+      setExistingImageIdMap: product.setExistingImageIdMap,
+      setSelectedCategories: category.setSelectedCategories,
+      setSubCategories: category.setSubCategories,
+      setSubChildCategories: category.setSubChildCategories,
+      setCategorySpecifications: category.setCategorySpecifications,
+      setCategoryAttributes,
+      setSelectedSpecifications: setSpecificationValues,
+      setVariantData: variant.setVariantData,
+      setVariantSelections,
+      setColumns: variant.setColumns,
+      setVariantImageIdMap,
     });
   }, [
-    category,
+    category.setCategorySpecifications,
+    category.setSelectedCategories,
+    category.setSubCategories,
+    category.setSubChildCategories,
+    editProductPayload,
     mode,
-    product.handleExistingProductImagesChange,
     product.setExistingImageIdMap,
+    product.setExistingProductImages,
     product.setProductForm,
-    productPayloadPromise,
+    setCategoryAttributes,
+    setSpecificationValues,
+    setVariantImageIdMap,
+    setVariantSelections,
     variant.setColumns,
     variant.setVariantData,
   ]);
@@ -358,9 +353,13 @@ export default function useProductAuthoring({
 interface HydrateEditProductArgs {
   editProductPayload: TEditProductPayload;
   setProductForm: (productForm: TProductForm) => void;
-  handleExistingProductImagesChange: (images: string[]) => void;
+  setExistingProductImages: Dispatch<SetStateAction<string[]>>;
   setExistingImageIdMap: (imageIdMap: Record<string, string>) => void;
   setSelectedCategories: Dispatch<SetStateAction<TCategory[]>>;
+  setSubCategories: Dispatch<SetStateAction<TCategory[]>>;
+  setSubChildCategories: Dispatch<SetStateAction<TCategory[]>>;
+  setCategorySpecifications: Dispatch<SetStateAction<TSpecification[]>>;
+  setCategoryAttributes: Dispatch<SetStateAction<TAttribute[]>>;
   setSelectedSpecifications: (specifications: Record<string, string>) => void;
   setVariantData: Dispatch<SetStateAction<TVariantDataMap>>;
   setVariantSelections: Dispatch<SetStateAction<Record<string, string[]>>>;
@@ -368,23 +367,23 @@ interface HydrateEditProductArgs {
   setVariantImageIdMap: (
     value: Record<string, Record<string, string>>,
   ) => void;
-  handleLoadCategoryContext: (
-    leafCategory: TCategory,
-  ) => Promise<TAttribute[] | undefined>;
 }
 
 function hydrateEditProduct({
   editProductPayload,
   setProductForm,
-  handleExistingProductImagesChange,
+  setExistingProductImages,
   setExistingImageIdMap,
   setSelectedCategories,
+  setSubCategories,
+  setSubChildCategories,
+  setCategorySpecifications,
+  setCategoryAttributes,
   setSelectedSpecifications,
   setVariantData,
   setVariantSelections,
   setColumns,
   setVariantImageIdMap,
-  handleLoadCategoryContext,
 }: HydrateEditProductArgs) {
   const { product } = editProductPayload;
   const imageUrls: string[] = [];
@@ -411,7 +410,7 @@ function hydrateEditProduct({
     }
   });
 
-  handleExistingProductImagesChange(existingProductImages);
+  setExistingProductImages(existingProductImages);
   setExistingImageIdMap(existingImageIdMap);
   setProductForm({
     type: "retail",
@@ -425,61 +424,76 @@ function hydrateEditProduct({
   });
   setSelectedSpecifications(product.specifications);
 
-  const categoryAncestors = editProductPayload.categoryAncestors;
-  setSelectedCategories([categoryAncestors.root, categoryAncestors.sub]);
-  handleLoadCategoryContext(categoryAncestors.subChild).then((attributes) => {
-    if (!attributes || !attributes.length) {
-      return;
-    }
+  const categoryContext = editProductPayload.categoryContext;
 
-    fillSelectedProductVariantData({
-      setVariantData: setVariantData as never,
-      setVariantSelections,
-      setColumns,
-      selectedProductVariants: product.variants,
-      categoryAttributes: attributes,
-    });
+  if (!categoryContext) {
+    return;
+  }
 
-    const nextVariantImageIdMap: Record<string, Record<string, string>> = {};
-    product.variants.forEach((existingVariant) => {
-      const key = createVariantDraftKey(
-        resolveVariantOptionValuesFromAttributes(attributes, existingVariant),
-      );
-      const variantBaseUrl = (existingVariant.image_base_url || "").replace(
-        /\/+$/,
-        "",
-      );
-      const toFullVariantImageUrl = (file: string) =>
-        /^(https?:)?\/\//.test(file)
-          ? file
-          : `${variantBaseUrl}/${String(file).replace(/^\/+/, "")}`;
-      const images = existingVariant.images || [];
-      let count = 0;
+  setSelectedCategories([
+    categoryContext.categoryAncestors.root,
+    categoryContext.categoryAncestors.sub,
+    categoryContext.categoryAncestors.subChild,
+  ]);
+  setSubCategories(categoryContext.subCategories);
+  setSubChildCategories(categoryContext.subChildCategories);
+  setCategorySpecifications(categoryContext.specifications);
+  setCategoryAttributes(categoryContext.attributes);
 
-      for (const image of images as unknown[]) {
-        if (
-          typeof image === "object" &&
-          image !== null &&
-          "file" in (image as Record<string, unknown>) &&
-          typeof (image as { file?: unknown }).file === "string" &&
-          "uuid" in (image as Record<string, unknown>) &&
-          typeof (image as { uuid?: unknown }).uuid === "string"
-        ) {
-          if (count >= MAX_VARIANT_IMAGE_COUNT) {
-            break;
-          }
-          const file = (image as { file: string }).file;
-          const imageUrl = toFullVariantImageUrl(file);
-          const uuid = (image as { uuid: string }).uuid;
-          if (!nextVariantImageIdMap[key]) {
-            nextVariantImageIdMap[key] = {};
-          }
-          nextVariantImageIdMap[key][imageUrl] = uuid;
-          count += 1;
-        }
-      }
-    });
+  if (!categoryContext.attributes.length) {
+    return;
+  }
 
-    setVariantImageIdMap(nextVariantImageIdMap);
+  fillSelectedProductVariantData({
+    setVariantData: setVariantData as never,
+    setVariantSelections,
+    setColumns,
+    selectedProductVariants: product.variants,
+    categoryAttributes: categoryContext.attributes,
   });
+
+  const nextVariantImageIdMap: Record<string, Record<string, string>> = {};
+  product.variants.forEach((existingVariant) => {
+    const key = createVariantDraftKey(
+      resolveVariantOptionValuesFromAttributes(
+        categoryContext.attributes,
+        existingVariant,
+      ),
+    );
+    const variantBaseUrl = (existingVariant.image_base_url || "").replace(
+      /\/+$/,
+      "",
+    );
+    const toFullVariantImageUrl = (file: string) =>
+      /^(https?:)?\/\//.test(file)
+        ? file
+        : `${variantBaseUrl}/${String(file).replace(/^\/+/, "")}`;
+    const images = existingVariant.images || [];
+    let count = 0;
+
+    for (const image of images as unknown[]) {
+      if (
+        typeof image === "object" &&
+        image !== null &&
+        "file" in (image as Record<string, unknown>) &&
+        typeof (image as { file?: unknown }).file === "string" &&
+        "uuid" in (image as Record<string, unknown>) &&
+        typeof (image as { uuid?: unknown }).uuid === "string"
+      ) {
+        if (count >= MAX_VARIANT_IMAGE_COUNT) {
+          break;
+        }
+        const file = (image as { file: string }).file;
+        const imageUrl = toFullVariantImageUrl(file);
+        const uuid = (image as { uuid: string }).uuid;
+        if (!nextVariantImageIdMap[key]) {
+          nextVariantImageIdMap[key] = {};
+        }
+        nextVariantImageIdMap[key][imageUrl] = uuid;
+        count += 1;
+      }
+    }
+  });
+
+  setVariantImageIdMap(nextVariantImageIdMap);
 }

@@ -1,15 +1,11 @@
 import { IMetaData } from "@/modules/core";
 import { fromZodIssues } from "@/modules/core/lib/utils.validationFeedback";
 import { z } from "zod";
-import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
-import { actionViewCategorySpecifications } from "@/modules/product.management/actions/category";
+import { actionViewCategoryAuthoringContext } from "@/modules/product.management/actions/category";
 import {
+  TCategoryAuthoringContextPayload,
   ProductSubmissionFeedback,
   TAttribute,
-  TAttributesIndexPayload,
-  TCategory,
-  TSpecificationsIndexPayload,
-  TSpecification,
   TVariantDataMap,
   TVariantPayload,
 } from "@/modules/product.management";
@@ -18,11 +14,6 @@ import {
   createVariantsPayload,
   updateVariantValidity,
 } from "@/modules/product.management/utils/productForm";
-
-export interface ProductCategoryContext {
-  attributes: TAttribute[];
-  specifications: TSpecification[];
-}
 
 export type ProductSubmissionFailure =
   | {
@@ -62,32 +53,9 @@ interface PrepareProductSubmissionInput<TSchema extends z.ZodTypeAny> {
 }
 
 export const loadProductCategoryContext = async (
-  category: TCategory,
-): Promise<ProductCategoryContext | IMetaData> => {
-  const [specificationsResponse, attributesResponse]: [
-    IMetaData | TSpecificationsIndexPayload,
-    IMetaData | TAttributesIndexPayload,
-  ] = await Promise.all([
-    actionViewCategorySpecifications(category.slug),
-    actionGetAttributes({
-      uuids: category.attributes?.join(","),
-    }),
-  ]);
-
-  if ("error" in specificationsResponse || "error" in attributesResponse) {
-    return {
-      error:
-        ("error" in specificationsResponse && specificationsResponse.error) ||
-        ("error" in attributesResponse && attributesResponse.error) ||
-        "Oops, something went wrong while fetching category data!",
-    };
-  }
-
-  return {
-    specifications: specificationsResponse.specifications?.data || [],
-    attributes: attributesResponse.attributes?.data || [],
-  };
-};
+  slug: string,
+): Promise<TCategoryAuthoringContextPayload | IMetaData> =>
+  actionViewCategoryAuthoringContext(slug);
 
 export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
   schema,

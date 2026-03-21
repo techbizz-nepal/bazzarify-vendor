@@ -44,13 +44,19 @@ export default function useCategory({
   };
 
   const handleClickSubChild = async (category: TCategory) => {
-    setSelectedCategories((prev) => [prev[0], prev[1], category]);
-    const categoryContext = await loadProductCategoryContext(category);
+    const categoryContext = await loadProductCategoryContext(category.slug);
     if ("error" in categoryContext) {
       toast.error(categoryContext.error);
       return;
     }
 
+    setSelectedCategories([
+      categoryContext.categoryAncestors.root,
+      categoryContext.categoryAncestors.sub,
+      categoryContext.categoryAncestors.subChild,
+    ]);
+    setSubCategories(categoryContext.subCategories);
+    setSubChildCategories(categoryContext.subChildCategories);
     setCategorySpecifications(categoryContext.specifications);
     setSpecifications({});
     setCategoryAttributes(categoryContext.attributes);

@@ -4,6 +4,7 @@ import { ApiResponse, IMetaData, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
 import {
+  TCategoryAuthoringContextPayload,
   TCategoryIndexPayload,
   TSpecificationsIndexPayload,
 } from "@/modules/product.management";
@@ -58,6 +59,29 @@ export const actionViewCategorySpecifications = async (
     );
     const responseData =
       response.data as ApiResponse<TSpecificationsIndexPayload>;
+    if (responseData.metaData.error) {
+      return { error: responseData.metaData.error };
+    }
+    return responseData.data.payload;
+  } catch (error) {
+    return handleUnknownError(error);
+  }
+};
+
+export const actionViewCategoryAuthoringContext = async (
+  slug: string,
+): Promise<TCategoryAuthoringContextPayload | IMetaData> => {
+  try {
+    const response = await (
+      await authAxiosInstance()
+    ).get(
+      PRODUCT_MANAGEMENT_ROUTES.category.viewParentRecursive.path.replace(
+        ":slug",
+        slug,
+      ),
+    );
+    const responseData =
+      response.data as ApiResponse<TCategoryAuthoringContextPayload>;
     if (responseData.metaData.error) {
       return { error: responseData.metaData.error };
     }

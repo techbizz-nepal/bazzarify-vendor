@@ -130,11 +130,12 @@ export type TCategoryAncestors = {
 export type TEditProductPayload = {
   product: TProduct;
   categoryAncestors: TCategoryAncestors;
+  categoryContext: TCategoryAuthoringContextPayload | null;
 };
-export type TCategoryViewParentRecursivePayload = {
-  category: TCategory;
-  subCategory: TCategory[];
-  subChildCategory: TCategory[];
+export type TCategoryAuthoringContextPayload = {
+  categoryAncestors: TCategoryAncestors;
+  subCategories: TCategory[];
+  subChildCategories: TCategory[];
   specifications: TSpecification[];
   attributes: TAttribute[];
 };

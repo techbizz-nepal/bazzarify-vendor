@@ -16,17 +16,37 @@ import ImageUploader from "@/modules/product.management/ui/ImageUploader";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import ProductDetail from "@/modules/product.management/ui/ProductDetail";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
-import { use } from "react";
-
 interface EditProps {
-  productPayloadPromise: Promise<TEditProductPayload | IMetaData>;
-  categoryIndexPayloadPromise: Promise<TCategoryIndexPayload | IMetaData>;
+  productPayload: TEditProductPayload | IMetaData;
+  categoryIndexPayload: TCategoryIndexPayload | IMetaData;
 }
 
 export default function Edit({
-  productPayloadPromise,
-  categoryIndexPayloadPromise,
+  productPayload,
+  categoryIndexPayload,
 }: EditProps) {
+  if ("error" in productPayload) {
+    return <ErrorComponent err={productPayload.error} />;
+  }
+  if ("error" in categoryIndexPayload) {
+    return <ErrorComponent err={categoryIndexPayload.error} />;
+  }
+
+  return (
+    <EditContent
+      productPayload={productPayload}
+      categoryIndexPayload={categoryIndexPayload}
+    />
+  );
+}
+
+function EditContent({
+  productPayload,
+  categoryIndexPayload,
+}: {
+  productPayload: TEditProductPayload;
+  categoryIndexPayload: TCategoryIndexPayload;
+}) {
   const {
     basicState,
     categoryState,
@@ -35,14 +55,10 @@ export default function Edit({
     selectorState,
     variantState,
     submissionState,
-  } = useUpdateProduct(productPayloadPromise);
-  const categoryIndexPayload = use(categoryIndexPayloadPromise);
-  if ("error" in categoryIndexPayload) {
-    return <ErrorComponent err={categoryIndexPayload.error} />;
-  }
+  } = useUpdateProduct(productPayload);
   const rootCategories = categoryIndexPayload.categories.data;
   return (
-    <PageContainer pageTitle="Create Products">
+    <PageContainer pageTitle="Edit Product">
       <ProductCard title="Basic Information">
         <div className="w-full max-w-6xl flex-col items-center space-y-4">
           <Label htmlFor="name">Name</Label>

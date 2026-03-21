@@ -45,6 +45,7 @@ export default function useProduct() {
     productHighlightsRef,
     productBoxItemsRef,
     existingProductImages,
+    setExistingProductImages,
     handleExistingProductImagesChange,
     uploadedProductImages,
     handleProductImageUpload,

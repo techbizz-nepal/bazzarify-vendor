@@ -13,12 +13,22 @@ import ImageUploader from "@/modules/product.management/ui/ImageUploader";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import ProductDetail from "@/modules/product.management/ui/ProductDetail";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
-import { use } from "react";
-
 interface CreateProps {
-  categoryIndexPayloadPromise: Promise<TCategoryIndexPayload | IMetaData>;
+  categoryIndexPayload: TCategoryIndexPayload | IMetaData;
 }
-export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
+export default function Create({ categoryIndexPayload }: CreateProps) {
+  if ("error" in categoryIndexPayload) {
+    return <ErrorComponent err={categoryIndexPayload.error} />;
+  }
+
+  return <CreateContent categoryIndexPayload={categoryIndexPayload} />;
+}
+
+function CreateContent({
+  categoryIndexPayload,
+}: {
+  categoryIndexPayload: TCategoryIndexPayload;
+}) {
   const {
     basicState,
     categoryState,
@@ -28,11 +38,6 @@ export default function Create({ categoryIndexPayloadPromise }: CreateProps) {
     variantState,
     submissionState,
   } = useCreateProduct();
-
-  const categoryIndexPayload = use(categoryIndexPayloadPromise);
-  if ("error" in categoryIndexPayload) {
-    return <ErrorComponent err={categoryIndexPayload.error} />;
-  }
   const rootCategories = categoryIndexPayload.categories.data;
   return (
     <PageContainer pageTitle="Create Products">
