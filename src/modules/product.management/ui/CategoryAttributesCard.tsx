@@ -6,6 +6,7 @@ import { TAttribute } from "@/modules/product.management";
 interface ICategoryAttributesCard {
   attributes: TAttribute[];
   selectedIds: string[] | null;
+  feedbackMessage?: string | null;
   onAttributeChange: (id: TAttribute["uuid"]) => void;
   onUpdateAction: (entity: "specifications" | "attributes") => void;
 }
@@ -13,17 +14,29 @@ interface ICategoryAttributesCard {
 const CategoryAttributesCard = ({
   attributes,
   selectedIds,
+  feedbackMessage,
   onAttributeChange,
   onUpdateAction,
 }: ICategoryAttributesCard) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between">
-          <CardTitle className="text-lg">Attributes</CardTitle>
-          <ThemedButton onClick={() => onUpdateAction("attributes")}>
-            Update Attributes
-          </ThemedButton>
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between">
+            <CardTitle className="text-lg">Attributes</CardTitle>
+            <ThemedButton onClick={() => onUpdateAction("attributes")}>
+              Update Attributes
+            </ThemedButton>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Attributes make a category sellable because variant combinations are
+            generated from them.
+          </p>
+          {feedbackMessage ? (
+            <p className="text-sm font-medium text-destructive">
+              {feedbackMessage}
+            </p>
+          ) : null}
         </div>
       </CardHeader>
       <CardContent>

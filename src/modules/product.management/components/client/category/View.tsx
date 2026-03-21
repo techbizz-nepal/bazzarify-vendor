@@ -15,8 +15,9 @@ import { actionGetSpecifications } from "@/modules/product.management/actions/sp
 import CategoryAttributesCard from "@/modules/product.management/ui/CategoryAttributesCard";
 import CategoryCard from "@/modules/product.management/ui/CategoryCard";
 import CategorySpecificationsCard from "@/modules/product.management/ui/CategorySpecificationsCard";
+import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import { useQueries } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export default function View({ slug }: { slug: string }) {
@@ -59,12 +60,24 @@ export default function View({ slug }: { slug: string }) {
   const [selectedSpecifications, setSelectedSpecifications] = useState<
     string[] | null
   >(null);
+  const [attributeUpdateError, setAttributeUpdateError] = useState<
+    string | null
+  >(null);
   const effectiveSelectedAttributes =
     selectedAttributes ?? response.category?.attributes ?? [];
   const effectiveSelectedSpecifications =
     selectedSpecifications ?? response.category?.specifications ?? [];
+  const categorySummary = useMemo(
+    () => ({
+      ...response.category,
+      attribute_count: response.category?.attributes?.length ?? 0,
+      specification_count: response.category?.specifications?.length ?? 0,
+    }),
+    [response.category],
+  );
 
   const handleAttributeChange = (uuid: string) => {
+    setAttributeUpdateError(null);
     setSelectedAttributes((prevState) => {
       const current = prevState ?? response.category?.attributes ?? [];
       return current.includes(uuid)
@@ -73,6 +86,7 @@ export default function View({ slug }: { slug: string }) {
     });
   };
   const handleSpecificationChange = (specId: string) => {
+    setAttributeUpdateError(null);
     setSelectedSpecifications((prevState) =>
       (prevState ?? response.category?.specifications ?? []).includes(specId)
         ? (prevState ?? response.category?.specifications ?? []).filter(
@@ -92,6 +106,7 @@ export default function View({ slug }: { slug: string }) {
   const handleUpdateCategory = (entity: string) => {
     let body = null;
     if (entity === "attributes") {
+      setAttributeUpdateError(null);
       body = { attributes: effectiveSelectedAttributes };
     }
     if (entity === "specifications") {
@@ -101,47 +116,54 @@ export default function View({ slug }: { slug: string }) {
       return;
     }
     actionUpdateCategory(slug, body).then((result) => {
-      if (result.data.message == "success") {
+      if (result && "data" in result && result.data.message == "success") {
         toast.info("Category updated successfully");
-      } else {
-        toast.error("Something went wrong");
+        return;
       }
+
+      const feedback =
+        result &&
+        typeof result === "object" &&
+        "summary" in result &&
+        "fieldErrors" in result
+          ? result
+          : getValidationFeedback(result, "Please fix the highlighted fields.");
+      if (entity === "attributes" && feedback?.fieldErrors.attributes?.[0]) {
+        setAttributeUpdateError(feedback.fieldErrors.attributes[0]);
+      }
+      toast.error(feedback?.summary ?? "Something went wrong");
     });
   };
   return (
     <div className="flex-col space-y-4">
       {response.category ? (
-        <CategoryCard category={response.category} />
+        <CategoryCard category={categorySummary} />
       ) : (
         <ContentSkeleton />
       )}
-      {!response.category?.children?.length && (
-        <>
-          {response.attributes !== undefined &&
-          !("error" in response.attributes) ? (
-            <CategoryAttributesCard
-              attributes={response.attributes.attributes.data}
-              selectedIds={effectiveSelectedAttributes}
-              onAttributeChange={handleAttributeChange}
-              onUpdateAction={handleUpdateCategory}
-            />
-          ) : (
-            <ContentSkeleton />
-          )}
-          {response.specifications ? (
-            <CategorySpecificationsCard
-              specifications={response.specifications?.data}
-              onSpecificationChange={handleSpecificationChange}
-              selectedIds={effectiveSelectedSpecifications}
-              onNextPage={handleSpecificationNextPage}
-              onPreviousPage={handleSpecificationPrevPage}
-              onPerPageChange={handleSpecificationPerPage}
-              onUpdateAction={handleUpdateCategory}
-            />
-          ) : (
-            <ContentSkeleton />
-          )}
-        </>
+      {response.attributes !== undefined && !("error" in response.attributes) ? (
+        <CategoryAttributesCard
+          attributes={response.attributes.attributes.data}
+          selectedIds={effectiveSelectedAttributes}
+          feedbackMessage={attributeUpdateError}
+          onAttributeChange={handleAttributeChange}
+          onUpdateAction={handleUpdateCategory}
+        />
+      ) : (
+        <ContentSkeleton />
+      )}
+      {response.specifications ? (
+        <CategorySpecificationsCard
+          specifications={response.specifications?.data}
+          onSpecificationChange={handleSpecificationChange}
+          selectedIds={effectiveSelectedSpecifications}
+          onNextPage={handleSpecificationNextPage}
+          onPreviousPage={handleSpecificationPrevPage}
+          onPerPageChange={handleSpecificationPerPage}
+          onUpdateAction={handleUpdateCategory}
+        />
+      ) : (
+        <ContentSkeleton />
       )}
     </div>
   );

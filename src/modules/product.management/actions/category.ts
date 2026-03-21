@@ -2,6 +2,7 @@
 
 import { ApiResponse, IMetaData, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
+import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
 import {
   TCategoryAuthoringContextPayload,
@@ -101,7 +102,6 @@ export const actionUpdateCategory = async (slug: string, body: object) => {
     );
     return response.data;
   } catch (error) {
-    console.error(error);
-    return null;
+    return getValidationFeedback(error, "Please fix the highlighted fields.");
   }
 };

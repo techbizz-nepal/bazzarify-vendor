@@ -46,6 +46,10 @@ const CategorySpecificationsCard = ({
               Update Specifications
             </ThemedButton>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Specifications enrich product metadata, but they do not make a
+            category sellable on their own.
+          </p>
           <div className="flex space-x-8">
             {/*<Input*/}
             {/*  placeholder="filter"*/}

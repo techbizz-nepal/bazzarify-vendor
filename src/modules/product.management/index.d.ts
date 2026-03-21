@@ -15,6 +15,8 @@ export type TCategory = {
   position?: string;
   slug: string;
   is_sellable?: boolean;
+  attribute_count?: number;
+  specification_count?: number;
   specifications?: string[];
   specifications_with_model?: TSpecification[];
   attributes?: string[];

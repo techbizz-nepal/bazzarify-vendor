@@ -7,6 +7,7 @@ import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 
 const categoryColumns: TableColumn<TCategory>[] = [
   { key: "name", title: "Name" },
+  { key: "is_sellable", title: "Sellable" },
   { key: "created_at", title: "Created At" },
   { key: "updated_at", title: "Updated At" },
 ];
@@ -64,6 +65,12 @@ export default async function CategoriesPage({
           hasNextPage: Boolean(categories?.next_page_url),
           hasPreviousPage: Boolean(categories?.prev_page_url),
         }}
+        rowActions={[
+          {
+            label: "Manage Schema",
+            hrefTemplate: "/categories/:slug/view",
+          },
+        ]}
       />
     </PageContainer>
   );
