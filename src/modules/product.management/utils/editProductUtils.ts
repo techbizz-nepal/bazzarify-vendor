@@ -4,6 +4,7 @@ import {
   TVariantDataMap,
 } from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { resolveStorageImageUrl } from "@/modules/product.management/utils/imageUrl";
 import {
   createVariantDraftKey,
   resolveVariantOptionValuesFromAttributes,
@@ -69,11 +70,6 @@ function transformProductVariants(
       variant,
     );
     // Normalize images to string URLs for UI consumption while preserving other fields
-    const base = (variant.image_base_url || "").replace(/\/+$/, "");
-    const toFull = (file: string) =>
-      /^(https?:)?\/\//.test(file)
-        ? file
-        : `${base}/${String(file).replace(/^\/+/, "")}`;
     const normalizedImages = (variant.images || []).map((img: unknown) => {
       if (img instanceof File) return img;
       if (
@@ -82,9 +78,14 @@ function transformProductVariants(
         "file" in (img as Record<string, unknown>) &&
         typeof (img as { file?: unknown }).file === "string"
       ) {
-        return toFull((img as { file: string }).file);
+        return resolveStorageImageUrl(
+          img as { file: string; uuid: string },
+          variant.image_base_url,
+        );
       }
-      if (typeof img === "string") return toFull(img);
+      if (typeof img === "string") {
+        return resolveStorageImageUrl(img, variant.image_base_url);
+      }
       return String(img);
     });
     const limitedImages = normalizedImages.slice(0, MAX_VARIANT_IMAGE_COUNT);

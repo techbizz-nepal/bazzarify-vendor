@@ -15,11 +15,12 @@ import {
   MAX_FILE_SIZE_MB,
   MAX_VARIANT_IMAGE_COUNT,
 } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import { resolveStorageImageUrl } from "@/modules/product.management/utils/imageUrl";
 import { validateImage } from "@/modules/product.management/utils/productForm";
 import { createVariantDraftKey } from "@/modules/product.management/utils/variantDraft";
 import { CirclePlus } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useMemo, useRef } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { FaX } from "react-icons/fa6";
 import { toast } from "sonner";
 
@@ -52,6 +53,36 @@ function PreviewImage({ file }: { file: File }) {
       src={url}
       alt="variant"
       className="h-14 w-14 border object-cover"
+    />
+  );
+}
+
+function ExistingVariantImage({
+  image,
+  baseUrl,
+}: {
+  image: string | TImage;
+  baseUrl?: string;
+}) {
+  const [broken, setBroken] = useState(false);
+  const src = resolveStorageImageUrl(image, baseUrl);
+
+  if (broken) {
+    return (
+      <div className="flex h-14 w-14 items-center justify-center border border-dashed text-center text-[10px] text-muted-foreground">
+        Unavailable
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      width={150}
+      height={150}
+      src={src}
+      alt="variant"
+      className="h-14 w-14 border object-cover"
+      onError={() => setBroken(true)}
     />
   );
 }
@@ -261,12 +292,9 @@ export default function VariantGrid({
                         {img instanceof File ? (
                           <PreviewImage file={img} />
                         ) : (
-                          <Image
-                            width={150}
-                            height={150}
-                            src={img as string}
-                            alt="variant"
-                            className="h-14 w-14 border object-cover"
+                          <ExistingVariantImage
+                            image={img as string | TImage}
+                            baseUrl={variant.image_base_url}
                           />
                         )}
                         <ThemedButton

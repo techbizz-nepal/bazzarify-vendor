@@ -68,6 +68,11 @@ function EditContent({
   const skuError = getSubmissionFieldError(feedback, "sku");
   const categoryError = getSubmissionFieldError(feedback, "category");
   const variantsError = hasSubmissionFieldPrefix(feedback, "variants");
+  const imagesError =
+    getSubmissionFieldError(feedback, "images") ||
+    (hasSubmissionFieldPrefix(feedback, "images")
+      ? feedback?.fieldErrors.images?.[0]
+      : undefined);
   const specificationErrors = specificationState.categorySpecifications.some(
     (specification) =>
       Boolean(
@@ -168,6 +173,7 @@ function EditContent({
           {/*** Product Image Start ***/}
           <ProductCard
             title="Product Images"
+            className={imagesError ? "border-destructive" : undefined}
             tooltip={{
               trigger: { type: "icon" },
               texts: [
@@ -186,6 +192,8 @@ function EditContent({
               onExistingListChange={(urls) =>
                 mediaState.handleExistingProductImagesChange(urls)
               }
+              invalid={Boolean(imagesError)}
+              errorMessage={imagesError}
             />
           </ProductCard>
           {/*** Product Image ends ***/}

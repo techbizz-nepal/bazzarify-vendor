@@ -76,6 +76,26 @@ export default function useProductAuthoring({
   } | null>(null);
   const hydratedEditProductUuidRef = useRef<string | null>(null);
 
+  const clearSubmissionFieldError = (field: string) => {
+    setSubmissionFeedback((previous) => {
+      if (!previous?.fieldErrors[field]) {
+        return previous;
+      }
+
+      const nextFieldErrors = { ...previous.fieldErrors };
+      delete nextFieldErrors[field];
+
+      if (Object.keys(nextFieldErrors).length === 0) {
+        return null;
+      }
+
+      return {
+        ...previous,
+        fieldErrors: nextFieldErrors,
+      };
+    });
+  };
+
   const product = useProduct();
   const category = useCategory({
     setCategoryAttributes,
@@ -134,6 +154,20 @@ export default function useProductAuthoring({
     }));
   };
 
+  const handleProductImageUpload = (files: File[]) => {
+    if (files.length > 0 || product.existingProductImages.length > 0) {
+      clearSubmissionFieldError("images");
+    }
+    product.handleProductImageUpload(files);
+  };
+
+  const handleExistingProductImagesChange = (images: string[]) => {
+    if (images.length > 0 || product.uploadedProductImages.length > 0) {
+      clearSubmissionFieldError("images");
+    }
+    product.handleExistingProductImagesChange(images);
+  };
+
   const handleClickSubChild = async (categoryLeaf: TCategory) => {
     await category.handleClickSubChild(categoryLeaf);
     resetDraftForCategoryChange();
@@ -158,7 +192,7 @@ export default function useProductAuthoring({
       const remainingImages = (product.existingProductImages || []).filter(
         (imageUrl) => imageUrl !== url,
       );
-      product.handleExistingProductImagesChange(remainingImages);
+      handleExistingProductImagesChange(remainingImages);
       const { [url]: removedImageUuid, ...restImageIdMap } =
         product.existingImageIdMap;
       void removedImageUuid;
@@ -219,16 +253,45 @@ export default function useProductAuthoring({
 
   const handleSubmit = async () => {
     if (
+      mode === "create" &&
+      product.uploadedProductImages.length === 0
+    ) {
+      const feedback: {
+        summary: string;
+        fieldErrors: Record<string, string[]>;
+      } = {
+        summary: "Please fix the highlighted fields.",
+        fieldErrors: {
+          images: ["Please select product image."],
+        },
+      };
+      setSubmissionFeedback(feedback);
+      toast.error(feedback.summary);
+      return;
+    }
+
+    if (
       mode === "update" &&
       (!product.productForm.uuid ||
         (!product.existingProductImages.length &&
           !product.uploadedProductImages.length))
     ) {
-      toast.error(
-        product.productForm.uuid
-          ? "Please select product image."
-          : "Cannot proceed request.",
-      );
+      const feedback: {
+        summary: string;
+        fieldErrors: Record<string, string[]>;
+      } = product.productForm.uuid
+        ? {
+            summary: "Please fix the highlighted fields.",
+            fieldErrors: {
+              images: ["Please select product image."],
+            },
+          }
+        : {
+            summary: "Cannot proceed request.",
+            fieldErrors: {},
+          };
+      setSubmissionFeedback(feedback);
+      toast.error(feedback.summary);
       return;
     }
 
@@ -324,8 +387,8 @@ export default function useProductAuthoring({
     },
     mediaState: {
       existingProductImages: product.existingProductImages,
-      handleProductImageUpload: product.handleProductImageUpload,
-      handleExistingProductImagesChange: product.handleExistingProductImagesChange,
+      handleProductImageUpload,
+      handleExistingProductImagesChange,
       handleRemoveExistingProductImage:
         mode === "update" ? handleRemoveExistingProductImage : undefined,
     },
