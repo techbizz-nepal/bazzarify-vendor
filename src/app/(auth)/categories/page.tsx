@@ -1,9 +1,14 @@
+import { Button } from "@/components/ui/button";
 import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import { TCategory } from "@/modules/product.management";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
+import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
+import { getCookieStore } from "@/modules/core/lib/utils.session";
+import Link from "next/link";
+import { FaPlus } from "react-icons/fa6";
 
 const categoryColumns: TableColumn<TCategory>[] = [
   { key: "name", title: "Name" },
@@ -17,6 +22,16 @@ export default async function CategoriesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const userUuid = await getSessionUserUUID(await getCookieStore());
+  const authUser = userUuid ? await getAuthUser(userUuid) : null;
+  const isAdmin =
+    authUser &&
+    typeof authUser === "object" &&
+    !("error" in authUser) &&
+    authUser.roles.some(
+      (role) => role.name === "super-admin" || role.name === "admin",
+    );
+
   const resolvedSearchParams = await searchParams;
   const flattenedParams = flattenSearchParams(resolvedSearchParams);
   const page = Number(flattenedParams.page ?? "1");
@@ -42,6 +57,16 @@ export default async function CategoriesPage({
       <ServerDataTable
         title="Manage Categories"
         description="Manage categories with server-driven filters, pagination, and backend-owned query behavior."
+        toolbarAction={
+          isAdmin ? (
+            <Button asChild size="sm">
+              <Link href="/categories/create">
+                <FaPlus className="mr-2" />
+                New Category
+              </Link>
+            </Button>
+          ) : null
+        }
         columns={categoryColumns}
         rows={categories?.data ?? []}
         emptyMessage="No categories found for the current filters."

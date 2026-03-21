@@ -34,6 +34,17 @@ export async function actionGetCategories(
   }
 }
 
+export const actionCreateCategory = async (body: object) => {
+  try {
+    const response = await (
+      await authAxiosInstance()
+    ).post(PRODUCT_MANAGEMENT_ROUTES.category.create.path, body);
+    return response.data;
+  } catch (error) {
+    return getValidationFeedback(error, "Please fix the highlighted fields.");
+  }
+};
+
 export const actionViewCategory = async (slug: string) => {
   try {
     const response = await (

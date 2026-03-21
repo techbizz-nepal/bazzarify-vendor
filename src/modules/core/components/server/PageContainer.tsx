@@ -5,9 +5,10 @@ import { ReactNode } from "react";
 interface Props {
   children: ReactNode;
   pageTitle: string;
+  actionSlot?: ReactNode;
 }
 
-const PageContainer = ({ children, pageTitle }: Props) => {
+const PageContainer = ({ children, pageTitle, actionSlot }: Props) => {
   return (
     <>
       <Breadcrumb />
@@ -16,6 +17,7 @@ const PageContainer = ({ children, pageTitle }: Props) => {
           title={pageTitle}
           className="text-primary text-lg font-semibold uppercase"
         />
+        {actionSlot}
       </div>
       {children}
     </>

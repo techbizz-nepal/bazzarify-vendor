@@ -4,6 +4,10 @@ const category: IRoute["category"] = {
   index: {
     path: "/product-management/categories/assigned",
   },
+  create: {
+    path: "/product-management/categories",
+    method: "POST",
+  },
   show: {
     path: "/product-management/categories/:slug",
   },
