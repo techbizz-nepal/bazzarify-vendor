@@ -126,6 +126,7 @@ function CreateContent({
       <ProductCard title="Category" className={categoryError ? "border-destructive" : undefined}>
         <CategoryDropdown
           selectedCategories={categoryState.selectedCategories}
+          committedCategories={categoryState.committedCategories}
           open={categoryState.showDropdown}
           onOpenChangeAction={categoryState.handleShowDropdownChange}
           rootCategories={rootCategories.filter((cat) =>
@@ -146,12 +147,13 @@ function CreateContent({
           onClickRoot={categoryState.handleClickRoot}
           onClickSub={categoryState.handleClickSub}
           onClickSubChild={categoryState.handleClickSubChild}
+          onCommitSelectedCategory={categoryState.handleCommitSelectedCategory}
           onFilterChange={categoryState.updateFilter}
           invalid={Boolean(categoryError)}
           errorMessage={categoryError}
         />
       </ProductCard>
-      {categoryState.selectedCategories.length === 3 && (
+      {categoryState.committedCategory && (
         <>
           {/*** Product Image Start ***/}
           <ProductCard

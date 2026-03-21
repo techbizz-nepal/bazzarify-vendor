@@ -1,22 +1,17 @@
 import {
-  TAttribute,
   TCategory,
   TSpecification,
 } from "@/modules/product.management";
-import { Dispatch, SetStateAction, useState } from "react";
-import { toast } from "sonner";
-import { loadProductCategoryContext } from "@/modules/product.management/utils/productAuthoring";
+import { useState } from "react";
 
-interface useCategoryProps {
-  setCategoryAttributes: Dispatch<SetStateAction<TAttribute[]>>;
-  setVariantSelections?: Dispatch<SetStateAction<Record<string, string[]>>>;
-}
-
-export default function useCategory({
-  setCategoryAttributes,
-  setVariantSelections,
-}: useCategoryProps) {
+export default function useCategory() {
   const [selectedCategories, setSelectedCategories] = useState<TCategory[]>([]);
+  const [committedCategories, setCommittedCategories] = useState<TCategory[]>(
+    [],
+  );
+  const [committedCategory, setCommittedCategory] = useState<TCategory | null>(
+    null,
+  );
   const [showDropdown, setShowDropdown] = useState(false);
   const [subCategories, setSubCategories] = useState<TCategory[]>([]);
   const [subChildCategories, setSubChildCategories] = useState<TCategory[]>([]);
@@ -43,26 +38,8 @@ export default function useCategory({
     setSelectedCategories((prev) => [prev[0], category]);
   };
 
-  const handleClickSubChild = async (category: TCategory) => {
-    const categoryContext = await loadProductCategoryContext(category.slug);
-    if ("error" in categoryContext) {
-      toast.error(categoryContext.error);
-      return;
-    }
-
-    setSelectedCategories([
-      categoryContext.categoryAncestors.root,
-      categoryContext.categoryAncestors.sub,
-      categoryContext.categoryAncestors.subChild,
-    ]);
-    setSubCategories(categoryContext.subCategories);
-    setSubChildCategories(categoryContext.subChildCategories);
-    setCategorySpecifications(categoryContext.specifications);
-    setSpecifications({});
-    setCategoryAttributes(categoryContext.attributes);
-    setVariantSelections?.({});
-
-    setShowDropdown(!showDropdown);
+  const handleClickSubChild = (category: TCategory) => {
+    setSelectedCategories((prev) => [prev[0], prev[1], category]);
   };
 
   const updateFilter = (level: "root" | "sub" | "subchild", value: string) => {
@@ -74,6 +51,8 @@ export default function useCategory({
 
   return {
     selectedCategories,
+    committedCategories,
+    committedCategory,
     showDropdown,
     subCategories,
     subChildCategories,
@@ -87,10 +66,11 @@ export default function useCategory({
     updateFilter,
     setSpecifications,
     setCategorySpecifications,
-    setCategoryAttributes,
     setFilters,
     setSubChildCategories,
     setSubCategories,
+    setCommittedCategories,
+    setCommittedCategory,
     setSelectedCategories,
     setShowDropdown,
     handleSpecificationChange,

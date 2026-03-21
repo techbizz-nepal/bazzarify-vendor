@@ -14,6 +14,7 @@ export type TCategory = {
   name: string;
   position?: string;
   slug: string;
+  is_sellable?: boolean;
   specifications?: string[];
   specifications_with_model?: TSpecification[];
   attributes?: string[];
@@ -186,13 +187,16 @@ export interface ProductAuthoringBasicState {
 export interface ProductAuthoringCategoryState {
   showDropdown: boolean;
   selectedCategories: TCategory[];
+  committedCategories: TCategory[];
+  committedCategory: TCategory | null;
   subCategories: TCategory[];
   subChildCategories: TCategory[];
   filters: { root: string; sub: string; subchild: string };
   handleShowDropdownChange: () => void;
   handleClickRoot: (category: TCategory) => void;
   handleClickSub: (category: TCategory) => void;
-  handleClickSubChild: (category: TCategory) => Promise<void>;
+  handleClickSubChild: (category: TCategory) => void;
+  handleCommitSelectedCategory: () => Promise<void>;
   updateFilter: (level: "root" | "sub" | "subchild", value: string) => void;
 }
 

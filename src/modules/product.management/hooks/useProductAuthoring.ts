@@ -32,6 +32,7 @@ import {
   resolveVariantOptionValuesFromAttributes,
 } from "@/modules/product.management/utils/variantDraft";
 import {
+  loadProductCategoryContext,
   prepareProductSubmission,
 } from "@/modules/product.management/utils/productAuthoring";
 import { omit } from "lodash-es";
@@ -97,10 +98,7 @@ export default function useProductAuthoring({
   };
 
   const product = useProduct();
-  const category = useCategory({
-    setCategoryAttributes,
-    setVariantSelections,
-  });
+  const category = useCategory();
   const variant = useVariant({
     variantSelections,
     setVariantSelections,
@@ -136,6 +134,12 @@ export default function useProductAuthoring({
     variant.setColumns([]);
   };
 
+  const categoryChangeNeedsResetConfirmation = () =>
+    Object.values(specificationValues).some((value) => value.trim() !== "") ||
+    Object.keys(variant.variantData).length > 0 ||
+    Object.values(variantSelections).some((values) => values.length > 0) ||
+    variant.columns.length > 0;
+
   const onProductFormInputChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -168,9 +172,49 @@ export default function useProductAuthoring({
     product.handleExistingProductImagesChange(images);
   };
 
-  const handleClickSubChild = async (categoryLeaf: TCategory) => {
-    await category.handleClickSubChild(categoryLeaf);
-    resetDraftForCategoryChange();
+  const handleCommitSelectedCategory = async () => {
+    const selectedCategory = category.selectedCategories.at(-1);
+
+    if (!selectedCategory) {
+      return;
+    }
+
+    if (!selectedCategory.is_sellable) {
+      toast.error("Choose a more specific category to continue.");
+      return;
+    }
+
+    const isChangingCommittedCategory =
+      category.committedCategory?.uuid !== selectedCategory.uuid;
+
+    if (
+      isChangingCommittedCategory &&
+      category.committedCategory &&
+      categoryChangeNeedsResetConfirmation() &&
+      !window.confirm(
+        "Changing category will reset specifications and variant configuration. Continue?",
+      )
+    ) {
+      return;
+    }
+
+    const categoryContext = await loadProductCategoryContext(selectedCategory.slug);
+    if ("error" in categoryContext) {
+      toast.error(categoryContext.error);
+      return;
+    }
+
+    if (isChangingCommittedCategory) {
+      resetDraftForCategoryChange();
+      setVariantSelections({});
+    }
+
+    category.setCommittedCategories([...category.selectedCategories]);
+    category.setCommittedCategory(selectedCategory);
+    category.setCategorySpecifications(categoryContext.specifications ?? []);
+    setCategoryAttributes(categoryContext.attributes ?? []);
+    category.setShowDropdown(false);
+    clearSubmissionFieldError("category");
   };
 
   const handleRemoveExistingProductImage = async (
@@ -223,6 +267,8 @@ export default function useProductAuthoring({
       setExistingProductImages: product.setExistingProductImages,
       setExistingImageIdMap: product.setExistingImageIdMap,
       setSelectedCategories: category.setSelectedCategories,
+      setCommittedCategories: category.setCommittedCategories,
+      setCommittedCategory: category.setCommittedCategory,
       setSubCategories: category.setSubCategories,
       setSubChildCategories: category.setSubChildCategories,
       setCategorySpecifications: category.setCategorySpecifications,
@@ -235,6 +281,8 @@ export default function useProductAuthoring({
     });
   }, [
     category.setCategorySpecifications,
+    category.setCommittedCategories,
+    category.setCommittedCategory,
     category.setSelectedCategories,
     category.setSubCategories,
     category.setSubChildCategories,
@@ -301,7 +349,7 @@ export default function useProductAuthoring({
             schema: CreateProductSchema,
             product: omit(product.productForm, "uuid"),
             productSku: product.productForm.sku,
-            selectedCategoryUuid: category.selectedCategories.at(2)?.uuid,
+            selectedCategoryUuid: category.committedCategory?.uuid,
             combinations: variant.combinations,
             columns: variant.columns,
             variantData: variant.variantData,
@@ -319,13 +367,13 @@ export default function useProductAuthoring({
               base_price: String(product.productForm.base_price),
               description: product.productForm.description,
               highlights: product.productForm.highlights,
-              box_items: product.productForm.box_items,
-            },
-            productSku: product.productForm.sku,
-            selectedCategoryUuid: category.selectedCategories.at(2)?.uuid,
-            combinations: variant.combinations,
-            columns: variant.columns,
-            variantData: variant.variantData,
+            box_items: product.productForm.box_items,
+          },
+          productSku: product.productForm.sku,
+          selectedCategoryUuid: category.committedCategory?.uuid,
+          combinations: variant.combinations,
+          columns: variant.columns,
+          variantData: variant.variantData,
             uploadedProductImages: product.uploadedProductImages,
             specifications: specificationValues,
             categoryAttributes,
@@ -376,13 +424,16 @@ export default function useProductAuthoring({
     categoryState: {
       showDropdown: category.showDropdown,
       selectedCategories: category.selectedCategories,
+      committedCategories: category.committedCategories,
+      committedCategory: category.committedCategory,
       subCategories: category.subCategories,
       subChildCategories: category.subChildCategories,
       filters: category.filters,
       handleShowDropdownChange: category.handleShowDropdownChange,
       handleClickRoot: category.handleClickRoot,
       handleClickSub: category.handleClickSub,
-      handleClickSubChild,
+      handleClickSubChild: category.handleClickSubChild,
+      handleCommitSelectedCategory,
       updateFilter: category.updateFilter,
     },
     mediaState: {
@@ -426,6 +477,8 @@ interface HydrateEditProductArgs {
   setExistingProductImages: Dispatch<SetStateAction<string[]>>;
   setExistingImageIdMap: (imageIdMap: Record<string, string>) => void;
   setSelectedCategories: Dispatch<SetStateAction<TCategory[]>>;
+  setCommittedCategories: Dispatch<SetStateAction<TCategory[]>>;
+  setCommittedCategory: Dispatch<SetStateAction<TCategory | null>>;
   setSubCategories: Dispatch<SetStateAction<TCategory[]>>;
   setSubChildCategories: Dispatch<SetStateAction<TCategory[]>>;
   setCategorySpecifications: Dispatch<SetStateAction<TSpecification[]>>;
@@ -445,6 +498,8 @@ function hydrateEditProduct({
   setExistingProductImages,
   setExistingImageIdMap,
   setSelectedCategories,
+  setCommittedCategories,
+  setCommittedCategory,
   setSubCategories,
   setSubChildCategories,
   setCategorySpecifications,
@@ -505,12 +560,15 @@ function hydrateEditProduct({
 
   const categorySpecifications = categoryContext.specifications ?? [];
   const categoryAttributes = categoryContext.attributes ?? [];
-
-  setSelectedCategories([
+  const normalizedCategoryPath = normalizeCategoryPath([
     categoryContext.categoryAncestors.root,
     categoryContext.categoryAncestors.sub,
     categoryContext.categoryAncestors.subChild,
   ]);
+
+  setSelectedCategories(normalizedCategoryPath);
+  setCommittedCategories(normalizedCategoryPath);
+  setCommittedCategory(normalizedCategoryPath.at(-1) ?? null);
   setSubCategories(categoryContext.subCategories);
   setSubChildCategories(categoryContext.subChildCategories);
   setCategorySpecifications(categorySpecifications);
@@ -572,4 +630,14 @@ function hydrateEditProduct({
   });
 
   setVariantImageIdMap(nextVariantImageIdMap);
+}
+
+function normalizeCategoryPath(categories: TCategory[]): TCategory[] {
+  return categories.filter(
+    (category): category is TCategory =>
+      Boolean(category?.uuid) &&
+      category.uuid !== "unknown" &&
+      Boolean(category?.name) &&
+      category.name !== "unknown",
+  );
 }
