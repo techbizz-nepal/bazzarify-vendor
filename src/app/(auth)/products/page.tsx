@@ -6,6 +6,7 @@ import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { actionGetProducts } from "@/modules/product.management/actions/product";
 import { TProduct } from "@/modules/product.management";
 import { requireVendorStoreGuard } from "@/modules/vendor/domain/requireVendorStoreGuard";
+import { Upload } from "lucide-react";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa6";
 
@@ -75,12 +76,20 @@ export default async function ProductsPage({
         title="Manage Products"
         description="Manage products with server-driven filters, pagination, and backend-owned query behavior."
         toolbarAction={
-          <Button asChild size="sm">
-            <Link href="/products/create">
-              <FaPlus className="mr-2" />
-              New Product
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" variant="outline">
+              <Link href="/products/import">
+                <Upload className="mr-2 h-4 w-4" />
+                Bulk Import
+              </Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/products/create">
+                <FaPlus className="mr-2" />
+                New Product
+              </Link>
+            </Button>
+          </div>
         }
         columns={productColumns}
         rows={products?.data ?? []}

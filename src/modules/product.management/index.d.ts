@@ -116,6 +116,123 @@ export type TProductIndexPayload = {
   table: TServerDataTableMeta;
 };
 
+export type TProductImportGuideField = {
+  key: string;
+  label: string;
+  required: boolean;
+  description: string;
+  example: string | null;
+};
+
+export type TProductImportTargetStore = {
+  uuid: string;
+  name: string;
+  slug: string;
+  email: string | null;
+  phone: string | null;
+  sellable_category_count: number;
+  product_authoring_ready: boolean;
+  owner: {
+    uuid: string;
+    name: string | null;
+    email: string | null;
+  } | null;
+};
+
+export type TProductImportEligibility = {
+  actor_type: "vendor" | "admin";
+  can_initiate: boolean;
+  target_store_required: boolean;
+  blocking_reasons: {
+    code: string;
+    message: string;
+  }[];
+  target_store: TProductImportTargetStore | null;
+};
+
+export type TProductImportGuidePayload = {
+  guide: {
+    template: {
+      filename: string;
+      headers: string[];
+      sample_rows: Record<string, string>[];
+      api_path: string;
+    };
+    constraints: {
+      csv_max_size_mb: number;
+      image_archive_max_size_mb: number;
+      grouping_rule: string;
+    };
+    prerequisites: string[];
+    workflow_steps: string[];
+    image_rules: string[];
+    fields: TProductImportGuideField[];
+  };
+  eligibility: TProductImportEligibility;
+};
+
+export type TProductImportRecord = {
+  uuid: string;
+  status: string | null;
+  source_filename: string | null;
+  image_archive_filename: string | null;
+  target_store_uuid: string | null;
+  target_store: Pick<TProductImportTargetStore, "uuid" | "name"> | null;
+  total_rows: number;
+  valid_rows: number;
+  invalid_rows: number;
+  processed_rows: number;
+  succeeded_rows: number;
+  failed_rows: number;
+  progress_percentage: number;
+  summary: Record<string, unknown> | null;
+  created_at: string | null;
+  updated_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+};
+
+export type TProductImportRow = {
+  uuid: string;
+  row_number: number;
+  status: string | null;
+  raw_payload: Record<string, unknown> | null;
+  normalized_payload: Record<string, unknown> | null;
+  errors: Record<string, unknown> | null;
+  suggestions: Record<string, unknown> | null;
+  product_uuid: string | null;
+};
+
+export type TProductImportUploadPayload = {
+  import: TProductImportRecord;
+};
+
+export type TProductImportValidationPayload = {
+  import: TProductImportRecord;
+  rows: TProductImportRow[];
+};
+
+export type TProductImportProcessPayload = {
+  import: TProductImportRecord;
+  result: {
+    processed_rows: number;
+    succeeded_rows: number;
+    failed_rows: number;
+    status: string;
+    sample_failures: {
+      import_key: string;
+      row_numbers: number[];
+      message: string;
+    }[];
+    idempotent_replay: boolean;
+    message?: string;
+  };
+};
+
+export type TProductImportTargetStorePayload = {
+  stores: TProductImportTargetStore[];
+};
+
 export type TSpecificationsIndexPayload = {
   specifications: IPaginatedData<TSpecification[]>;
 };

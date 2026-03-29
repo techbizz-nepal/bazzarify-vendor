@@ -1,0 +1,161 @@
+import { z } from "zod";
+
+export const ProductImportTargetStoreSchema = z
+  .object({
+    uuid: z.uuid(),
+    name: z.string(),
+    slug: z.string(),
+    email: z.string().nullable(),
+    phone: z.string().nullable(),
+    sellable_category_count: z.number().int().nonnegative(),
+    product_authoring_ready: z.boolean(),
+    owner: z
+      .object({
+        uuid: z.uuid(),
+        name: z.string().nullable(),
+        email: z.string().nullable(),
+      })
+      .nullable(),
+  })
+  .strict();
+
+export const ProductImportEligibilitySchema = z
+  .object({
+    actor_type: z.enum(["vendor", "admin"]),
+    can_initiate: z.boolean(),
+    target_store_required: z.boolean(),
+    blocking_reasons: z.array(
+      z
+        .object({
+          code: z.string(),
+          message: z.string(),
+        })
+        .strict(),
+    ),
+    target_store: ProductImportTargetStoreSchema.nullable(),
+  })
+  .strict();
+
+export const ProductImportGuidePayloadSchema = z
+  .object({
+    guide: z
+      .object({
+        template: z
+          .object({
+            filename: z.string(),
+            headers: z.array(z.string()),
+            sample_rows: z.array(z.record(z.string(), z.string())),
+            api_path: z.string(),
+          })
+          .strict(),
+        constraints: z
+          .object({
+            csv_max_size_mb: z.number().int().positive(),
+            image_archive_max_size_mb: z.number().int().positive(),
+            grouping_rule: z.string(),
+          })
+          .strict(),
+        prerequisites: z.array(z.string()),
+        workflow_steps: z.array(z.string()),
+        image_rules: z.array(z.string()),
+        fields: z.array(
+          z
+            .object({
+              key: z.string(),
+              label: z.string(),
+              required: z.boolean(),
+              description: z.string(),
+              example: z.string().nullable(),
+            })
+            .strict(),
+        ),
+      })
+      .strict(),
+    eligibility: ProductImportEligibilitySchema,
+  })
+  .strict();
+
+export const ProductImportRecordSchema = z
+  .object({
+    uuid: z.uuid(),
+    status: z.string().nullable(),
+    source_filename: z.string().nullable(),
+    image_archive_filename: z.string().nullable(),
+    target_store_uuid: z.uuid().nullable(),
+    target_store: z
+      .object({
+        uuid: z.uuid(),
+        name: z.string(),
+      })
+      .nullable(),
+    total_rows: z.number().int().nonnegative(),
+    valid_rows: z.number().int().nonnegative(),
+    invalid_rows: z.number().int().nonnegative(),
+    processed_rows: z.number().int().nonnegative(),
+    succeeded_rows: z.number().int().nonnegative(),
+    failed_rows: z.number().int().nonnegative(),
+    progress_percentage: z.number().nonnegative(),
+    summary: z.record(z.string(), z.unknown()).nullable(),
+    created_at: z.string().nullable(),
+    updated_at: z.string().nullable(),
+    started_at: z.string().nullable(),
+    finished_at: z.string().nullable(),
+  })
+  .strict();
+
+export const ProductImportRowSchema = z
+  .object({
+    uuid: z.uuid(),
+    row_number: z.number().int().positive(),
+    status: z.string().nullable(),
+    raw_payload: z.record(z.string(), z.unknown()).nullable(),
+    normalized_payload: z.record(z.string(), z.unknown()).nullable(),
+    errors: z.record(z.string(), z.unknown()).nullable(),
+    suggestions: z.record(z.string(), z.unknown()).nullable(),
+    product_uuid: z.uuid().nullable(),
+  })
+  .strict();
+
+export const ProductImportUploadPayloadSchema = z
+  .object({
+    import: ProductImportRecordSchema,
+  })
+  .strict();
+
+export const ProductImportValidationPayloadSchema = z
+  .object({
+    import: ProductImportRecordSchema,
+    rows: z.array(ProductImportRowSchema),
+  })
+  .strict();
+
+export const ProductImportProcessPayloadSchema = z
+  .object({
+    import: ProductImportRecordSchema,
+    result: z
+      .object({
+        processed_rows: z.number().int().nonnegative(),
+        succeeded_rows: z.number().int().nonnegative(),
+        failed_rows: z.number().int().nonnegative(),
+        status: z.string(),
+        sample_failures: z.array(
+          z
+            .object({
+              import_key: z.string(),
+              row_numbers: z.array(z.number().int().positive()),
+              message: z.string(),
+            })
+            .strict(),
+        ),
+        idempotent_replay: z.boolean(),
+        message: z.string().optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+export const ProductImportTargetStorePayloadSchema = z
+  .object({
+    stores: z.array(ProductImportTargetStoreSchema),
+  })
+  .strict();

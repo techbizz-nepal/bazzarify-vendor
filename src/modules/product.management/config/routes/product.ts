@@ -18,7 +18,31 @@ const product: IRoute["product"] = {
   },
   delete: {
     path: "/product-management/products/:uuid",
-  }
+  },
+  importGuide: {
+    path: "/product-management/product-imports/guide",
+  },
+  importTemplate: {
+    path: "/product-management/product-imports/template",
+  },
+  importStoreOptions: {
+    path: "/product-management/product-imports/target-stores",
+  },
+  importStore: {
+    path: "/product-management/product-imports",
+  },
+  importShow: {
+    path: "/product-management/product-imports/:uuid",
+  },
+  importValidate: {
+    path: "/product-management/product-imports/:uuid/validate",
+  },
+  importProcess: {
+    path: "/product-management/product-imports/:uuid/process",
+  },
+  importRows: {
+    path: "/product-management/product-imports/:uuid/rows",
+  },
 };
 
 export default product;
