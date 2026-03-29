@@ -9,6 +9,15 @@ const StoreSummarySchema = z
   })
   .strip();
 
+const StoreScopedTotalsSchema = z
+  .object({
+    sub_total: z.float64().nonnegative().default(0),
+    discount_total: z.float64().nonnegative().default(0),
+    tax_total: z.float64().nonnegative().default(0),
+    grand_total: z.float64().nonnegative().default(0),
+  })
+  .strip();
+
 export const ShippingInformationSchema = z
   .object({
     zip: z.string(),
@@ -68,6 +77,7 @@ export const OrderSchema = z
     payment_status: z.string().max(32),
     payment_method: z.string().max(32),
     payment_fee: z.float64().nonnegative().default(0),
+    store_scoped_totals: StoreScopedTotalsSchema.nullable().optional(),
     placed_at: z.iso.datetime(),
     cancelled_at: z.iso.datetime().nullable().optional(),
     completed_at: z.iso.datetime().nullable().optional(),
@@ -149,6 +159,7 @@ export const OrderListItemSchema = OrderSchema.pick({
   items_count: z.number().int().nonnegative().nullable().optional(),
   visible_items_count: z.number().int().nonnegative().nullable().optional(),
   visible_item_quantity: z.number().int().nonnegative().nullable().optional(),
+  visible_grand_total: z.number().nonnegative().nullable().optional(),
   buyer: z
     .object({
       name: z.string().nullable().optional(),

@@ -25,6 +25,7 @@ type OrderListCountFields = {
   item_count?: number | null;
   visible_items_count?: number | null;
   visible_item_quantity?: number | null;
+  visible_grand_total?: number | null;
 };
 
 interface OrdersServerTableProps {
@@ -92,10 +93,18 @@ export default function OrdersServerTable({
     },
     {
       key: "grand_total",
-      title: "Grand Total",
+      title: canManageWholeOrder ? "Grand Total" : "Your Total",
       align: "right",
-      render: (value) =>
-        typeof value === "number" ? `$${value.toFixed(2)}` : "$0.00",
+      render: (value, record) => {
+        const counts = record as OrderListItem & OrderListCountFields;
+        const resolvedValue = canManageWholeOrder
+          ? value
+          : counts.visible_grand_total ?? 0;
+
+        return typeof resolvedValue === "number"
+          ? `$${resolvedValue.toFixed(2)}`
+          : "$0.00";
+      },
     },
     {
       key: "buyer.name",

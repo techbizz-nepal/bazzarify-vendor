@@ -52,21 +52,17 @@ export default function Show({
   } = useOrderShow({ order, canManageWholeOrder });
   const router = useRouter();
   const [isItemActionPending, startItemAction] = useTransition();
-
   const scopedItemCount = order.items.length;
   const scopedQuantity = order.items.reduce(
     (total, item) => total + item.qty_ordered,
     0,
   );
-  const scopedSubtotal = order.items.reduce(
-    (total, item) => total + item.row_total,
-    0,
-  );
-  const scopedDiscount = order.items.reduce(
-    (total, item) => total + item.row_discount,
-    0,
-  );
-  const scopedTax = order.items.reduce((total, item) => total + item.row_tax, 0);
+  const scopedTotals = order.store_scoped_totals ?? {
+    sub_total: 0,
+    discount_total: 0,
+    tax_total: 0,
+    grand_total: 0,
+  };
 
   const itemRemainingQuantity = (item: TOrder["items"][number]) =>
     Math.max(0, item.qty_ordered - item.qty_canceled - item.qty_shipped);
@@ -182,19 +178,27 @@ export default function Show({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p>Sub Total: {canManageWholeOrder ? order.sub_total : scopedSubtotal}</p>
             <p>
-              Discount: {canManageWholeOrder ? order.discount_total : scopedDiscount}
+              Sub Total: {canManageWholeOrder ? order.sub_total : scopedTotals.sub_total}
             </p>
-            <p>Tax: {canManageWholeOrder ? order.tax_total : scopedTax}</p>
+            <p>
+              Discount:{" "}
+              {canManageWholeOrder
+                ? order.discount_total
+                : scopedTotals.discount_total}
+            </p>
+            <p>Tax: {canManageWholeOrder ? order.tax_total : scopedTotals.tax_total}</p>
             {canManageWholeOrder ? (
               <>
                 <p>Shipping: {order.shipping_total}</p>
                 <p>Method: {order.payment_method}</p>
                 <p>Type: {order.payment_status}</p>
                 <p>Fee: {order.payment_fee}</p>
+                <p>Grand Total: {order.grand_total}</p>
               </>
-            ) : null}
+            ) : (
+              <p>Your Total: {scopedTotals.grand_total}</p>
+            )}
           </CardContent>
         </Card>
         <Card className="grid md:col-span-2 grid-cols-1">
@@ -314,19 +318,19 @@ export default function Show({
                 <TableRow>
                   <TableCell className="text-left">Sub Total</TableCell>
                   <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
-                    {canManageWholeOrder ? order.sub_total : scopedSubtotal}
+                    {canManageWholeOrder ? order.sub_total : scopedTotals.sub_total}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Discount</TableCell>
                   <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
-                    {canManageWholeOrder ? order.discount_total : scopedDiscount}
+                    {canManageWholeOrder ? order.discount_total : scopedTotals.discount_total}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Tax</TableCell>
                   <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
-                    {canManageWholeOrder ? order.tax_total : scopedTax}
+                    {canManageWholeOrder ? order.tax_total : scopedTotals.tax_total}
                   </TableCell>
                 </TableRow>
                 {canManageWholeOrder ? (
@@ -344,7 +348,12 @@ export default function Show({
                       <TableCell colSpan={5}>{order.grand_total}</TableCell>
                     </TableRow>
                   </>
-                ) : null}
+                ) : (
+                  <TableRow>
+                    <TableCell className="text-left">Your Total</TableCell>
+                    <TableCell colSpan={6}>{scopedTotals.grand_total}</TableCell>
+                  </TableRow>
+                )}
               </TableFooter>
             </Table>
           </CardContent>
