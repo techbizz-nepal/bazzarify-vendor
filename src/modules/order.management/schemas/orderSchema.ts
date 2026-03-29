@@ -14,6 +14,7 @@ const StoreScopedTotalsSchema = z
     sub_total: z.float64().nonnegative().default(0),
     discount_total: z.float64().nonnegative().default(0),
     tax_total: z.float64().nonnegative().default(0),
+    shipping_total: z.float64().nonnegative().default(0),
     grand_total: z.float64().nonnegative().default(0),
   })
   .strip();

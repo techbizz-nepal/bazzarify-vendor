@@ -61,6 +61,7 @@ export default function Show({
     sub_total: 0,
     discount_total: 0,
     tax_total: 0,
+    shipping_total: 0,
     grand_total: 0,
   };
 
@@ -197,7 +198,10 @@ export default function Show({
                 <p>Grand Total: {order.grand_total}</p>
               </>
             ) : (
-              <p>Your Total: {scopedTotals.grand_total}</p>
+              <>
+                <p>Shipping: {scopedTotals.shipping_total}</p>
+                <p>Your Total: {scopedTotals.grand_total}</p>
+              </>
             )}
           </CardContent>
         </Card>
@@ -349,10 +353,16 @@ export default function Show({
                     </TableRow>
                   </>
                 ) : (
-                  <TableRow>
-                    <TableCell className="text-left">Your Total</TableCell>
-                    <TableCell colSpan={6}>{scopedTotals.grand_total}</TableCell>
-                  </TableRow>
+                  <>
+                    <TableRow>
+                      <TableCell className="text-left">Shipping</TableCell>
+                      <TableCell colSpan={6}>{scopedTotals.shipping_total}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-left">Your Total</TableCell>
+                      <TableCell colSpan={6}>{scopedTotals.grand_total}</TableCell>
+                    </TableRow>
+                  </>
                 )}
               </TableFooter>
             </Table>
