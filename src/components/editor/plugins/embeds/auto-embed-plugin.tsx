@@ -18,7 +18,7 @@ import {
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { PopoverPortal } from "@radix-ui/react-popover"
 import type { LexicalEditor } from "lexical"
-import { FigmaIcon, TwitterIcon, YoutubeIcon } from "lucide-react"
+import { MessageSquare, PenTool, Video } from "lucide-react"
 
 import { useEditorModal } from "@/components/editor/editor-hooks/use-modal"
 import { INSERT_FIGMA_COMMAND } from "@/components/editor/plugins/embeds/figma-plugin"
@@ -62,7 +62,7 @@ export const YoutubeEmbedConfig: CustomEmbedConfig = {
   exampleUrl: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
 
   // Icon for display.
-  icon: <YoutubeIcon className="size-4" />,
+  icon: <Video className="size-4" />,
 
   insertNode: (editor: LexicalEditor, result: EmbedMatchResult) => {
     editor.dispatchCommand(INSERT_YOUTUBE_COMMAND, result.id)
@@ -97,7 +97,7 @@ export const TwitterEmbedConfig: CustomEmbedConfig = {
   exampleUrl: "https://twitter.com/jack/status/20",
 
   // Icon for display.
-  icon: <TwitterIcon className="size-4" />,
+  icon: <MessageSquare className="size-4" />,
 
   // Create the Lexical embed node from the url data.
   insertNode: (editor: LexicalEditor, result: EmbedMatchResult) => {
@@ -130,7 +130,7 @@ export const FigmaEmbedConfig: CustomEmbedConfig = {
 
   exampleUrl: "https://www.figma.com/file/LKQ4FJ4bTnCSjedbRpk931/Sample-File",
 
-  icon: <FigmaIcon className="size-4" />,
+  icon: <PenTool className="size-4" />,
 
   insertNode: (editor: LexicalEditor, result: EmbedMatchResult) => {
     editor.dispatchCommand(INSERT_FIGMA_COMMAND, result.id)
