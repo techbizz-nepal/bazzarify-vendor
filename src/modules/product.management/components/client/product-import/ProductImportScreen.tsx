@@ -31,6 +31,7 @@ import {
 } from "@/modules/product.management";
 import {
   actionCreateProductImport,
+  actionGetProductImport,
   actionGetProductImportTargetStores,
   actionProcessProductImport,
   actionValidateProductImport,
@@ -41,7 +42,7 @@ import {
 } from "@/modules/vendor/domain/storeRequirementNavigation";
 import { Check, ChevronsUpDown, Download, Upload } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type ValidationFeedback = {
@@ -86,6 +87,55 @@ const statusClassName = (status: string | null | undefined) => {
     default:
       return "bg-muted text-muted-foreground";
   }
+};
+
+const TERMINAL_IMPORT_STATUSES = new Set([
+  "completed",
+  "completed_with_errors",
+  "failed",
+]);
+
+const buildProcessResultFromImport = (
+  importRecord: TProductImportRecord,
+): TProductImportProcessPayload["result"] => {
+  const summary = importRecord.summary ?? {};
+  const sampleFailures = Array.isArray(summary.sample_failures)
+    ? summary.sample_failures
+        .map((entry) => {
+          if (typeof entry !== "object" || entry === null) {
+            return null;
+          }
+
+          return {
+            import_key:
+              typeof entry.import_key === "string" ? entry.import_key : "",
+            row_numbers: Array.isArray(entry.row_numbers)
+              ? entry.row_numbers.filter(
+                  (value: unknown): value is number => typeof value === "number",
+                )
+              : [],
+            message: typeof entry.message === "string" ? entry.message : "",
+          };
+        })
+        .filter(
+          (
+            entry,
+          ): entry is {
+            import_key: string;
+            row_numbers: number[];
+            message: string;
+          } => Boolean(entry),
+        )
+    : [];
+
+  return {
+    processed_rows: importRecord.processed_rows,
+    succeeded_rows: importRecord.succeeded_rows,
+    failed_rows: importRecord.failed_rows,
+    status: importRecord.status ?? "unknown",
+    sample_failures: sampleFailures,
+    idempotent_replay: false,
+  };
 };
 
 interface ProductImportScreenProps {
@@ -257,6 +307,14 @@ export default function ProductImportScreen({
       void actionProcessProductImport(currentImport.uuid).then((result) => {
         if (result && typeof result === "object" && "import" in result && "result" in result) {
           setCurrentImport(result.import);
+          if (result.result.status === "processing" || result.result.queued) {
+            setProcessResult(null);
+            toast.success(
+              result.result.message ?? "Import processing has been queued.",
+            );
+            return;
+          }
+
           setProcessResult(result.result);
           toast.success(
             result.result.idempotent_replay
@@ -281,6 +339,47 @@ export default function ProductImportScreen({
     typeof currentImport.summary.message === "string"
       ? currentImport.summary.message
       : null;
+
+  useEffect(() => {
+    if (!currentImport?.uuid || currentImport.status !== "processing") {
+      return;
+    }
+
+    let cancelled = false;
+
+    const timeoutId = window.setTimeout(() => {
+      void actionGetProductImport(currentImport.uuid).then((result) => {
+        if (cancelled || !result || typeof result !== "object") {
+          return;
+        }
+
+        if ("error" in result) {
+          console.error("[product-import-poll]", {
+            import_uuid: currentImport.uuid,
+            error: result.error,
+          });
+          return;
+        }
+
+        setCurrentImport(result.import);
+
+        if (result.import.status && TERMINAL_IMPORT_STATUSES.has(result.import.status)) {
+          setProcessResult(buildProcessResultFromImport(result.import));
+
+          if (result.import.failed_rows > 0) {
+            toast.error("Import finished with processing failures.");
+          } else {
+            toast.success("Import completed successfully.");
+          }
+        }
+      });
+    }, 1500);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [currentImport]);
 
   return (
     <div className="space-y-6">
@@ -693,6 +792,14 @@ export default function ProductImportScreen({
             {summaryMessage ? (
               <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
                 {summaryMessage}
+              </div>
+            ) : null}
+
+            {currentImport.status === "processing" ? (
+              <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                Import processing is running in the background. This page is
+                polling backend status so you can track progress without
+                re-submitting the import.
               </div>
             ) : null}
           </CardContent>

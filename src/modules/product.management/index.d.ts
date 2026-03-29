@@ -225,6 +225,7 @@ export type TProductImportProcessPayload = {
       message: string;
     }[];
     idempotent_replay: boolean;
+    queued?: boolean;
     message?: string;
   };
 };

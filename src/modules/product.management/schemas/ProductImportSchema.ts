@@ -148,6 +148,7 @@ export const ProductImportProcessPayloadSchema = z
             .strict(),
         ),
         idempotent_replay: z.boolean(),
+        queued: z.boolean().optional(),
         message: z.string().optional(),
       })
       .strict(),

@@ -198,6 +198,35 @@ export const actionValidateProductImport = async (
   }
 };
 
+export const actionGetProductImport = async (
+  uuid: string,
+): Promise<TProductImportUploadPayload | ReturnType<typeof handleUnknownError>> => {
+  try {
+    const client = await authAxiosInstance();
+    const response = await client.get(
+      PRODUCT_MANAGEMENT_ROUTES.product.importShow.path.replace(":uuid", uuid),
+    );
+
+    const parsed = ApiResponseSchema(
+      ProductImportUploadPayloadSchema,
+    ).safeParse(response.data);
+
+    if (!parsed.success) {
+      console.error("[product-import-show-schema]", parsed.error.flatten());
+      throw new Error("Product import show schema validation failed.");
+    }
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      return normalizeActionError(response.data, "Unable to fetch import status.");
+    }
+
+    return parsed.data.data.payload;
+  } catch (error) {
+    logImportSchemaFailure("[product-import-show]", error, { uuid });
+    return handleUnknownError(error);
+  }
+};
+
 export const actionProcessProductImport = async (
   uuid: string,
 ): Promise<TProductImportProcessPayload | ImportActionFeedback> => {
