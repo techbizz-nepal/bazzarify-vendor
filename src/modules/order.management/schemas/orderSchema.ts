@@ -146,13 +146,13 @@ export const OrderListItemSchema = OrderSchema.pick({
   payment_method: z.string().max(32).optional(),
   item_count: z.number().int().nonnegative().optional(),
   item_quantity: z.number().int().nonnegative().optional(),
-  items_count: z.number().int().nonnegative().optional(),
-  visible_items_count: z.number().int().nonnegative().optional(),
-  visible_item_quantity: z.number().int().nonnegative().optional(),
+  items_count: z.number().int().nonnegative().nullable().optional(),
+  visible_items_count: z.number().int().nonnegative().nullable().optional(),
+  visible_item_quantity: z.number().int().nonnegative().nullable().optional(),
   buyer: z
     .object({
-      name: z.string().optional(),
-      email: z.string().email().optional(),
+      name: z.string().nullable().optional(),
+      email: z.string().email().nullable().optional(),
     })
     .nullable()
     .optional(),
