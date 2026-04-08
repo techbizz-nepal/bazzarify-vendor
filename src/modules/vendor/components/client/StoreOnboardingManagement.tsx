@@ -121,14 +121,12 @@ export default function StoreOnboardingManagement({
     [selectedCategories],
   );
 
-  const selectedCategoryPreviewNames = useMemo(
-    () => selectedCategoryNames.slice(0, 8),
-    [selectedCategoryNames],
-  );
-
-  const remainingSelectedCategoryCount = Math.max(
-    0,
-    selectedCategoryNames.length - selectedCategoryPreviewNames.length,
+  const selectedCategoryChips = useMemo(
+    () =>
+      [...selectedCategories].sort((left, right) =>
+        left.name.localeCompare(right.name),
+      ),
+    [selectedCategories],
   );
 
   const handleToggleCategory = (
@@ -563,56 +561,28 @@ export default function StoreOnboardingManagement({
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {selectedCategoryPreviewNames.length > 0 ? (
-                      <>
-                        {selectedCategoryPreviewNames.map((name) => (
-                          <span
-                            key={name}
-                            className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 ring-1 ring-slate-200"
-                          >
-                            {name}
-                          </span>
-                        ))}
-                        {remainingSelectedCategoryCount > 0 ? (
-                          <span className="rounded-full bg-slate-200 px-3 py-1 text-xs text-slate-700">
-                            +{remainingSelectedCategoryCount} more
-                          </span>
-                        ) : null}
-                      </>
+                    {selectedCategoryChips.length > 0 ? (
+                      <div className="max-h-40 w-full overflow-y-auto pr-1">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedCategoryChips.map((category) => (
+                            <button
+                              key={category.uuid}
+                              type="button"
+                              onClick={() => handleToggleCategory(category, false)}
+                              className="inline-flex max-w-full items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-100"
+                            >
+                              <span className="truncate">{category.name}</span>
+                              <X className="size-3 shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ) : (
                       <span className="text-slate-500">
                         No categories selected yet.
                       </span>
                     )}
                   </div>
-                  {selectedCategories.length > 0 ? (
-                    <div className="mt-4 space-y-2">
-                      {selectedCategories.map((category) => (
-                        <div
-                          key={category.uuid}
-                          className="flex items-center justify-between gap-4 rounded-md border bg-white px-3 py-2"
-                        >
-                          <div className="min-w-0">
-                            <div className="truncate font-medium text-slate-900">
-                              {category.name}
-                            </div>
-                            <div className="truncate text-xs text-slate-500">
-                              {category.slug}
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleToggleCategory(category, false)}
-                          >
-                            <X className="size-4" />
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
                 </div>
               </div>
 
