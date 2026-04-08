@@ -56,6 +56,11 @@ export default function ProductVariant({
         onRemove={removeValue}
         nonRemovable={nonRemovable}
       />
+      <div className="rounded-lg border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+        Availability lets you manually hide a variant from sale. Sellable
+        quantity is calculated by the core backend from availability, stock,
+        and reservations.
+      </div>
       <VariantGrid
         selections={variantSelections}
         combinations={combinations}
