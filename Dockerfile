@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.8-alpine AS builder
+FROM oven/bun:1.3.11-alpine AS builder
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --production --frozen-lockfile && bun i -d typescript && bun pm cache rm
@@ -6,7 +6,7 @@ COPY . .
 ENV NODE_ENV=production
 RUN bun run build
 
-FROM oven/bun:1.3.8-alpine AS runner
+FROM oven/bun:1.3.11-alpine AS runner
 WORKDIR /app
 COPY --from=builder /app/.next/standalone standalone
 COPY --from=builder /app/.next/static standalone/.next/static

@@ -73,7 +73,7 @@ export default function LoginForm() {
 
   return (
     <>
-      {process.env.NEXT_PUBLIC_ENVIRONMENT == "development" ? (
+      {process.env.NODE_ENV == "development" ? (
         <ThemedButton
           type="button"
           onClick={handleDevLogin}
