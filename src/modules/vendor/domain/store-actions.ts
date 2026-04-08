@@ -12,9 +12,11 @@ import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import postDataAndValidate from "@/modules/core/utils/postDataAndValidate";
 import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
+import type { TCategory } from "@/modules/product.management";
 import {
   StoreOnboardingBulkApplyPreviewSchema,
   StoreOnboardingBulkApplyResultSchema,
+  TStoreOnboardingCategoryOption,
   StoreTypeIndexPayloadSchema,
   StoreTypeOptionSchema,
 } from "@/modules/vendor/domain/schemas/storeOnboarding";
@@ -164,12 +166,41 @@ export const actionUpdateAdminStoreOnboardingSet = async ({
   }
 };
 
-export const actionGetAdminSellableCategories = async () => {
-  return actionGetCategories({
-    filter: { sellable: true },
-    perPage: "500",
+const toStoreOnboardingCategoryOption = (
+  category: TCategory,
+): TStoreOnboardingCategoryOption => ({
+  uuid: category.uuid,
+  name: category.name,
+  slug: category.slug,
+  is_sellable: category.is_sellable,
+});
+
+export const actionSearchAdminSellableCategories = async ({
+  search,
+  page = 1,
+}: {
+  search: string;
+  page?: number;
+}) => {
+  const response = await actionGetCategories({
+    filter: {
+      sellable: true,
+      ...(search.trim() ? { name: search.trim() } : {}),
+    },
+    perPage: "20",
+    page,
     sort: "name",
   });
+
+  if ("error" in response) {
+    return response;
+  }
+
+  return {
+    categories: response.categories.data.map(toStoreOnboardingCategoryOption),
+    currentPage: Number(response.categories.current_page ?? page),
+    hasNextPage: Boolean(response.categories.next_page_url),
+  };
 };
 
 export const actionPreviewAdminStoreOnboardingBulkApply = async (

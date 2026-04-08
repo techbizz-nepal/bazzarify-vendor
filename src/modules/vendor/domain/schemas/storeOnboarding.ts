@@ -10,6 +10,15 @@ export const StoreOnboardingCategorySchema = z
   })
   .strip();
 
+export const StoreOnboardingCategoryOptionSchema = z
+  .object({
+    uuid: z.uuid(),
+    name: z.string(),
+    slug: z.string(),
+    is_sellable: z.boolean().optional(),
+  })
+  .strip();
+
 export const StoreOnboardingCategorySetSchema = z
   .object({
     uuid: z.uuid(),
@@ -70,6 +79,9 @@ export const StoreOnboardingBulkApplyResultSchema = z
 
 export type TStoreOnboardingCategory = z.infer<
   typeof StoreOnboardingCategorySchema
+>;
+export type TStoreOnboardingCategoryOption = z.infer<
+  typeof StoreOnboardingCategoryOptionSchema
 >;
 export type TStoreOnboardingCategorySet = z.infer<
   typeof StoreOnboardingCategorySetSchema

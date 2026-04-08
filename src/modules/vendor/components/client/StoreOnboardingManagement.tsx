@@ -22,30 +22,27 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { TCategoryIndexPayload } from "@/modules/product.management";
 import {
   actionApplyAdminStoreOnboardingBulk,
   actionPreviewAdminStoreOnboardingBulkApply,
+  actionSearchAdminSellableCategories,
   actionUpdateAdminStoreOnboardingSet,
 } from "@/modules/vendor/domain/store-actions";
 import {
   TStoreOnboardingBulkApplyPreview,
+  TStoreOnboardingCategoryOption,
   TStoreTypeOption,
 } from "@/modules/vendor/domain/schemas/storeOnboarding";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { Check, ChevronsUpDown, LoaderCircle, X } from "lucide-react";
+import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-
-type SellableCategory = TCategoryIndexPayload["categories"]["data"][number];
 
 interface StoreOnboardingManagementProps {
   storeTypes: TStoreTypeOption[];
-  sellableCategories: SellableCategory[];
 }
 
 export default function StoreOnboardingManagement({
   storeTypes,
-  sellableCategories,
 }: StoreOnboardingManagementProps) {
   const getDraftState = (storeType: TStoreTypeOption | null) => {
     const onboardingSet = storeType?.onboarding_category_set;
@@ -53,8 +50,12 @@ export default function StoreOnboardingManagement({
     return {
       draftName: onboardingSet?.name ?? "Starter onboarding set",
       draftDescription: onboardingSet?.description ?? "",
-      selectedCategoryUuids:
-        onboardingSet?.categories.map((category) => category.uuid) ?? [],
+      selectedCategories:
+        onboardingSet?.categories.map((category) => ({
+          uuid: category.uuid,
+          name: category.name,
+          slug: category.slug,
+        })) ?? [],
     };
   };
 
@@ -67,15 +68,23 @@ export default function StoreOnboardingManagement({
   const [draftDescription, setDraftDescription] = useState(
     initialDraftState.draftDescription,
   );
-  const [selectedCategoryUuids, setSelectedCategoryUuids] = useState<string[]>(
-    initialDraftState.selectedCategoryUuids,
-  );
+  const [selectedCategories, setSelectedCategories] = useState<
+    TStoreOnboardingCategoryOption[]
+  >(initialDraftState.selectedCategories);
   const [isSaving, setIsSaving] = useState(false);
   const [bulkPreview, setBulkPreview] =
     useState<TStoreOnboardingBulkApplyPreview | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isApplyingBulk, setIsApplyingBulk] = useState(false);
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
+  const [categorySearch, setCategorySearch] = useState("");
+  const deferredCategorySearch = useDeferredValue(categorySearch);
+  const [searchResults, setSearchResults] = useState<
+    TStoreOnboardingCategoryOption[]
+  >([]);
+  const [searchPage, setSearchPage] = useState(1);
+  const [hasNextSearchPage, setHasNextSearchPage] = useState(false);
+  const [isSearchingCategories, setIsSearchingCategories] = useState(false);
 
   const selectedStoreType = useMemo(
     () =>
@@ -92,22 +101,24 @@ export default function StoreOnboardingManagement({
     setSelectedStoreTypeUuid(storeType?.uuid ?? "");
     setDraftName(nextDraftState.draftName);
     setDraftDescription(nextDraftState.draftDescription);
-    setSelectedCategoryUuids(nextDraftState.selectedCategoryUuids);
+    setSelectedCategories(nextDraftState.selectedCategories);
+    setCategorySearch("");
+    setSearchResults([]);
+    setSearchPage(1);
+    setHasNextSearchPage(false);
   };
 
-  const selectedCategoryNameSet = useMemo(
-    () =>
-      new Set(
-        sellableCategories
-          .filter((category) => selectedCategoryUuids.includes(category.uuid))
-          .map((category) => category.name),
-      ),
-    [sellableCategories, selectedCategoryUuids],
+  const selectedCategoryUuids = useMemo(
+    () => selectedCategories.map((category) => category.uuid),
+    [selectedCategories],
   );
 
   const selectedCategoryNames = useMemo(
-    () => [...selectedCategoryNameSet].sort((left, right) => left.localeCompare(right)),
-    [selectedCategoryNameSet],
+    () =>
+      [...selectedCategories.map((category) => category.name)].sort((left, right) =>
+        left.localeCompare(right),
+      ),
+    [selectedCategories],
   );
 
   const selectedCategoryPreviewNames = useMemo(
@@ -120,12 +131,20 @@ export default function StoreOnboardingManagement({
     selectedCategoryNames.length - selectedCategoryPreviewNames.length,
   );
 
-  const handleToggleCategory = (categoryUuid: string, checked: boolean) => {
-    setSelectedCategoryUuids((current) =>
-      checked
-        ? [...current, categoryUuid]
-        : current.filter((uuid) => uuid !== categoryUuid),
-    );
+  const handleToggleCategory = (
+    category: TStoreOnboardingCategoryOption,
+    checked: boolean,
+  ) => {
+    setSelectedCategories((current) => {
+      if (checked) {
+        if (current.some((entry) => entry.uuid === category.uuid)) {
+          return current;
+        }
+        return [...current, category];
+      }
+
+      return current.filter((entry) => entry.uuid !== category.uuid);
+    });
   };
 
   const handleSave = () => {
@@ -134,7 +153,7 @@ export default function StoreOnboardingManagement({
       return;
     }
 
-    if (selectedCategoryUuids.length === 0) {
+    if (selectedCategories.length === 0) {
       toast.error("Assign at least one sellable category.");
       return;
     }
@@ -146,7 +165,7 @@ export default function StoreOnboardingManagement({
         storeTypeUuid: selectedStoreType.uuid,
         name: draftName.trim() || "Starter onboarding set",
         description: draftDescription.trim() || null,
-        categoryUuids: selectedCategoryUuids,
+        categoryUuids: selectedCategories.map((category) => category.uuid),
       })
         .then((response) => {
           if (
@@ -175,8 +194,75 @@ export default function StoreOnboardingManagement({
         })
         .finally(() => {
           setIsSaving(false);
-        });
+      });
     });
+  };
+
+  useEffect(() => {
+    const search = deferredCategorySearch.trim();
+
+    if (!isCategoryPickerOpen || search.length === 0) {
+      setSearchResults([]);
+      setSearchPage(1);
+      setHasNextSearchPage(false);
+      setIsSearchingCategories(false);
+      return;
+    }
+
+    setIsSearchingCategories(true);
+
+    void actionSearchAdminSellableCategories({
+      search,
+      page: searchPage,
+    })
+      .then((response) => {
+        if ("error" in response) {
+          setSearchResults([]);
+          setHasNextSearchPage(false);
+          if (response.error) {
+            toast.error(response.error);
+          }
+          return;
+        }
+
+        setSearchResults((current) =>
+          searchPage === 1
+            ? response.categories
+            : [
+                ...current,
+                ...response.categories.filter(
+                  (category) =>
+                    !current.some((entry) => entry.uuid === category.uuid),
+                ),
+              ],
+        );
+        setHasNextSearchPage(response.hasNextPage);
+      })
+      .catch((error) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load sellable categories.";
+        toast.error(message);
+        setSearchResults([]);
+        setHasNextSearchPage(false);
+      })
+      .finally(() => {
+        setIsSearchingCategories(false);
+      });
+  }, [deferredCategorySearch, isCategoryPickerOpen, searchPage]);
+
+  const handleCategorySearchChange = (value: string) => {
+    setCategorySearch(value);
+    setSearchPage(1);
+  };
+
+  const handleLoadMoreCategories = () => {
+    if (!hasNextSearchPage || isSearchingCategories) {
+      return;
+    }
+
+    setSearchPage((current) => current + 1);
   };
 
   const loadBulkPreview = async (storeTypeUuid: string) => {
@@ -380,14 +466,27 @@ export default function StoreOnboardingManagement({
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[360px] p-0" align="end">
-                      <Command>
-                        <CommandInput placeholder="Search sellable categories..." />
+                      <Command shouldFilter={false}>
+                        <CommandInput
+                          value={categorySearch}
+                          onValueChange={handleCategorySearchChange}
+                          placeholder="Search sellable categories..."
+                        />
                         <CommandList>
-                          <CommandEmpty>No matching categories.</CommandEmpty>
+                          {deferredCategorySearch.trim().length === 0 ? (
+                            <div className="px-4 py-6 text-center text-sm text-slate-500">
+                              Type to search sellable categories.
+                            </div>
+                          ) : null}
+                          {deferredCategorySearch.trim().length > 0 &&
+                          !isSearchingCategories &&
+                          searchResults.length === 0 ? (
+                            <CommandEmpty>No matching categories.</CommandEmpty>
+                          ) : null}
                           <CommandGroup>
                             <ScrollArea className="h-72">
                               <div className="p-1">
-                                {sellableCategories.map((category) => {
+                                {searchResults.map((category) => {
                                   const isChecked = selectedCategoryUuids.includes(
                                     category.uuid,
                                   );
@@ -398,7 +497,7 @@ export default function StoreOnboardingManagement({
                                       value={`${category.name} ${category.slug}`}
                                       onSelect={() =>
                                         handleToggleCategory(
-                                          category.uuid,
+                                          category,
                                           !isChecked,
                                         )
                                       }
@@ -408,7 +507,7 @@ export default function StoreOnboardingManagement({
                                         checked={isChecked}
                                         onCheckedChange={(checked) =>
                                           handleToggleCategory(
-                                            category.uuid,
+                                            category,
                                             checked === true,
                                           )
                                         }
@@ -427,6 +526,24 @@ export default function StoreOnboardingManagement({
                                     </CommandItem>
                                   );
                                 })}
+                                {isSearchingCategories ? (
+                                  <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-slate-500">
+                                    <LoaderCircle className="size-4 animate-spin" />
+                                    Searching categories...
+                                  </div>
+                                ) : null}
+                                {hasNextSearchPage && !isSearchingCategories ? (
+                                  <div className="px-3 py-3">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      className="w-full"
+                                      onClick={handleLoadMoreCategories}
+                                    >
+                                      Load more results
+                                    </Button>
+                                  </div>
+                                ) : null}
                               </div>
                             </ScrollArea>
                           </CommandGroup>
@@ -468,6 +585,34 @@ export default function StoreOnboardingManagement({
                       </span>
                     )}
                   </div>
+                  {selectedCategories.length > 0 ? (
+                    <div className="mt-4 space-y-2">
+                      {selectedCategories.map((category) => (
+                        <div
+                          key={category.uuid}
+                          className="flex items-center justify-between gap-4 rounded-md border bg-white px-3 py-2"
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate font-medium text-slate-900">
+                              {category.name}
+                            </div>
+                            <div className="truncate text-xs text-slate-500">
+                              {category.slug}
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleCategory(category, false)}
+                          >
+                            <X className="size-4" />
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
