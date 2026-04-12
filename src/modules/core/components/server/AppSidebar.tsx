@@ -110,14 +110,16 @@ export async function AppSidebar({ className }: { className?: string }) {
       );
   return (
     <Sidebar className={className}>
-      <SidebarHeader>
-        <Image
-          src="/logo.png"
-          alt="logo"
-          width={342}
-          height={88}
-          priority={true}
-        />
+      <SidebarHeader className="p-4 pb-2">
+        <div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
+          <Image
+            src="/logo.png"
+            alt="logo"
+            width={342}
+            height={88}
+            priority={true}
+          />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
