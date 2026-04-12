@@ -18,7 +18,7 @@ export default function SidebarMenuButtonComponent({
   return (
     <SidebarMenuButton
       asChild
-      className="py-6"
+      className="py-6 font-medium"
       isActive={
         routePath === "/" ? pathname === "/" : pathname.includes(routePath)
       }

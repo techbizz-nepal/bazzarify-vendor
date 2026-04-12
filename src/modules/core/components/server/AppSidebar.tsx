@@ -119,15 +119,12 @@ export async function AppSidebar({ className }: { className?: string }) {
           priority={true}
         />
       </SidebarHeader>
-      <SidebarContent className="bg-sidebar-primary">
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem
-                  key={item.title}
-                  className="text-sidebar-primary-foreground hover:text-sidebar-accent-foreground"
-                >
+                <SidebarMenuItem key={item.title}>
                   <SidebarMenuButtonComponent
                     routePath={item.path}
                     title={item.title}
