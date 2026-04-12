@@ -172,7 +172,13 @@ function EditContent({
           onFilterChange={categoryState.updateFilter}
           invalid={Boolean(categoryError)}
           errorMessage={categoryError}
+          categoryChangeLocked={categoryState.categoryChangeLocked}
+          lockedSelectionMessage="Category changes are unavailable in edit. Create a new product if you need a different category."
         />
+        <p className="pt-2 text-sm text-muted-foreground">
+          Category reassignment is currently unavailable while editing an
+          existing product.
+        </p>
       </ProductCard>
       {categoryState.committedCategory && (
         <>
@@ -189,6 +195,10 @@ function EditContent({
               ],
             }}
           >
+            <p className="mb-3 text-sm text-muted-foreground">
+              Existing product image removals are staged locally and only apply
+              after you save this product.
+            </p>
             <ImageUploader
               onImageSelect={mediaState.handleProductImageUpload}
               initialImages={mediaState.existingProductImages}
@@ -201,6 +211,11 @@ function EditContent({
               invalid={Boolean(imagesError)}
               errorMessage={imagesError}
             />
+            {mediaState.hasPendingExistingImageRemovals && (
+              <p className="mt-3 text-sm text-amber-700">
+                Pending product image removals will apply when you save.
+              </p>
+            )}
           </ProductCard>
           {/*** Product Image ends ***/}
           {/*** Product Specifications starts ***/}
@@ -271,11 +286,20 @@ function EditContent({
               title="Product Variants"
               className={variantsError ? "border-destructive" : undefined}
             >
+              <p className="mb-3 text-sm text-muted-foreground">
+                Existing variant image removals are staged locally and only
+                apply after you save this product.
+              </p>
               <ProductVariant
                 feedback={feedback}
                 variantState={variantState}
                 selectorState={selectorState}
               />
+              {variantState.hasPendingExistingImageRemovals && (
+                <p className="mt-4 text-sm text-amber-700">
+                  Pending variant image removals will apply when you save.
+                </p>
+              )}
             </ProductCard>
           )}
           {/*** Product description ends ***/}

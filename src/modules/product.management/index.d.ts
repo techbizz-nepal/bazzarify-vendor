@@ -281,6 +281,7 @@ export interface VariantState {
   setVariantSelections: Dispatch<SetStateAction<Record<string, string[]>>>;
   combinations: string[][];
   variantData: TVariantDataMap;
+  hasPendingExistingImageRemovals?: boolean;
   handleVariantChange: <K extends keyof TVariant>(
     combo: string[],
     field: K,
@@ -318,10 +319,12 @@ export interface ProductAuthoringCategoryState {
   handleClickSubChild: (category: TCategory) => void;
   handleCommitSelectedCategory: () => Promise<void>;
   updateFilter: (level: "root" | "sub" | "subchild", value: string) => void;
+  categoryChangeLocked?: boolean;
 }
 
 export interface ProductAuthoringMediaState {
   existingProductImages: string[];
+  hasPendingExistingImageRemovals?: boolean;
   handleProductImageUpload: (files: File[]) => void;
   handleExistingProductImagesChange: (images: string[]) => void;
   handleRemoveExistingProductImage?: (url: string) => Promise<boolean>;

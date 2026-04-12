@@ -7,7 +7,6 @@ import {
   TSpecification,
   TVariantDataMap,
 } from "@/modules/product.management";
-import { actionDelete as actionDeleteImage } from "@/modules/product.management/actions/image";
 import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
   actionStoreProducts,
@@ -76,6 +75,12 @@ export default function useProductAuthoring({
     fieldErrors: Record<string, string[]>;
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [removedProductImageUuids, setRemovedProductImageUuids] = useState<
+    string[]
+  >([]);
+  const [removedVariantImageUuids, setRemovedVariantImageUuids] = useState<
+    Record<string, string[]>
+  >({});
   const hydratedEditProductUuidRef = useRef<string | null>(null);
 
   const clearSubmissionFieldError = (field: string) => {
@@ -106,23 +111,14 @@ export default function useProductAuthoring({
     onExistingVariantImageRemove: async (combo, url) => {
       const key = createVariantDraftKey(combo);
       const uuid = variantImageIdMap[key]?.[url];
-      if (!uuid) return false;
-
-      const response = await actionDeleteImage({ uuid, storageUrl: url });
-      if ("error" in response) {
-        toast.error(response.error);
+      if (!uuid) {
         return false;
       }
 
-      setVariantImageIdMap((previousMap) => {
-        const nextMap = { ...previousMap };
-        const imageMap = { ...(nextMap[key] || {}) };
-        delete imageMap[url];
-        nextMap[key] = imageMap;
-        return nextMap;
-      });
-
-      toast.success("Variant image removed.");
+      setRemovedVariantImageUuids((previous) => ({
+        ...previous,
+        [key]: Array.from(new Set([...(previous[key] || []), uuid])),
+      }));
       return true;
     },
   });
@@ -131,6 +127,7 @@ export default function useProductAuthoring({
     setSpecificationValues({});
     setSubmissionFeedback(null);
     setVariantImageIdMap({});
+    setRemovedVariantImageUuids({});
     variant.setVariantData({});
     variant.setColumns([]);
   };
@@ -189,6 +186,17 @@ export default function useProductAuthoring({
       category.committedCategory?.uuid !== selectedCategory.uuid;
 
     if (
+      mode === "update" &&
+      isChangingCommittedCategory &&
+      category.committedCategory
+    ) {
+      toast.error(
+        "Changing category is not supported while editing an existing product.",
+      );
+      return;
+    }
+
+    if (
       isChangingCommittedCategory &&
       category.committedCategory &&
       categoryChangeNeedsResetConfirmation() &&
@@ -228,12 +236,6 @@ export default function useProductAuthoring({
         return false;
       }
 
-      const response = await actionDeleteImage({ uuid, storageUrl: url });
-      if ("error" in response) {
-        toast.error(response.error);
-        return false;
-      }
-
       const remainingImages = (product.existingProductImages || []).filter(
         (imageUrl) => imageUrl !== url,
       );
@@ -242,11 +244,13 @@ export default function useProductAuthoring({
         product.existingImageIdMap;
       void removedImageUuid;
       product.setExistingImageIdMap(restImageIdMap);
-      toast.success("Image removed.");
+      setRemovedProductImageUuids((previous) =>
+        Array.from(new Set([...previous, uuid])),
+      );
       return true;
     } catch (error) {
       console.log(error);
-      toast.error("Failed to remove image. Please try again.");
+      toast.error("Failed to stage image removal. Please try again.");
       return false;
     }
   };
@@ -396,6 +400,22 @@ export default function useProductAuthoring({
     setIsSubmitting(true);
 
     try {
+      if (mode === "update") {
+        removedProductImageUuids.forEach((uuid, index) => {
+          submission.formData.append(`removed_product_image_uuids[${index}]`, uuid);
+        });
+
+        variant.combinations.forEach((combo, index) => {
+          const key = createVariantDraftKey(combo);
+          (removedVariantImageUuids[key] || []).forEach((uuid, removeIndex) => {
+            submission.formData.append(
+              `variants[${index}][removed_image_uuids][${removeIndex}]`,
+              uuid,
+            );
+          });
+        });
+      }
+
       const response =
         mode === "create"
           ? await actionStoreProducts(submission.formData)
@@ -445,9 +465,11 @@ export default function useProductAuthoring({
       handleClickSubChild: category.handleClickSubChild,
       handleCommitSelectedCategory,
       updateFilter: category.updateFilter,
+      categoryChangeLocked: mode === "update",
     },
     mediaState: {
       existingProductImages: product.existingProductImages,
+      hasPendingExistingImageRemovals: removedProductImageUuids.length > 0,
       handleProductImageUpload,
       handleExistingProductImagesChange,
       handleRemoveExistingProductImage:
@@ -468,6 +490,9 @@ export default function useProductAuthoring({
       setVariantSelections,
       combinations: variant.combinations,
       variantData: variant.variantData,
+      hasPendingExistingImageRemovals: Object.values(
+        removedVariantImageUuids,
+      ).some((uuids) => uuids.length > 0),
       handleVariantChange: variant.handleVariantChange,
       handleImageUpload: variant.handleImageUpload,
       handleImageRemove: variant.handleImageRemove,

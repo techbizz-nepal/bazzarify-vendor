@@ -24,6 +24,8 @@ interface ICategoryDropdown {
   selectedCategories: TCategory[] | [];
   invalid?: boolean;
   errorMessage?: string;
+  categoryChangeLocked?: boolean;
+  lockedSelectionMessage?: string;
 }
 
 export default function CategoryDropdown({
@@ -41,6 +43,8 @@ export default function CategoryDropdown({
   selectedCategories,
   invalid = false,
   errorMessage,
+  categoryChangeLocked = false,
+  lockedSelectionMessage,
 }: ICategoryDropdown) {
   const currentCategory = selectedCategories.at(-1) ?? null;
   const selectedPath = selectedCategories.map((category) => category.name).join(" > ");
@@ -147,8 +151,9 @@ export default function CategoryDropdown({
             )}
             {currentCategory?.is_sellable && hasUncommittedSelection && (
               <p className="text-sm text-muted-foreground">
-                Use this category to refresh specifications and variant
-                configuration for the selected node.
+                {categoryChangeLocked && lockedSelectionMessage
+                  ? lockedSelectionMessage
+                  : "Use this category to refresh specifications and variant configuration for the selected node."}
               </p>
             )}
           </div>
@@ -156,7 +161,11 @@ export default function CategoryDropdown({
             <Button
               type="button"
               onClick={onCommitSelectedCategory}
-              disabled={!currentCategory || !currentCategory.is_sellable}
+              disabled={
+                !currentCategory ||
+                !currentCategory.is_sellable ||
+                (categoryChangeLocked && hasUncommittedSelection)
+              }
             >
               Use this category
             </Button>
