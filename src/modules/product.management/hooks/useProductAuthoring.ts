@@ -75,6 +75,7 @@ export default function useProductAuthoring({
     summary: string;
     fieldErrors: Record<string, string[]>;
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const hydratedEditProductUuidRef = useRef<string | null>(null);
 
   const clearSubmissionFieldError = (field: string) => {
@@ -300,6 +301,10 @@ export default function useProductAuthoring({
   ]);
 
   const handleSubmit = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
     if (
       mode === "create" &&
       product.uploadedProductImages.length === 0
@@ -388,32 +393,37 @@ export default function useProductAuthoring({
 
     setSubmissionFeedback(null);
     toast.info(mode === "create" ? "Uploading product..." : "Updating product...");
+    setIsSubmitting(true);
 
-    const response =
-      mode === "create"
-        ? await actionStoreProducts(submission.formData)
-        : await actionUpdateProducts(
-            submission.formData,
-            product.productForm.uuid as string,
-          );
+    try {
+      const response =
+        mode === "create"
+          ? await actionStoreProducts(submission.formData)
+          : await actionUpdateProducts(
+              submission.formData,
+              product.productForm.uuid as string,
+            );
 
-    if ("error" in response) {
-      const feedback = getValidationFeedback(
-        "details" in response ? response.details : response.error,
-      );
-      if (feedback) {
-        setSubmissionFeedback(feedback);
+      if ("error" in response) {
+        const feedback = getValidationFeedback(
+          "details" in response ? response.details : response.error,
+        );
+        if (feedback) {
+          setSubmissionFeedback(feedback);
+        }
+        toast.error(feedback?.summary ?? response.error);
+        return;
       }
-      toast.error(feedback?.summary ?? response.error);
-      return;
-    }
 
-    toast.success(
-      mode === "create"
-        ? PRODUCT_CRUD_CONSTANTS.createProductSuccess
-        : PRODUCT_CRUD_CONSTANTS.updateProductSuccess,
-    );
-    router.replace("/products");
+      toast.success(
+        mode === "create"
+          ? PRODUCT_CRUD_CONSTANTS.createProductSuccess
+          : PRODUCT_CRUD_CONSTANTS.updateProductSuccess,
+      );
+      router.replace("/products");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return {
@@ -466,6 +476,7 @@ export default function useProductAuthoring({
     },
     submissionState: {
       feedback: submissionFeedback,
+      isSubmitting,
       handleSubmit,
     },
   };

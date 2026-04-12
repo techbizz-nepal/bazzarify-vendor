@@ -14,9 +14,14 @@ const VariantDraftSchema = z.object({
   images: z.array(z.unknown()).optional(),
 });
 
+const OptionalCreateSkuSchema = z.union([
+  z.literal(""),
+  z.string().min(8, "Product sku must be at least 8 characters long").max(32),
+]);
+
 export const CreateProductSchema = z.object({
   type: z.string(),
-  sku: z.string().min(8),
+  sku: OptionalCreateSkuSchema.optional(),
   name: z.string().min(8, "Product name must be at least 8 characters long"),
   base_price: z
     .string("Base price is not valid")
@@ -24,7 +29,9 @@ export const CreateProductSchema = z.object({
     .refine((val) => /^(?:[1-9]\d*|0)(?:\.\d+)?$/.test(val), {
       message: "Base price must be 1 to 9 digits",
     }),
-  description: z.string(),
+  description: z.string().refine(isValidRichTextEditorContent, {
+    message: "Product description is required",
+  }),
   highlights: z.string().min(1, "Product highlights is required"),
   box_items: z.string().min(1, "Product box items is required"),
   category: z.uuid("Category is required"),

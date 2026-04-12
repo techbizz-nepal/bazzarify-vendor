@@ -122,6 +122,10 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
       return;
     }
 
+    if (key === "sku" && typeof value === "string" && value.trim() === "") {
+      return;
+    }
+
     formData.append(key, String(value));
   });
 

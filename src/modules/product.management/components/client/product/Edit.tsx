@@ -288,9 +288,10 @@ function EditContent({
             )}
             <ThemedButton
               onClick={submissionState.handleSubmit}
+              disabled={submissionState.isSubmitting}
               className="w-full"
             >
-              Submit
+              {submissionState.isSubmitting ? "Submitting..." : "Submit"}
             </ThemedButton>
           </div>
         </>

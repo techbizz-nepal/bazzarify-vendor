@@ -335,6 +335,7 @@ export interface ProductAuthoringSpecificationState {
 
 export interface ProductAuthoringSubmissionState {
   feedback: ProductSubmissionFeedback | null;
+  isSubmitting: boolean;
   handleSubmit: () => Promise<void>;
 }
 
