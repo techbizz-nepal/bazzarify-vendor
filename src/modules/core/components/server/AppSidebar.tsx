@@ -1,8 +1,4 @@
 import {
-  getAuthUser,
-  getSessionUserUUID,
-} from "@/modules/auth/data/lib/auth-lib";
-import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -11,6 +7,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import {
+  getAuthUser,
+  getSessionUserUUID,
+} from "@/modules/auth/data/lib/auth-lib";
 import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
 import { TMenuItem } from "@/modules/core/data";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
@@ -111,7 +111,7 @@ export async function AppSidebar({ className }: { className?: string }) {
   return (
     <Sidebar className={className}>
       <SidebarHeader className="p-4 pb-2">
-        <div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
+        <div className="rounded-2xl px-4 py-3">
           <Image
             src="/logo.png"
             alt="logo"
