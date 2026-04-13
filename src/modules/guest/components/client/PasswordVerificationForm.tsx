@@ -17,28 +17,44 @@ import {
 } from "@/components/ui/input-otp";
 import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import Link from "next/link";
-import { UseFormReturn } from "react-hook-form";
+import { Path, UseFormReturn } from "react-hook-form";
 
-interface IRegistrationRequestVerification {
+type PasswordVerificationFields = {
+  phone: string;
+  otp: string;
+  password: string;
+  password_confirmation: string;
+};
+
+interface PasswordVerificationFormProps<T extends PasswordVerificationFields> {
   className?: string;
   formTitle: string;
   formHelpText: string;
   buttonLabel: string;
-  onSubmitAction: (data: RegistrationVerificationFormValues) => void;
-  form: UseFormReturn<RegistrationVerificationFormValues>;
+  onSubmitAction: (data: T) => void;
+  form: UseFormReturn<T>;
+  backHref: string;
+  backLabel: string;
+  phoneInputMode?: "editable" | "readonly";
 }
 
-export default function RegistrationVerification({
+export default function PasswordVerificationForm<
+  T extends PasswordVerificationFields,
+>({
   className,
   formTitle,
   formHelpText,
   buttonLabel,
   onSubmitAction,
   form,
-}: IRegistrationRequestVerification) {
+  backHref,
+  backLabel,
+  phoneInputMode = "editable",
+}: PasswordVerificationFormProps<T>) {
+  const isPhoneReadonly = phoneInputMode === "readonly";
+
   return (
     <div className={className}>
       <FormTitle
@@ -61,13 +77,14 @@ export default function RegistrationVerification({
                     className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
                     type="number"
                     placeholder="Enter phone"
+                    readOnly={isPhoneReadonly}
                     {...field}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-            name="phone"
+            name={"phone" as Path<T>}
           />
 
           <FormField
@@ -75,9 +92,9 @@ export default function RegistrationVerification({
               <FormItem className="flex flex-col gap-y-2">
                 <FormControl>
                   <InputOTP
-                    autoComplete={""}
+                    autoComplete=""
                     pattern={REGEXP_ONLY_DIGITS}
-                    containerClassName="flex items-center justify-center w-full"
+                    containerClassName="flex w-full items-center justify-center"
                     maxLength={6}
                     {...field}
                   >
@@ -97,7 +114,7 @@ export default function RegistrationVerification({
                 <FormMessage />
               </FormItem>
             )}
-            name="otp"
+            name={"otp" as Path<T>}
           />
           <FormField
             render={({ field }) => (
@@ -115,7 +132,7 @@ export default function RegistrationVerification({
                 <FormMessage />
               </FormItem>
             )}
-            name="password"
+            name={"password" as Path<T>}
           />
           <FormField
             render={({ field }) => (
@@ -135,7 +152,7 @@ export default function RegistrationVerification({
                 <FormMessage />
               </FormItem>
             )}
-            name="password_confirmation"
+            name={"password_confirmation" as Path<T>}
           />
           <ThemedButton
             disabled={form.formState.isSubmitting}
@@ -146,9 +163,9 @@ export default function RegistrationVerification({
           </ThemedButton>
           <Link
             className="text-md bg-foreground text-primary-foreground flex w-full cursor-pointer items-center justify-center rounded-md py-3"
-            href="/register"
+            href={backHref}
           >
-            Back
+            {backLabel}
           </Link>
         </form>
       </Form>
