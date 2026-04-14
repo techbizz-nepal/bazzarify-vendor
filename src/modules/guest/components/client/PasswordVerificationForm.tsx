@@ -38,6 +38,7 @@ interface PasswordVerificationFormProps<T extends PasswordVerificationFields> {
   backHref: string;
   backLabel: string;
   phoneInputMode?: "editable" | "readonly";
+  phoneDisplayText?: string;
 }
 
 export default function PasswordVerificationForm<
@@ -52,8 +53,10 @@ export default function PasswordVerificationForm<
   backHref,
   backLabel,
   phoneInputMode = "editable",
+  phoneDisplayText,
 }: PasswordVerificationFormProps<T>) {
   const isPhoneReadonly = phoneInputMode === "readonly";
+  const showPhoneDisplay = isPhoneReadonly && !!phoneDisplayText;
 
   return (
     <div className={className}>
@@ -72,14 +75,23 @@ export default function PasswordVerificationForm<
               <FormItem className="flex flex-col gap-y-2">
                 <FormLabel className="text-slate-500">Phone</FormLabel>
                 <FormControl>
-                  <Input
-                    autoComplete="mobile tel"
-                    className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
-                    type="number"
-                    placeholder="Enter phone"
-                    readOnly={isPhoneReadonly}
-                    {...field}
-                  />
+                  {showPhoneDisplay ? (
+                    <div className="flex items-center gap-x-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                      <span className="text-sm font-medium tracking-widest text-slate-700">
+                        {phoneDisplayText}
+                      </span>
+                      <input type="hidden" {...field} />
+                    </div>
+                  ) : (
+                    <Input
+                      autoComplete="mobile tel"
+                      className="border border-slate-300 accent-orange-600 placeholder:text-slate-400"
+                      type="number"
+                      placeholder="Enter phone"
+                      readOnly={isPhoneReadonly}
+                      {...field}
+                    />
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>

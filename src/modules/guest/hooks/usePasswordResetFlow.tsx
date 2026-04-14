@@ -1,3 +1,5 @@
+"use client";
+
 import {
   applyValidationFeedback,
   getValidationFeedback,
@@ -16,7 +18,7 @@ import {
 } from "@/modules/guest/config/schemas/reset.password.verification.form";
 import { buildPasswordResetVerificationHref } from "@/modules/guest/utils/passwordReset";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -40,7 +42,8 @@ const getMessageText = (response: unknown, fallback: string) => {
   return fallback;
 };
 
-export function usePasswordResetRequestFlow(router: AppRouterInstance) {
+export function usePasswordResetRequestFlow() {
+  const router = useRouter();
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordFormSchema),
     defaultValues: {
@@ -93,12 +96,11 @@ export function usePasswordResetRequestFlow(router: AppRouterInstance) {
 }
 
 export function usePasswordResetVerificationFlow({
-  router,
   phone,
 }: {
-  router: AppRouterInstance;
   phone: string;
 }) {
+  const router = useRouter();
   const form = useForm<ResetPasswordVerificationFormValues>({
     resolver: zodResolver(ResetPasswordVerificationFormSchema),
     defaultValues: {

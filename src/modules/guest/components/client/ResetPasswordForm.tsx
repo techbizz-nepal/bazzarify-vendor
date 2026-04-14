@@ -15,11 +15,9 @@ import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { usePasswordResetRequestFlow } from "@/modules/guest/hooks/usePasswordResetFlow";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function ResetPasswordForm() {
-  const router = useRouter();
-  const { form, handleRequestPasswordReset } = usePasswordResetRequestFlow(router);
+  const { form, handleRequestPasswordReset } = usePasswordResetRequestFlow();
 
   return (
     <div className="flex w-11/12 md:w-6/12 flex-col space-y-6 rounded-md bg-white p-16">
