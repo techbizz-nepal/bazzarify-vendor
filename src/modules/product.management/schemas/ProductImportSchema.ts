@@ -48,6 +48,15 @@ export const ProductImportGuidePayloadSchema = z
             api_path: z.string(),
           })
           .strict(),
+        // Backend (ProductImportController::guide) emits the catalog download metadata
+        // so the client can proxy to the ZIP endpoint and gate the admin flow on
+        // target_store_uuid. Per the "API Contract Parity" invariant.
+        catalog: z
+          .object({
+            api_path: z.string(),
+            requires_target_store_uuid: z.boolean(),
+          })
+          .strict(),
         constraints: z
           .object({
             csv_max_size_mb: z.number().int().positive(),

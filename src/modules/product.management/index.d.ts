@@ -158,6 +158,10 @@ export type TProductImportGuidePayload = {
       sample_rows: Record<string, string>[];
       api_path: string;
     };
+    catalog: {
+      api_path: string;
+      requires_target_store_uuid: boolean;
+    };
     constraints: {
       csv_max_size_mb: number;
       image_archive_max_size_mb: number;

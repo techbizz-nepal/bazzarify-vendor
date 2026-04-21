@@ -25,6 +25,9 @@ const product: IRoute["product"] = {
   importTemplate: {
     path: "/product-management/product-imports/template",
   },
+  importCatalog: {
+    path: "/product-management/product-imports/catalog",
+  },
   importStoreOptions: {
     path: "/product-management/product-imports/target-stores",
   },

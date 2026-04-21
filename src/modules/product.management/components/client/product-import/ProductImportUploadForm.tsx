@@ -86,6 +86,13 @@ export default function ProductImportUploadForm({
   const storeError = getFieldError(feedback, "store_uuid");
   const uploadBlockedReason = eligibility.blocking_reasons[0] ?? null;
 
+  const catalog = guidePayload.guide.catalog;
+  const catalogRequiresStore = catalog.requires_target_store_uuid;
+  const catalogDisabled = catalogRequiresStore && !selectedStoreUuid;
+  const catalogHref = catalogRequiresStore
+    ? `/products/imports/catalog?target_store_uuid=${encodeURIComponent(selectedStoreUuid)}`
+    : "/products/imports/catalog";
+
   const selectedStoreLabel = useMemo(() => {
     if (selectedStoreName) return selectedStoreName;
     return (
@@ -186,13 +193,37 @@ export default function ProductImportUploadForm({
                 validation and processing from the import detail page.
               </CardDescription>
             </div>
-            <Button asChild variant="outline">
-              <Link href={guidePayload.guide.template.api_path}>
-                <Download className="mr-2 h-4 w-4" />
-                Download Sample CSV
-              </Link>
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild variant="outline">
+                <Link href={guidePayload.guide.template.api_path}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Sample CSV
+                </Link>
+              </Button>
+              {catalogDisabled ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled
+                  title="Select a target store to enable the catalog download."
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Catalog
+                </Button>
+              ) : (
+                <Button asChild variant="outline">
+                  <Link href={catalogHref} target="_blank" rel="noopener">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Catalog
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Use the exact category slugs, specification keys, attribute names,
+            and values from the catalog to avoid validation errors.
+          </p>
         </CardHeader>
         <CardContent className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-4">
