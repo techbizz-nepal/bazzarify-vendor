@@ -160,3 +160,68 @@ export const ProductImportTargetStorePayloadSchema = z
     stores: z.array(ProductImportTargetStoreSchema),
   })
   .strict();
+
+export const ProductImportTableFilterSchema = z.union([
+  z
+    .object({
+      type: z.string(),
+      key: z.string(),
+      label: z.string(),
+      placeholder: z.string().optional(),
+      options: z
+        .array(
+          z
+            .object({
+              label: z.string(),
+              value: z.string(),
+            })
+            .strict(),
+        )
+        .optional(),
+    })
+    .passthrough(),
+  z.record(z.string(), z.unknown()),
+]);
+
+export const ProductImportTableMetaSchema = z
+  .object({
+    search: z
+      .object({
+        queryKey: z.string(),
+        placeholder: z.string(),
+      })
+      .strict(),
+    filters: z.array(ProductImportTableFilterSchema),
+  })
+  .strict();
+
+export const ProductImportListPayloadSchema = z
+  .object({
+    imports: z
+      .object({
+        data: z.array(ProductImportRecordSchema),
+        current_page: z.number().int().positive().optional(),
+        per_page: z.number().int().positive().optional(),
+        path: z.string().optional(),
+        next_page_url: z.string().nullable().optional(),
+        prev_page_url: z.string().nullable().optional(),
+        from: z.number().int().nullable().optional(),
+        to: z.number().int().nullable().optional(),
+      })
+      .passthrough(),
+    table: ProductImportTableMetaSchema,
+  })
+  .strict();
+
+export const ProductImportActivePayloadSchema = z
+  .object({
+    active_import: ProductImportRecordSchema.nullable(),
+  })
+  .strict();
+
+export const ProductImportActiveImportErrorSchema = z
+  .object({
+    uuid: z.uuid(),
+    status: z.string().nullable(),
+  })
+  .strict();

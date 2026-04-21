@@ -31,6 +31,12 @@ const product: IRoute["product"] = {
   importStore: {
     path: "/product-management/product-imports",
   },
+  importIndex: {
+    path: "/product-management/product-imports",
+  },
+  importActive: {
+    path: "/product-management/product-imports/active",
+  },
   importShow: {
     path: "/product-management/product-imports/:uuid",
   },
@@ -42,6 +48,12 @@ const product: IRoute["product"] = {
   },
   importRows: {
     path: "/product-management/product-imports/:uuid/rows",
+  },
+  importCancel: {
+    path: "/product-management/product-imports/:uuid/cancel",
+  },
+  importErrorReport: {
+    path: "/product-management/product-imports/:uuid/error-report",
   },
 };
 

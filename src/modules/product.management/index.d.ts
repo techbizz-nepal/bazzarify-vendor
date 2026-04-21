@@ -234,6 +234,29 @@ export type TProductImportTargetStorePayload = {
   stores: TProductImportTargetStore[];
 };
 
+export type TProductImportTableFilter = {
+  type?: string;
+  key: string;
+  label: string;
+  placeholder?: string;
+  options?: { label: string; value: string }[];
+  [extra: string]: unknown;
+};
+
+export type TProductImportTableMeta = {
+  search: { queryKey: string; placeholder: string };
+  filters: TProductImportTableFilter[];
+};
+
+export type TProductImportListPayload = {
+  imports: IPaginatedData<TProductImportRecord[]>;
+  table: TProductImportTableMeta;
+};
+
+export type TProductImportActivePayload = {
+  active_import: TProductImportRecord | null;
+};
+
 export type TSpecificationsIndexPayload = {
   specifications: IPaginatedData<TSpecification[]>;
 };

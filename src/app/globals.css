@@ -11,6 +11,8 @@
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-selected-foreground: var(--sidebar-selected-foreground);
+  --color-sidebar-selected: var(--sidebar-selected);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
@@ -73,8 +75,18 @@
   --sidebar-foreground: oklch(0.985 0.001 106.423);
   --sidebar-primary: oklch(0.654 0.199 36.943);
   --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-accent: oklch(1 0 0);
-  --sidebar-accent-foreground: oklch(0.654 0.199 36.943);
+  /*
+   * Selection token for active nav items. Must remain a third tier distinct from
+   * --sidebar (chrome bg) and --sidebar-foreground (chrome text), otherwise
+   * data-[active] rules collapse into invisible text. Value mirrors the navy
+   * used as the dark background in bazzarify-app/constants/Colors.ts (#0F172A).
+   * --sidebar-accent* re-points here so shadcn's built-in data-[active=true]
+   * rules (components/ui/sidebar.tsx) flow through without per-call-site overrides.
+   */
+  --sidebar-selected: oklch(0.205 0.040 264.5);
+  --sidebar-selected-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-accent: var(--sidebar-selected);
+  --sidebar-accent-foreground: var(--sidebar-selected-foreground);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.985 0.001 106.423);
 }
@@ -107,8 +119,11 @@
   --sidebar-foreground: oklch(0.985 0.001 106.423);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-accent: oklch(0.268 0.007 34.298);
-  --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
+  /* In dark mode the chrome is already navy, so invert: selected = brand orange. */
+  --sidebar-selected: oklch(0.654 0.199 36.943);
+  --sidebar-selected-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-accent: var(--sidebar-selected);
+  --sidebar-accent-foreground: var(--sidebar-selected-foreground);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.553 0.013 58.071);
 }
@@ -121,4 +136,27 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@keyframes collapsible-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+
+@keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@theme inline {
+  --animate-collapsible-down: collapsible-down 160ms ease-out;
+  --animate-collapsible-up: collapsible-up 160ms ease-out;
 }

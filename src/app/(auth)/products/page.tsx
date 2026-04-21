@@ -78,7 +78,7 @@ export default async function ProductsPage({
         toolbarAction={
           <div className="flex items-center gap-2">
             <Button asChild size="sm" variant="outline">
-              <Link href="/products/import">
+              <Link href="/products/imports/new">
                 <Upload className="mr-2 h-4 w-4" />
                 Bulk Import
               </Link>
