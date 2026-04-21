@@ -112,7 +112,7 @@ export default function ProductImportsServerTable({
           {canDownloadErrors ? (
             <Button asChild size="sm" variant="outline">
               <Link
-                href={`/product-management/product-imports/${record.uuid}/error-report`}
+                href={`/products/imports/${record.uuid}/error-report`}
                 target="_blank"
                 rel="noopener"
               >

@@ -417,7 +417,7 @@ export default function ProductImportDetailScreen({
             ) ? (
               <Button asChild variant="outline" size="sm">
                 <Link
-                  href={`/product-management/product-imports/${currentImport.uuid}/error-report`}
+                  href={`/products/imports/${currentImport.uuid}/error-report`}
                   target="_blank"
                   rel="noopener"
                 >
