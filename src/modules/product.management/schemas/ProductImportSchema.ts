@@ -110,8 +110,17 @@ export const ProductImportRowSchema = z
     status: z.string().nullable(),
     raw_payload: z.record(z.string(), z.unknown()).nullable(),
     normalized_payload: z.record(z.string(), z.unknown()).nullable(),
-    errors: z.record(z.string(), z.unknown()).nullable(),
-    suggestions: z.record(z.string(), z.unknown()).nullable(),
+    // Backend (ProductImportPreflightValidator::addError) builds Record<string, string[]>
+    // for INVALID rows; an empty PHP array (READY rows) JSON-encodes as [] not {}.
+    errors: z
+      .union([
+        z.array(z.string()),
+        z.record(z.string(), z.array(z.string())),
+      ])
+      .nullable(),
+    // Backend (ProductImportPreflightValidator) emits array_values(array_unique(...))
+    // of plain strings (or [] when no suggestions). Never a record.
+    suggestions: z.array(z.string()).nullable(),
     product_uuid: z.uuid().nullable(),
   })
   .strict();
@@ -137,7 +146,9 @@ export const ProductImportProcessPayloadSchema = z
         processed_rows: z.number().int().nonnegative(),
         succeeded_rows: z.number().int().nonnegative(),
         failed_rows: z.number().int().nonnegative(),
-        status: z.string(),
+        // Backend (ProductImportProcessor::buildReplayResult) uses $import->status?->value;
+        // nullable on the wire when status column is null.
+        status: z.string().nullable(),
         sample_failures: z.array(
           z
             .object({
@@ -168,6 +179,8 @@ export const ProductImportTableFilterSchema = z.union([
       key: z.string(),
       label: z.string(),
       placeholder: z.string().optional(),
+      // ServerDataTableMeta::option accepts string|int values; current call sites
+      // only pass strings. Keep strict and revisit if a numeric option is added.
       options: z
         .array(
           z
@@ -178,6 +191,10 @@ export const ProductImportTableFilterSchema = z.union([
             .strict(),
         )
         .optional(),
+      // ServerDataTableMeta::dateRange additional fields.
+      fromKey: z.string().optional(),
+      toKey: z.string().optional(),
+      maxMonths: z.number().int().positive().optional(),
     })
     .passthrough(),
   z.record(z.string(), z.unknown()),

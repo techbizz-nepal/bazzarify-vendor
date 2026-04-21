@@ -198,8 +198,8 @@ export type TProductImportRow = {
   status: string | null;
   raw_payload: Record<string, unknown> | null;
   normalized_payload: Record<string, unknown> | null;
-  errors: Record<string, unknown> | null;
-  suggestions: Record<string, unknown> | null;
+  errors: string[] | Record<string, string[]> | null;
+  suggestions: string[] | null;
   product_uuid: string | null;
 };
 
@@ -218,7 +218,7 @@ export type TProductImportProcessPayload = {
     processed_rows: number;
     succeeded_rows: number;
     failed_rows: number;
-    status: string;
+    status: string | null;
     sample_failures: {
       import_key: string;
       row_numbers: number[];
