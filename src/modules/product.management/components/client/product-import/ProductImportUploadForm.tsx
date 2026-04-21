@@ -38,6 +38,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 type ValidationFeedback = {
   summary: string;
@@ -77,11 +78,7 @@ export default function ProductImportUploadForm({
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isSearchingStores, startStoreSearchTransition] = useTransition();
-  const idempotencyKeyRef = useRef<string>(
-    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-  );
+  const idempotencyKeyRef = useRef<string>(uuidv4());
 
   const eligibility = guidePayload.eligibility;
   const csvError = getFieldError(feedback, "csv");
@@ -119,10 +116,7 @@ export default function ProductImportUploadForm({
   };
 
   const rotateIdempotencyKey = () => {
-    idempotencyKeyRef.current =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    idempotencyKeyRef.current = uuidv4();
   };
 
   const handleUpload = () => {
