@@ -359,7 +359,7 @@ export default function StoreOnboardingManagement({
                 className={[
                   "w-full rounded-lg border p-3 text-left transition-colors",
                   isSelected
-                    ? "border-slate-900 bg-slate-900 text-white"
+                    ? "border-[var(--selected)] bg-[var(--selected)] text-[var(--selected-foreground)]"
                     : "border-slate-200 bg-white hover:border-slate-400",
                 ].join(" ")}
               >
@@ -368,7 +368,9 @@ export default function StoreOnboardingManagement({
                   <div
                     className={[
                       "mt-1 text-sm",
-                      isSelected ? "text-slate-200" : "text-slate-600",
+                      isSelected
+                        ? "text-[color:color-mix(in_oklab,var(--selected-foreground)_80%,transparent)]"
+                        : "text-slate-600",
                     ].join(" ")}
                   >
                     {storeType.description}
@@ -377,7 +379,9 @@ export default function StoreOnboardingManagement({
                 <div
                   className={[
                     "mt-2 text-xs uppercase tracking-wide",
-                    isSelected ? "text-slate-300" : "text-slate-500",
+                    isSelected
+                      ? "text-[color:color-mix(in_oklab,var(--selected-foreground)_72%,transparent)]"
+                      : "text-slate-500",
                   ].join(" ")}
                 >
                   {categoryCount} starter sellable categories

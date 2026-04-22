@@ -1,21 +1,18 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  getAuthUser,
-  getSessionUserUUID,
-} from "@/modules/auth/data/lib/auth-lib";
+import { getSessionUser } from "@/modules/auth/data/auth-service";
 import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
+import SidebarAccountMenu from "@/modules/core/components/client/SidebarAccountMenu";
 import SidebarMenuGroupComponent from "@/modules/core/components/client/SidebarMenuGroup";
 import { TMenuEntry } from "@/modules/core/data";
-import { getCookieStore } from "@/modules/core/lib/utils.session";
-import { Settings } from "lucide-react";
 import { headers } from "next/headers";
 import Image from "next/image";
 import { FaHome, FaImage } from "react-icons/fa";
@@ -56,21 +53,6 @@ const adminNavigations: TMenuEntry[] = [
   productsGroup,
   { type: "link", title: "Orders", path: "/orders", icon: FaFirstOrder },
   { type: "link", title: "Users", path: "/users", icon: FaUsers },
-  {
-    type: "group",
-    title: "Settings",
-    defaultPath: "/settings/store-onboarding",
-    pathMatch: "/settings",
-    icon: Settings,
-    children: [
-      {
-        type: "link",
-        title: "Store onboarding",
-        path: "/settings/store-onboarding",
-        icon: Settings,
-      },
-    ],
-  },
 ];
 
 const vendorNavigations: TMenuEntry[] = [
@@ -86,20 +68,97 @@ function isEntryVisible(entry: TMenuEntry, isSuperAdmin: boolean): boolean {
   return true;
 }
 
+function getDisplayName(name: string | null, email: string | null): string {
+  const trimmedName = name?.trim();
+  if (trimmedName) {
+    return trimmedName;
+  }
+
+  const emailLocalPart = email?.split("@")[0]?.trim();
+  if (emailLocalPart) {
+    return emailLocalPart;
+  }
+
+  return "Account";
+}
+
+function getInitials(label: string): string {
+  const segments = label
+    .split(/\s+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+
+  if (segments.length === 0) {
+    return "AC";
+  }
+
+  if (segments.length === 1) {
+    return segments[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${segments[0][0] ?? ""}${segments[1][0] ?? ""}`.toUpperCase();
+}
+
+function formatRoleSummary(roleNames: string[]): string {
+  if (roleNames.length === 0) {
+    return "No assigned roles";
+  }
+
+  return roleNames
+    .map((roleName) =>
+      roleName
+        .split("-")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" "),
+    )
+    .join(", ");
+}
+
 export async function AppSidebar({ className }: { className?: string }) {
   const requestHeaders = await headers();
   const isVendor = requestHeaders.get("host")?.startsWith("vendor.");
-  const userUuid = await getSessionUserUUID(await getCookieStore());
-  const authUser = userUuid ? await getAuthUser(userUuid) : null;
+  const sessionUser = await getSessionUser();
   const isSuperAdmin = Boolean(
-    authUser &&
-      typeof authUser === "object" &&
-      !("error" in authUser) &&
-      authUser.roles.some((role) => role.name === "super-admin"),
+    sessionUser?.roles.some((role) => role.name === "super-admin"),
   );
   const entries = (isVendor ? vendorNavigations : adminNavigations).filter(
     (entry) => isEntryVisible(entry, isSuperAdmin),
   );
+  const roleNames = sessionUser?.roles.map((role) => role.name) ?? [];
+  const displayName = getDisplayName(
+    sessionUser?.name ?? null,
+    sessionUser?.email ?? null,
+  );
+  const initials = getInitials(displayName);
+  const roleSummary = formatRoleSummary(roleNames);
+  const hasSettingsAccess = roleNames.some(
+    (roleName) => roleName === "admin" || roleName === "super-admin",
+  );
+  const storeName = sessionUser?.store?.name?.trim() || null;
+  const hasStore = Boolean(sessionUser?.store);
+  const hasBlockedStoreSetup =
+    sessionUser?.store?.product_authoring_ready === false;
+
+  const secondaryText = storeName || sessionUser?.email || "Signed in";
+  const identitySummary = hasBlockedStoreSetup
+    ? "Store setup incomplete"
+    : storeName || "Signed in account";
+  const storeAction = !isVendor
+    ? null
+    : !hasStore
+      ? {
+          href: "/store-required",
+          label: "Complete store setup",
+          tone: "default" as const,
+        }
+      : hasBlockedStoreSetup
+        ? {
+            href: "/store-remediation",
+            label: "Finish store setup",
+            tone: "warning" as const,
+          }
+        : null;
+
   return (
     <Sidebar className={className}>
       <SidebarHeader className="p-4 pb-2">
@@ -152,6 +211,22 @@ export async function AppSidebar({ className }: { className?: string }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      {sessionUser ? (
+        <SidebarFooter className="border-t border-sidebar-border bg-transparent p-4">
+          <SidebarAccountMenu
+            initials={initials}
+            displayName={displayName}
+            secondaryText={secondaryText}
+            email={sessionUser.email}
+            roleSummary={roleSummary}
+            identitySummary={identitySummary}
+            settingsHref={
+              hasSettingsAccess ? "/settings/store-onboarding" : null
+            }
+            storeAction={storeAction}
+          />
+        </SidebarFooter>
+      ) : null}
     </Sidebar>
   );
 }
