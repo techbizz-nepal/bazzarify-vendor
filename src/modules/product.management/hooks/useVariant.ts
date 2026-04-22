@@ -4,9 +4,8 @@ import {
   TVariantDataMap,
 } from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
-import { generateCombinations } from "@/modules/product.management/utils/generateCombinations";
 import { createVariantDraftKey } from "@/modules/product.management/utils/variantDraft";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 interface useVariantProps {
   variantSelections: Record<string, string[]>;
@@ -18,6 +17,37 @@ interface useVariantProps {
     url: string,
   ) => Promise<boolean>;
 }
+
+const EMPTY_VARIANT_SEED: TVariant = {
+  name: "",
+  stock: "",
+  price: "",
+  available: true,
+  images: [],
+  isValid: false,
+};
+
+const parseComboKey = (key: string): string[] => {
+  try {
+    const parsed = JSON.parse(key) as unknown;
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const buildCartesian = (
+  columns: readonly string[],
+  selections: Record<string, string[]>,
+): string[][] =>
+  columns.reduce<string[][]>(
+    (acc, column) =>
+      acc.flatMap((combo) =>
+        (selections[column] || []).map((value) => [...combo, value]),
+      ),
+    [[]],
+  );
+
 export default function useVariant({
   variantSelections,
   setVariantSelections,
@@ -25,62 +55,102 @@ export default function useVariant({
 }: useVariantProps) {
   const [columns, setColumns] = useState<string[]>([]);
   const [variantData, setVariantData] = useState<TVariantDataMap>({});
-  const toggleValue = (attribute: string, value: string) => {
-    setVariantSelections((prev) => {
-      const current = prev[attribute] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      const next = { ...prev, [attribute]: updated };
 
-      // Update columns based on filtered keys that still have values
-      const newColumnList = Object.keys(next).filter(
-        (attr) => next[attr].length > 0,
+  // Variants grid rows are driven by the actual entries in `variantData`, not by
+  // a synthetic cartesian product of selected attribute values. This guarantees
+  // sparse matrices (e.g. bulk-imported products with only a subset of combos)
+  // render exactly the variants that exist, without fabricated empty duplicates.
+  const combinations = useMemo<string[][]>(
+    () =>
+      Object.keys(variantData)
+        .map(parseComboKey)
+        .filter((combo) => combo.length > 0),
+    [variantData],
+  );
+
+  const applyToggle = useCallback(
+    (attribute: string, value: string) => {
+      const currentAttrValues = variantSelections[attribute] || [];
+      const isAdding = !currentAttrValues.includes(value);
+      const nextAttrValues = isAdding
+        ? [...currentAttrValues, value]
+        : currentAttrValues.filter((v) => v !== value);
+
+      const nextSelections: Record<string, string[]> = {
+        ...variantSelections,
+        [attribute]: nextAttrValues,
+      };
+
+      const prevActiveAttrs = Object.keys(variantSelections).filter(
+        (attr) => (variantSelections[attr] || []).length > 0,
       );
-      setColumns((prevCols) => {
-        return prevCols
-          .filter((col) => newColumnList.includes(col))
-          .concat(newColumnList.filter((col) => !prevCols.includes(col)));
-      });
-
-      return next;
-    });
-  };
-
-  const removeValue = (attribute: string, value: string) => {
-    setVariantSelections((prev) => {
-      const current = prev[attribute] || [];
-      const updated = current.filter((v) => v !== value);
-      const next = { ...prev, [attribute]: updated };
-      // Clean up variantData keys that are no longer valid
-      const remainingCombinations = generateCombinations(next);
-      const keepKeys = new Set(
-        remainingCombinations.map((combo) => combo.join("|")),
+      const nextActiveAttrs = Object.keys(nextSelections).filter(
+        (attr) => nextSelections[attr].length > 0,
       );
 
-      setVariantData((prevData) => {
-        const newData: typeof prevData = {};
-        for (const key in prevData) {
-          if (keepKeys.has(key)) {
-            newData[key] = prevData[key]; // keep valid
+      const nextColumns = columns
+        .filter((col) => nextActiveAttrs.includes(col))
+        .concat(nextActiveAttrs.filter((col) => !columns.includes(col)));
+
+      const dimensionChanged =
+        prevActiveAttrs.length !== nextActiveAttrs.length;
+
+      let nextVariantData: TVariantDataMap;
+
+      if (dimensionChanged || Object.keys(variantData).length === 0) {
+        const cartesian = buildCartesian(nextColumns, nextSelections);
+        nextVariantData = {};
+        for (const combo of cartesian) {
+          if (combo.length === 0) continue;
+          const key = createVariantDraftKey(combo);
+          nextVariantData[key] = variantData[key] ?? { ...EMPTY_VARIANT_SEED };
+        }
+      } else if (isAdding) {
+        const attrIdx = nextColumns.indexOf(attribute);
+        const otherColumns = nextColumns.filter((c) => c !== attribute);
+        const otherCartesian = buildCartesian(otherColumns, nextSelections);
+        nextVariantData = { ...variantData };
+        for (const row of otherCartesian) {
+          const combo = [...row];
+          combo.splice(attrIdx, 0, value);
+          const key = createVariantDraftKey(combo);
+          if (!nextVariantData[key]) {
+            nextVariantData[key] = { ...EMPTY_VARIANT_SEED };
           }
         }
-        return newData;
-      });
+      } else {
+        const attrIdx = columns.indexOf(attribute);
+        nextVariantData = {};
+        for (const [key, data] of Object.entries(variantData)) {
+          const combo = parseComboKey(key);
+          if (attrIdx < 0 || combo[attrIdx] !== value) {
+            nextVariantData[key] = data;
+          }
+        }
+      }
 
-      return next;
-    });
-  };
-  const combinations = (() => {
-    const entries = Object.entries(variantSelections).filter(
-      ([, values]) => values.length > 0,
-    );
-    if (entries.length === 0) return []; // no attribute values selected
-    if (entries.length === 1) {
-      return entries[0][1].map((value) => [value]); // map to single-value combos
-    }
-    return generateCombinations(variantSelections); // default behavior for >1 attribute
-  })();
+      setVariantSelections(nextSelections);
+      setColumns(nextColumns);
+      setVariantData(nextVariantData);
+    },
+    [columns, setVariantSelections, variantData, variantSelections],
+  );
+
+  const toggleValue = useCallback(
+    (attribute: string, value: string) => {
+      applyToggle(attribute, value);
+    },
+    [applyToggle],
+  );
+
+  const removeValue = useCallback(
+    (attribute: string, value: string) => {
+      const currentAttrValues = variantSelections[attribute] || [];
+      if (!currentAttrValues.includes(value)) return;
+      applyToggle(attribute, value);
+    },
+    [applyToggle, variantSelections],
+  );
 
   const handleVariantChange = <K extends keyof TVariant>(
     combo: string[],
@@ -90,7 +160,7 @@ export default function useVariant({
     const key = createVariantDraftKey(combo);
     setVariantData((prev) => ({
       ...prev,
-      [key]: { ...(prev[key] || {}), [field]: value },
+      [key]: { ...(prev[key] || EMPTY_VARIANT_SEED), [field]: value },
     }));
   };
 
@@ -99,19 +169,16 @@ export default function useVariant({
     const fileList = Array.from(files).filter((file) => file instanceof File);
     setVariantData((prev) => {
       const existingAll = prev[key]?.images || [];
-      // Keep both existing string URLs and Files
       const existing = [...existingAll];
-      // Determine remaining slots considering both existing strings and Files
       const remaining = Math.max(0, MAX_VARIANT_IMAGE_COUNT - existing.length);
       if (remaining <= 0) {
-        return prev; // cannot add more
+        return prev;
       }
-      // Take only up to remaining new files
       const toAdd = fileList.slice(0, remaining);
       return {
         ...prev,
         [key]: {
-          ...(prev[key] || {}),
+          ...(prev[key] || EMPTY_VARIANT_SEED),
           images: [...existing, ...toAdd].slice(0, MAX_VARIANT_IMAGE_COUNT),
         },
       };
@@ -125,14 +192,14 @@ export default function useVariant({
     const key = createVariantDraftKey(combo);
     if (typeof image === "string" && onExistingVariantImageRemove) {
       const ok = await onExistingVariantImageRemove(combo, image);
-      if (!ok) return; // abort removal if API fails
+      if (!ok) return;
     }
     setVariantData((prev) => {
       const images = prev[key]?.images?.filter((img) => img !== image) || [];
       return {
         ...prev,
         [key]: {
-          ...(prev[key] || {}),
+          ...(prev[key] || EMPTY_VARIANT_SEED),
           images,
         },
       };
