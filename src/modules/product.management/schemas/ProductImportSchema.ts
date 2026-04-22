@@ -46,6 +46,7 @@ export const ProductImportGuidePayloadSchema = z
             headers: z.array(z.string()),
             sample_rows: z.array(z.record(z.string(), z.string())),
             api_path: z.string(),
+            requires_target_store_uuid: z.boolean(),
           })
           .strict(),
         // Backend (ProductImportController::guide) emits the catalog download metadata

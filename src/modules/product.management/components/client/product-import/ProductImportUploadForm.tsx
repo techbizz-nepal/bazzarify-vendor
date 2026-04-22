@@ -93,6 +93,13 @@ export default function ProductImportUploadForm({
     ? `/products/imports/catalog?target_store_uuid=${encodeURIComponent(selectedStoreUuid)}`
     : "/products/imports/catalog";
 
+  const template = guidePayload.guide.template;
+  const templateRequiresStore = template.requires_target_store_uuid;
+  const templateDisabled = templateRequiresStore && !selectedStoreUuid;
+  const templateHref = templateRequiresStore
+    ? `/products/import/template?target_store_uuid=${encodeURIComponent(selectedStoreUuid)}`
+    : "/products/import/template";
+
   const selectedStoreLabel = useMemo(() => {
     if (selectedStoreName) return selectedStoreName;
     return (
@@ -194,12 +201,24 @@ export default function ProductImportUploadForm({
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button asChild variant="outline">
-                <Link href={guidePayload.guide.template.api_path}>
+              {templateDisabled ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled
+                  title="Select a target store to enable the sample template download."
+                >
                   <Download className="mr-2 h-4 w-4" />
                   Download Sample CSV
-                </Link>
-              </Button>
+                </Button>
+              ) : (
+                <Button asChild variant="outline">
+                  <Link href={templateHref}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Sample CSV
+                  </Link>
+                </Button>
+              )}
               {catalogDisabled ? (
                 <Button
                   type="button"

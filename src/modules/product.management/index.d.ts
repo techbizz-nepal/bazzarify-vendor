@@ -157,6 +157,7 @@ export type TProductImportGuidePayload = {
       headers: string[];
       sample_rows: Record<string, string>[];
       api_path: string;
+      requires_target_store_uuid: boolean;
     };
     catalog: {
       api_path: string;
