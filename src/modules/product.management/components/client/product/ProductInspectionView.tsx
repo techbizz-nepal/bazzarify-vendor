@@ -317,7 +317,19 @@ export default function ProductInspectionView({ productPayload }: Props) {
     .map((node) => node.name)
     .join(" › ");
 
-  const specEntries = Object.entries(product.specifications ?? {});
+  const specEntries: [string, string][] = (() => {
+    const specs = product.specifications as unknown;
+    if (
+      !specs ||
+      typeof specs !== "object" ||
+      Array.isArray(specs)
+    ) {
+      return [];
+    }
+    return Object.entries(specs as Record<string, unknown>)
+      .filter(([, value]) => value !== null && value !== undefined)
+      .map(([key, value]) => [key, String(value)]);
+  })();
 
   return (
     <PageContainer
@@ -466,9 +478,6 @@ export default function ProductInspectionView({ productPayload }: Props) {
                     <Badge className={cn(statusBadge.className)}>
                       {statusBadge.label}
                     </Badge>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      (raw: {product.status ?? "—"})
-                    </span>
                   </KeyValue>
                   <KeyValue label="UUID">
                     <div className="flex items-center gap-1">
@@ -799,28 +808,6 @@ export default function ProductInspectionView({ productPayload }: Props) {
             </CardContent>
           </Card>
 
-          <div className="rounded-md border bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 sm:grid-cols-4">
-              <span>
-                <span className="font-medium">image_base_path:</span>{" "}
-                <code className="font-mono">
-                  {product.image_base_path || "—"}
-                </code>
-              </span>
-              <span>
-                <span className="font-medium">image_base_url:</span>{" "}
-                <code className="font-mono">{imageBaseUrl || "—"}</code>
-              </span>
-              <span>
-                <span className="font-medium">type:</span>{" "}
-                <code className="font-mono">{product.type}</code>
-              </span>
-              <span>
-                <span className="font-medium">status (raw):</span>{" "}
-                <code className="font-mono">{String(product.status ?? "—")}</code>
-              </span>
-            </div>
-          </div>
         </div>
       </TooltipProvider>
     </PageContainer>
