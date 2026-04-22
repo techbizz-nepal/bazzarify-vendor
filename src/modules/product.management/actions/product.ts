@@ -6,6 +6,7 @@ import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
 import {
   TEditProductPayload,
+  TProduct,
   TProductIndexPayload,
   TShowProductPayload,
 } from "@/modules/product.management";
@@ -104,6 +105,27 @@ export const actionStoreProducts = async (
       return toProductActionError(responseData.metaData);
     }
     return responseData.data.payload;
+  } catch (error) {
+    return handleUnknownError(error);
+  }
+};
+
+export const actionUpdateProductStatus = async (
+  uuid: string,
+  status: number,
+): Promise<TProduct | ProductActionError> => {
+  const client = await authAxiosInstance();
+  try {
+    const response = await client.patch(
+      PRODUCT_MANAGEMENT_ROUTES.product.updateStatus.path.replace(":uuid", uuid),
+      { status },
+    );
+    const responseData = response.data as ApiResponse<{ product: TProduct }>;
+
+    if (responseData.metaData?.error) {
+      return toProductActionError(responseData.metaData);
+    }
+    return responseData.data.payload.product;
   } catch (error) {
     return handleUnknownError(error);
   }

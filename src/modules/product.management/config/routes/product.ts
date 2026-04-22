@@ -16,6 +16,9 @@ const product: IRoute["product"] = {
   update: {
     path: "/product-management/products/:uuid",
   },
+  updateStatus: {
+    path: "/product-management/products/:uuid/status",
+  },
   delete: {
     path: "/product-management/products/:uuid",
   },
