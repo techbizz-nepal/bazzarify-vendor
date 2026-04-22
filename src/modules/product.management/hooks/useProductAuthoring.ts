@@ -182,7 +182,7 @@ export default function useProductAuthoring({
     }
 
     if (!selectedCategory.is_sellable) {
-      toast.error("Choose a more specific category to continue.");
+      toast.error("Choose a category that already defines product fields.");
       return;
     }
 
@@ -363,7 +363,7 @@ export default function useProductAuthoring({
             schema: CreateProductSchema,
             product: omit(product.productForm, "uuid"),
             productSku: product.productForm.sku,
-            selectedCategoryUuid: category.committedCategory?.uuid,
+            committedCategoryUuid: category.committedCategory?.uuid,
             combinations: variant.combinations,
             columns: variant.columns,
             variantData: variant.variantData,
@@ -384,7 +384,7 @@ export default function useProductAuthoring({
             box_items: product.productForm.box_items,
           },
           productSku: product.productForm.sku,
-          selectedCategoryUuid: category.committedCategory?.uuid,
+          committedCategoryUuid: category.committedCategory?.uuid,
           combinations: variant.combinations,
           columns: variant.columns,
           variantData: variant.variantData,

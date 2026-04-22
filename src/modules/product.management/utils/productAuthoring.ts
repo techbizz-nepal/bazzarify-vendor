@@ -43,7 +43,7 @@ interface PrepareProductSubmissionInput<TSchema extends z.ZodTypeAny> {
   schema: TSchema;
   product: Record<string, unknown>;
   productSku: string;
-  selectedCategoryUuid?: string;
+  committedCategoryUuid?: string;
   combinations: string[][];
   columns: string[];
   variantData: TVariantDataMap;
@@ -61,7 +61,7 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
   schema,
   product,
   productSku,
-  selectedCategoryUuid,
+  committedCategoryUuid,
   combinations,
   columns,
   variantData,
@@ -94,7 +94,7 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
   );
   const validationResult = schema.safeParse({
     ...product,
-    category: selectedCategoryUuid,
+    category: committedCategoryUuid,
     variants,
   });
 

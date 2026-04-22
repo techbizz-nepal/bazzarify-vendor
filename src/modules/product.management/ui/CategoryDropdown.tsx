@@ -47,6 +47,7 @@ export default function CategoryDropdown({
   lockedSelectionMessage,
 }: ICategoryDropdown) {
   const currentCategory = selectedCategories.at(-1) ?? null;
+  const isReadOnly = categoryChangeLocked && committedCategories.length > 0;
   const selectedPath = selectedCategories.map((category) => category.name).join(" > ");
   const committedPath = committedCategories
     .map((category) => category.name)
@@ -79,6 +80,27 @@ export default function CategoryDropdown({
       ))}
     </div>
   );
+
+  if (isReadOnly) {
+    return (
+      <div>
+        <div
+          className={cn(
+            "flex h-8 w-full min-w-0 items-center rounded-md border bg-muted/20 px-3 py-1 text-base shadow-xs",
+            invalid && "border-destructive",
+          )}
+          aria-disabled="true"
+        >
+          <p className="truncate text-gray-500">
+            {committedCategories.length ? committedPath : "No category committed yet."}
+          </p>
+        </div>
+        {errorMessage && (
+          <p className="pt-2 text-sm text-destructive">{errorMessage}</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu onOpenChange={onOpenChangeAction} open={open}>
@@ -145,8 +167,8 @@ export default function CategoryDropdown({
             </p>
             {currentCategory && !currentCategory.is_sellable && (
               <p className="text-sm text-muted-foreground">
-                Choose a more specific category to continue. This category
-                does not define product fields yet.
+                Choose a category that already defines product fields to
+                continue.
               </p>
             )}
             {currentCategory?.is_sellable && hasUncommittedSelection && (
