@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   TProductImportGuidePayload,
   TProductImportTargetStore,
@@ -33,7 +34,14 @@ import {
   buildStoreRemediationPath,
   buildStoreRequirementPath,
 } from "@/modules/vendor/domain/storeRequirementNavigation";
-import { Check, ChevronsUpDown, Download, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  ChevronsUpDown,
+  Download,
+  Info,
+  Upload,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
@@ -188,16 +196,19 @@ export default function ProductImportUploadForm({
     });
   };
 
+  const vendorTargetStore =
+    eligibility.actor_type === "vendor" ? eligibility.target_store : null;
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="space-y-4">
+      <Card className={!eligibility.can_initiate ? "border-destructive" : undefined}>
+        <CardHeader className="pb-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-1">
               <CardTitle>New Bulk Product Import</CardTitle>
               <CardDescription>
-                Upload a validated CSV (and image ZIP if referenced), then drive
-                validation and processing from the import detail page.
+                Download the catalog and template for this store, then upload a
+                CSV (and image ZIP) to start validation.
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -205,17 +216,18 @@ export default function ProductImportUploadForm({
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   disabled
-                  title="Select a target store to enable the sample template download."
+                  title="Select a target store to enable the template download."
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Sample CSV
+                  Template
                 </Button>
               ) : (
-                <Button asChild variant="outline">
+                <Button asChild variant="outline" size="sm">
                   <Link href={templateHref}>
                     <Download className="mr-2 h-4 w-4" />
-                    Download Sample CSV
+                    Template
                   </Link>
                 </Button>
               )}
@@ -223,288 +235,186 @@ export default function ProductImportUploadForm({
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   disabled
                   title="Select a target store to enable the catalog download."
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Catalog
+                  Catalog
                 </Button>
               ) : (
-                <Button asChild variant="outline">
+                <Button asChild variant="outline" size="sm">
                   <Link href={catalogHref} target="_blank" rel="noopener">
                     <Download className="mr-2 h-4 w-4" />
-                    Download Catalog
+                    Catalog
                   </Link>
                 </Button>
               )}
             </div>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Use the exact category slugs, specification keys, attribute names,
-            and values from the catalog to avoid validation errors.
-          </p>
         </CardHeader>
-        <CardContent className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-medium">Prerequisites</h3>
-              <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                {guidePayload.guide.prerequisites.map((item) => (
-                  <li key={item} className="rounded-md border bg-muted/30 px-3 py-2">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium">Image Packaging Rules</h3>
-              <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                {guidePayload.guide.image_rules.map((item) => (
-                  <li key={item} className="rounded-md border bg-muted/30 px-3 py-2">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-medium">Workflow</h3>
-              <ol className="mt-2 space-y-2 text-sm text-muted-foreground">
-                {guidePayload.guide.workflow_steps.map((item, index) => (
-                  <li key={item} className="rounded-md border bg-muted/30 px-3 py-2">
-                    {index + 1}. {item}
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
-              <div className="font-medium text-slate-900">Upload limits</div>
-              <div className="mt-2 space-y-1">
-                <p>CSV: up to {guidePayload.guide.constraints.csv_max_size_mb} MB</p>
-                <p>
-                  Image ZIP: up to{" "}
-                  {guidePayload.guide.constraints.image_archive_max_size_mb} MB
-                </p>
-                <p>{guidePayload.guide.constraints.grouping_rule}</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Field Guide</CardTitle>
-          <CardDescription>
-            The backend owns the import contract. Keep headers unchanged and use
-            existing category, attribute, and attribute-value data already
-            present in Bazarify.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[360px] rounded-md border">
-            <div className="divide-y">
-              {guidePayload.guide.fields.map((field) => (
-                <div
-                  key={field.key}
-                  className="grid gap-3 p-4 md:grid-cols-[220px_1fr]"
-                >
-                  <div className="space-y-1">
-                    <div className="font-medium">{field.label}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {field.key}
-                    </div>
-                    <span
-                      className={cn(
-                        "inline-flex rounded-full px-2 py-1 text-xs font-medium",
-                        field.required
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground",
-                      )}
-                    >
-                      {field.required ? "Required" : "Optional"}
-                    </span>
-                  </div>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>{field.description}</p>
-                    {field.example ? (
-                      <div className="rounded-md border bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700">
-                        {field.example}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
-
-      <Card className={!eligibility.can_initiate ? "border-destructive" : undefined}>
-        <CardHeader>
-          <CardTitle>Eligibility</CardTitle>
-          <CardDescription>
-            Bulk import cannot bypass the existing store and category authority
-            model.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {eligibility.actor_type === "vendor" && eligibility.target_store ? (
-            <div className="rounded-md border bg-slate-50 p-4 text-sm text-slate-700">
-              <div className="font-medium text-slate-900">
-                {eligibility.target_store.name}
-              </div>
-              <div className="mt-2 space-y-1">
-                <p>Slug: {eligibility.target_store.slug}</p>
-                <p>
-                  Sellable assigned categories:{" "}
-                  {eligibility.target_store.sellable_category_count}
-                </p>
-                <p>
-                  Product authoring ready:{" "}
-                  {eligibility.target_store.product_authoring_ready ? "Yes" : "No"}
-                </p>
-              </div>
-            </div>
-          ) : null}
-
+        <CardContent className="space-y-5">
           {eligibility.target_store_required ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label>Target Store</Label>
-              <div className="flex gap-3">
-                <Popover
-                  open={isStorePickerOpen}
-                  onOpenChange={setIsStorePickerOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-between",
-                        storeError && "border-destructive",
-                      )}
-                    >
-                      <span className="truncate">{selectedStoreLabel}</span>
-                      <ChevronsUpDown className="ml-2 h-4 w-4 opacity-60" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[420px] p-0" align="start">
-                    <Command shouldFilter={false}>
-                      <div className="flex items-center gap-2 border-b p-2">
-                        <CommandInput
-                          placeholder="Search stores..."
-                          value={storeSearch}
-                          onValueChange={setStoreSearch}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleStoreSearch}
-                          disabled={isSearchingStores}
-                        >
-                          {isSearchingStores ? "Searching..." : "Search"}
-                        </Button>
-                      </div>
-                      <CommandList>
-                        <CommandEmpty>No stores found.</CommandEmpty>
-                        <CommandGroup>
-                          {storeOptions.map((store) => (
-                            <CommandItem
-                              key={store.uuid}
-                              value={store.name}
-                              disabled={!store.product_authoring_ready}
-                              onSelect={() => {
-                                setSelectedStoreUuid(store.uuid);
-                                setSelectedStoreName(store.name);
-                                clearFieldError("store_uuid");
-                                setIsStorePickerOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedStoreUuid === store.uuid
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              <div className="flex flex-col">
-                                <span>{store.name}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {store.slug} ·{" "}
-                                  {store.sellable_category_count} sellable categories
-                                  {!store.product_authoring_ready
-                                    ? " · not ready"
-                                    : ""}
-                                </span>
-                              </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <Popover open={isStorePickerOpen} onOpenChange={setIsStorePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-between",
+                      storeError && "border-destructive",
+                    )}
+                  >
+                    <span className="truncate">{selectedStoreLabel}</span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-60" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[420px] p-0" align="start">
+                  <Command shouldFilter={false}>
+                    <div className="flex items-center gap-2 border-b p-2">
+                      <CommandInput
+                        placeholder="Search stores..."
+                        value={storeSearch}
+                        onValueChange={setStoreSearch}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleStoreSearch}
+                        disabled={isSearchingStores}
+                      >
+                        {isSearchingStores ? "Searching..." : "Search"}
+                      </Button>
+                    </div>
+                    <CommandList>
+                      <CommandEmpty>No stores found.</CommandEmpty>
+                      <CommandGroup>
+                        {storeOptions.map((store) => (
+                          <CommandItem
+                            key={store.uuid}
+                            value={store.name}
+                            disabled={!store.product_authoring_ready}
+                            onSelect={() => {
+                              setSelectedStoreUuid(store.uuid);
+                              setSelectedStoreName(store.name);
+                              clearFieldError("store_uuid");
+                              setIsStorePickerOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedStoreUuid === store.uuid
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span>{store.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {store.slug} ·{" "}
+                                {store.sellable_category_count} sellable categories
+                                {!store.product_authoring_ready
+                                  ? " · not ready"
+                                  : ""}
+                              </span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {storeError ? (
                 <p className="text-sm text-destructive">{storeError}</p>
               ) : initialStoreOptionsError ? (
                 <p className="text-sm text-destructive">{initialStoreOptionsError}</p>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Only stores with sellable assigned categories are valid import
-                  targets.
+                <p className="text-xs text-muted-foreground">
+                  Only stores with sellable assigned categories are valid import targets.
                 </p>
               )}
+            </div>
+          ) : vendorTargetStore ? (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border bg-muted/30 px-3 py-2 text-sm">
+              <span className="font-medium">{vendorTargetStore.name}</span>
+              <span className="text-muted-foreground">{vendorTargetStore.slug}</span>
+              <span className="text-muted-foreground">
+                · {vendorTargetStore.sellable_category_count} sellable categories
+              </span>
+              <span
+                className={cn(
+                  "text-xs",
+                  vendorTargetStore.product_authoring_ready
+                    ? "text-emerald-600"
+                    : "text-destructive",
+                )}
+              >
+                {vendorTargetStore.product_authoring_ready
+                  ? "· ready"
+                  : "· not ready"}
+              </span>
             </div>
           ) : null}
 
           {uploadBlockedReason ? (
-            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-              <div className="font-medium">{uploadBlockedReason.message}</div>
-              <div className="mt-3">
-                {uploadBlockedReason.code === "store_required" ? (
-                  <Button asChild variant="outline">
-                    <Link href={buildStoreRequirementPath("/products/imports/new")}>
-                      Create Your Store
-                    </Link>
-                  </Button>
-                ) : uploadBlockedReason.code === "store_not_ready" ? (
-                  <Button asChild variant="outline">
-                    <Link href={buildStoreRemediationPath("/products/imports/new")}>
-                      Fix Store Readiness
-                    </Link>
-                  </Button>
-                ) : null}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              <span className="font-medium">{uploadBlockedReason.message}</span>
+              {uploadBlockedReason.code === "store_required" ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={buildStoreRequirementPath("/products/imports/new")}>
+                    Create Your Store
+                  </Link>
+                </Button>
+              ) : uploadBlockedReason.code === "store_not_ready" ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={buildStoreRemediationPath("/products/imports/new")}>
+                    Fix Store Readiness
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="space-y-1">
+              <div className="font-medium">
+                One <code className="rounded bg-amber-100 px-1">import_key</code> = one product
+              </div>
+              <div className="text-xs">
+                Rows sharing the same <code className="rounded bg-amber-100 px-1">import_key</code> describe
+                variants of a single product and must (a) stay contiguous in the CSV and
+                (b) keep these <strong>product-level columns identical</strong> on every row:
+                {" "}
+                <code className="rounded bg-amber-100 px-1">category_slug</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">name</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">description</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">highlights</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">box_items</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">base_price</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">product_sku</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">product_image_filenames</code>,
+                {" "}<code className="rounded bg-amber-100 px-1">specifications_json</code>.
+                {" "}Only the <code className="rounded bg-amber-100 px-1">variant_*</code> columns
+                should differ between rows.
               </div>
             </div>
-          ) : (
-            <div className="rounded-md border bg-primary/5 p-4 text-sm text-foreground">
-              Import can start once your CSV package is uploaded. Validation
-              will stop unknown categories, attribute values, image filenames,
-              and malformed variant combinations before any product write
-              occurs.
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Upload Package</CardTitle>
-          <CardDescription>
-            After upload you will be redirected to the import detail page where
-            you can validate and process rows.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid gap-5 lg:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="product-import-csv">CSV File</Label>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="product-import-csv">
+                CSV File{" "}
+                <span className="text-xs text-muted-foreground">
+                  (≤ {guidePayload.guide.constraints.csv_max_size_mb} MB)
+                </span>
+              </Label>
               <Input
                 id="product-import-csv"
                 type="file"
@@ -517,17 +427,21 @@ export default function ProductImportUploadForm({
                 disabled={!eligibility.can_initiate}
               />
               {csvError ? (
-                <p className="text-sm text-destructive">{csvError}</p>
+                <p className="text-xs text-destructive">{csvError}</p>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Use the downloaded sample template and keep the header order
-                  intact.
+                <p className="text-xs text-muted-foreground">
+                  Keep the template headers unchanged.
                 </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="product-import-zip">Image ZIP (optional)</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="product-import-zip">
+                Image ZIP{" "}
+                <span className="text-xs text-muted-foreground">
+                  (≤ {guidePayload.guide.constraints.image_archive_max_size_mb} MB, optional)
+                </span>
+              </Label>
               <Input
                 id="product-import-zip"
                 type="file"
@@ -540,17 +454,20 @@ export default function ProductImportUploadForm({
                 disabled={!eligibility.can_initiate}
               />
               {imageArchiveError ? (
-                <p className="text-sm text-destructive">{imageArchiveError}</p>
+                <p className="text-xs text-destructive">{imageArchiveError}</p>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Required only when the CSV references product or variant
-                  image filenames.
+                <p className="text-xs text-muted-foreground">
+                  Required when the CSV references image filenames.
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              Validation runs before any product write. Unknown categories,
+              attributes, or image filenames are rejected.
+            </p>
             <Button
               type="button"
               onClick={handleUpload}
@@ -560,6 +477,167 @@ export default function ProductImportUploadForm({
               {isPending ? "Uploading..." : "Upload Package"}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-2 sm:p-3">
+          <Tabs defaultValue="grouping">
+            <TabsList className="w-full justify-start overflow-x-auto">
+              <TabsTrigger value="grouping">Grouping Rules</TabsTrigger>
+              <TabsTrigger value="prerequisites">Prerequisites</TabsTrigger>
+              <TabsTrigger value="workflow">Workflow</TabsTrigger>
+              <TabsTrigger value="images">Image Rules</TabsTrigger>
+              <TabsTrigger value="fields">Field Guide</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="grouping" className="mt-3">
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start gap-2 rounded-md border bg-muted/30 px-3 py-2">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    {guidePayload.guide.constraints.grouping_rule}
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-md border p-3">
+                    <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Must be identical across rows
+                    </div>
+                    <ul className="mt-2 flex flex-wrap gap-1.5">
+                      {[
+                        "category_slug",
+                        "name",
+                        "description",
+                        "highlights",
+                        "box_items",
+                        "base_price",
+                        "product_sku",
+                        "product_image_filenames",
+                        "specifications_json",
+                      ].map((col) => (
+                        <li
+                          key={col}
+                          className="rounded bg-muted px-2 py-0.5 font-mono text-xs"
+                        >
+                          {col}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Should differ per row (variant-level)
+                    </div>
+                    <ul className="mt-2 flex flex-wrap gap-1.5">
+                      {[
+                        "variant_sku",
+                        "variant_price",
+                        "variant_stock",
+                        "variant_available",
+                        "variant_image_filenames",
+                        "variant_attributes_json",
+                      ].map((col) => (
+                        <li
+                          key={col}
+                          className="rounded bg-muted px-2 py-0.5 font-mono text-xs"
+                        >
+                          {col}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Tip: to add more variants, copy the first row for that product and only change the{" "}
+                  <code className="rounded bg-muted px-1 font-mono">variant_*</code> columns. Changing
+                  any product-level column between rows sharing the same{" "}
+                  <code className="rounded bg-muted px-1 font-mono">import_key</code> rejects the whole
+                  group.
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="prerequisites" className="mt-3">
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                {guidePayload.guide.prerequisites.map((item) => (
+                  <li
+                    key={item}
+                    className="rounded-md border bg-muted/30 px-3 py-1.5"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </TabsContent>
+
+            <TabsContent value="workflow" className="mt-3">
+              <ol className="space-y-1.5 text-sm text-muted-foreground">
+                {guidePayload.guide.workflow_steps.map((item, index) => (
+                  <li
+                    key={item}
+                    className="rounded-md border bg-muted/30 px-3 py-1.5"
+                  >
+                    <span className="mr-2 font-medium text-foreground">
+                      {index + 1}.
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            </TabsContent>
+
+            <TabsContent value="images" className="mt-3">
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                {guidePayload.guide.image_rules.map((item) => (
+                  <li
+                    key={item}
+                    className="rounded-md border bg-muted/30 px-3 py-1.5"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </TabsContent>
+
+            <TabsContent value="fields" className="mt-3">
+              <ScrollArea className="h-[320px] rounded-md border">
+                <div className="divide-y">
+                  {guidePayload.guide.fields.map((field) => (
+                    <div
+                      key={field.key}
+                      className="grid gap-2 p-3 md:grid-cols-[200px_1fr]"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{field.label}</span>
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {field.key}
+                        </span>
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
+                            field.required
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {field.required ? "Required" : "Optional"}
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-sm text-muted-foreground">
+                        <p>{field.description}</p>
+                        {field.example ? (
+                          <div className="rounded border bg-muted/30 px-2 py-1 font-mono text-xs text-foreground">
+                            {field.example}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
