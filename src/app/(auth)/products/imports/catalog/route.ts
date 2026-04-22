@@ -33,18 +33,21 @@ export async function GET(request: NextRequest) {
       cache: "no-store",
     });
 
-    if (!upstream.ok || upstream.body === null) {
+    if (!upstream.ok) {
       return NextResponse.json(
         { error: "Unable to download the product import catalog." },
         { status: upstream.status >= 400 ? upstream.status : 502 },
       );
     }
 
-    return new NextResponse(upstream.body, {
+    const buffer = await upstream.arrayBuffer();
+
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type":
           upstream.headers.get("content-type") ?? "application/zip",
+        "Content-Length": String(buffer.byteLength),
         "Content-Disposition":
           upstream.headers.get("content-disposition") ??
           `attachment; filename="product-import-catalog.zip"`,
