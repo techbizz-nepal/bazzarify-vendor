@@ -13,6 +13,7 @@ import SidebarMenuButtonComponent from "@/modules/core/components/client/Sidebar
 import SidebarAccountMenu from "@/modules/core/components/client/SidebarAccountMenu";
 import SidebarMenuGroupComponent from "@/modules/core/components/client/SidebarMenuGroup";
 import { TMenuEntry } from "@/modules/core/data";
+import { cn } from "@/lib/utils";
 import { headers } from "next/headers";
 import Image from "next/image";
 import { FaHome, FaImage } from "react-icons/fa";
@@ -131,9 +132,11 @@ export async function AppSidebar({ className }: { className?: string }) {
   );
   const initials = getInitials(displayName);
   const roleSummary = formatRoleSummary(roleNames);
-  const hasSettingsAccess = roleNames.some(
-    (roleName) => roleName === "admin" || roleName === "super-admin",
-  );
+  const hasSettingsAccess =
+    !isVendor &&
+    roleNames.some(
+      (roleName) => roleName === "admin" || roleName === "super-admin",
+    );
   const storeName = sessionUser?.store?.name?.trim() || null;
   const hasStore = Boolean(sessionUser?.store);
   const hasBlockedStoreSetup =
@@ -160,73 +163,75 @@ export async function AppSidebar({ className }: { className?: string }) {
         : null;
 
   return (
-    <Sidebar className={className}>
-      <SidebarHeader className="p-4 pb-2">
-        <div className="rounded-2xl px-4 py-3">
-          <Image
-            src="/logo.png"
-            alt="logo"
-            width={342}
-            height={88}
-            priority={true}
-          />
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {entries.map((entry) => {
-                if (entry.type === "group") {
-                  const GroupIcon = entry.icon;
+    <div className={isVendor ? "sidebar-theme-vendor" : "sidebar-theme-admin"}>
+      <Sidebar className={cn(className)}>
+        <SidebarHeader className="p-4 pb-2">
+          <div className="rounded-2xl px-4 py-3">
+            <Image
+              src="/logo.png"
+              alt="logo"
+              width={342}
+              height={88}
+              priority={true}
+            />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {entries.map((entry) => {
+                  if (entry.type === "group") {
+                    const GroupIcon = entry.icon;
+                    return (
+                      <SidebarMenuGroupComponent
+                        key={entry.title}
+                        title={entry.title}
+                        pathMatch={entry.pathMatch}
+                        icon={<GroupIcon />}
+                        items={entry.children.map((child) => {
+                          const ChildIcon = child.icon;
+                          return {
+                            title: child.title,
+                            path: child.path,
+                            icon: <ChildIcon />,
+                          };
+                        })}
+                      />
+                    );
+                  }
                   return (
-                    <SidebarMenuGroupComponent
-                      key={entry.title}
-                      title={entry.title}
-                      pathMatch={entry.pathMatch}
-                      icon={<GroupIcon />}
-                      items={entry.children.map((child) => {
-                        const ChildIcon = child.icon;
-                        return {
-                          title: child.title,
-                          path: child.path,
-                          icon: <ChildIcon />,
-                        };
-                      })}
-                    />
+                    <SidebarMenuItem key={entry.title}>
+                      <SidebarMenuButtonComponent
+                        routePath={entry.path}
+                        title={entry.title}
+                      >
+                        <entry.icon />
+                      </SidebarMenuButtonComponent>
+                    </SidebarMenuItem>
                   );
-                }
-                return (
-                  <SidebarMenuItem key={entry.title}>
-                    <SidebarMenuButtonComponent
-                      routePath={entry.path}
-                      title={entry.title}
-                    >
-                      <entry.icon />
-                    </SidebarMenuButtonComponent>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      {sessionUser ? (
-        <SidebarFooter className="border-t border-sidebar-border bg-transparent p-4">
-          <SidebarAccountMenu
-            initials={initials}
-            displayName={displayName}
-            secondaryText={secondaryText}
-            email={sessionUser.email}
-            roleSummary={roleSummary}
-            identitySummary={identitySummary}
-            settingsHref={
-              hasSettingsAccess ? "/settings/store-onboarding" : null
-            }
-            storeAction={storeAction}
-          />
-        </SidebarFooter>
-      ) : null}
-    </Sidebar>
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        {sessionUser ? (
+          <SidebarFooter className="border-t border-sidebar-border bg-transparent p-4">
+            <SidebarAccountMenu
+              initials={initials}
+              displayName={displayName}
+              secondaryText={secondaryText}
+              email={sessionUser.email}
+              roleSummary={roleSummary}
+              identitySummary={identitySummary}
+              settingsHref={
+                hasSettingsAccess ? "/settings/store-onboarding" : null
+              }
+              storeAction={storeAction}
+            />
+          </SidebarFooter>
+        ) : null}
+      </Sidebar>
+    </div>
   );
 }

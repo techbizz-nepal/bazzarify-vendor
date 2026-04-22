@@ -139,6 +139,24 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .sidebar-theme-admin {
+    --sidebar: oklch(0.654 0.199 36.943);
+    --sidebar-foreground: oklch(0.985 0.001 106.423);
+    --sidebar-primary: oklch(0.654 0.199 36.943);
+    --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
+    --sidebar-border: oklch(1 0 0 / 12%);
+    --sidebar-ring: oklch(0.985 0.001 106.423);
+  }
+
+  .sidebar-theme-vendor {
+    --sidebar: oklch(1 0 0);
+    --sidebar-foreground: oklch(0.147 0.004 49.25);
+    --sidebar-primary: oklch(1 0 0);
+    --sidebar-primary-foreground: oklch(0.147 0.004 49.25);
+    --sidebar-border: oklch(0.923 0.003 48.717);
+    --sidebar-ring: oklch(0.709 0.01 56.259);
+  }
 }
 
 @keyframes collapsible-down {
