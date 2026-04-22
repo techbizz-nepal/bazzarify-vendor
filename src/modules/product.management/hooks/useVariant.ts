@@ -5,7 +5,8 @@ import {
 } from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { createVariantDraftKey } from "@/modules/product.management/utils/variantDraft";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 interface useVariantProps {
   variantSelections: Record<string, string[]>;
@@ -16,9 +17,23 @@ interface useVariantProps {
     combo: string[],
     url: string,
   ) => Promise<boolean>;
+  /**
+   * Per-product attribute dimension cap. Create = MAX_ATTRIBUTE_DIMENSIONS
+   * (hard 3). Edit = max(MAX_ATTRIBUTE_DIMENSIONS, initialActiveAttrs) so
+   * legacy products over the cap stay editable (grandfather clause) but
+   * cannot grow further.
+   */
+  attributeCap?: number;
 }
 
-const EMPTY_VARIANT_SEED: TVariant = {
+export interface VariantRow {
+  rowId: string;
+  combo: string[];
+  comboKey: string;
+  uuid?: string;
+}
+
+export const EMPTY_VARIANT_SEED: TVariant = {
   name: "",
   stock: "",
   price: "",
@@ -26,6 +41,8 @@ const EMPTY_VARIANT_SEED: TVariant = {
   images: [],
   isValid: false,
 };
+
+export const MAX_ATTRIBUTE_DIMENSIONS = 3;
 
 const parseComboKey = (key: string): string[] => {
   try {
@@ -48,25 +65,143 @@ const buildCartesian = (
     [[]],
   );
 
+const generateTmpRowId = () => `tmp-${uuidv4()}`;
+
 export default function useVariant({
   variantSelections,
   setVariantSelections,
   onExistingVariantImageRemove,
+  attributeCap = MAX_ATTRIBUTE_DIMENSIONS,
 }: useVariantProps) {
+  const effectiveCap = Math.max(MAX_ATTRIBUTE_DIMENSIONS, attributeCap);
   const [columns, setColumns] = useState<string[]>([]);
   const [variantData, setVariantData] = useState<TVariantDataMap>({});
+  const [removedVariantUuids, setRemovedVariantUuids] = useState<string[]>([]);
 
-  // Variants grid rows are driven by the actual entries in `variantData`, not by
-  // a synthetic cartesian product of selected attribute values. This guarantees
-  // sparse matrices (e.g. bulk-imported products with only a subset of combos)
-  // render exactly the variants that exist, without fabricated empty duplicates.
-  const combinations = useMemo<string[][]>(
-    () =>
-      Object.keys(variantData)
-        .map(parseComboKey)
-        .filter((combo) => combo.length > 0),
-    [variantData],
+  // Stable row-id allocations keyed by comboKey. Persists across attribute
+  // toggles so a tmp row keeps its identity (and thus its refs / images /
+  // field state) even when other dimensions change shape.
+  const rowIdsRef = useRef<Record<string, string>>({});
+
+  const getRowId = useCallback(
+    (comboKey: string, uuid: string | undefined): string => {
+      if (uuid) {
+        return uuid;
+      }
+      let id = rowIdsRef.current[comboKey];
+      if (!id) {
+        id = generateTmpRowId();
+        rowIdsRef.current[comboKey] = id;
+      }
+      return id;
+    },
+    [],
   );
+
+  // Grid rows derive from actual entries in `variantData`, never from a
+  // synthetic cartesian product of selections. See Variant Editor Parity
+  // invariant. Row identity is UUID (server) or stable tmp-id (session).
+  const rows = useMemo<VariantRow[]>(() => {
+    const result: VariantRow[] = [];
+    for (const comboKey of Object.keys(variantData)) {
+      const combo = parseComboKey(comboKey);
+      if (combo.length === 0) continue;
+      const uuid = variantData[comboKey]?.uuid;
+      const row: VariantRow = {
+        rowId: getRowId(comboKey, uuid),
+        combo,
+        comboKey,
+      };
+      if (uuid) row.uuid = uuid;
+      result.push(row);
+    }
+    return result;
+  }, [getRowId, variantData]);
+
+  const combinations = useMemo<string[][]>(
+    () => rows.map((row) => row.combo),
+    [rows],
+  );
+
+  const addVariant = useCallback((combo: string[]) => {
+    const cleanCombo = combo.map((v) => (v ?? "").toString());
+    if (cleanCombo.some((v) => v.trim() === "")) {
+      return;
+    }
+    const key = createVariantDraftKey(cleanCombo);
+    setVariantData((prev) => {
+      if (prev[key]) {
+        return prev;
+      }
+      return { ...prev, [key]: { ...EMPTY_VARIANT_SEED } };
+    });
+  }, []);
+
+  const generateMissingCombinations = useCallback(() => {
+    const activeColumns = columns.filter(
+      (col) => (variantSelections[col] || []).length > 0,
+    );
+    if (activeColumns.length === 0) return;
+    const cartesian = buildCartesian(activeColumns, variantSelections);
+    setVariantData((prev) => {
+      const next = { ...prev };
+      for (const combo of cartesian) {
+        if (combo.length === 0) continue;
+        const key = createVariantDraftKey(combo);
+        if (!next[key]) {
+          next[key] = { ...EMPTY_VARIANT_SEED };
+        }
+      }
+      return next;
+    });
+  }, [columns, variantSelections]);
+
+  const deleteRow = useCallback((rowId: string) => {
+    setVariantData((prev) => {
+      const next: TVariantDataMap = {};
+      let removedUuid: string | undefined;
+      let removedKey: string | undefined;
+      for (const [key, data] of Object.entries(prev)) {
+        const candidateRowId = data.uuid ?? rowIdsRef.current[key];
+        if (candidateRowId === rowId) {
+          removedUuid = data.uuid;
+          removedKey = key;
+          continue;
+        }
+        next[key] = data;
+      }
+      if (removedKey) {
+        delete rowIdsRef.current[removedKey];
+      }
+      if (removedUuid) {
+        setRemovedVariantUuids((ids) =>
+          ids.includes(removedUuid!) ? ids : [...ids, removedUuid!],
+        );
+      }
+      return next;
+    });
+  }, []);
+
+  const bulkApply = useCallback(
+    (rowIds: string[], patch: Partial<Pick<TVariant, "price" | "stock" | "available">>) => {
+      if (rowIds.length === 0) return;
+      const rowIdSet = new Set(rowIds);
+      setVariantData((prev) => {
+        const next: TVariantDataMap = { ...prev };
+        for (const [key, data] of Object.entries(prev)) {
+          const candidateRowId = data.uuid ?? rowIdsRef.current[key];
+          if (!candidateRowId || !rowIdSet.has(candidateRowId)) continue;
+          next[key] = { ...data, ...patch };
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
+  const resetRemovedVariantUuids = useCallback(() => {
+    setRemovedVariantUuids([]);
+  }, []);
 
   const applyToggle = useCallback(
     (attribute: string, value: string) => {
@@ -88,6 +223,18 @@ export default function useVariant({
         (attr) => nextSelections[attr].length > 0,
       );
 
+      // Enforce attribute dimension cap only when adding a brand-new dimension.
+      // Create mode uses the hard MAX_ATTRIBUTE_DIMENSIONS; edit mode may
+      // receive a higher `attributeCap` for legacy products over the limit so
+      // they remain editable (grandfather clause) but cannot grow further.
+      if (
+        isAdding &&
+        !prevActiveAttrs.includes(attribute) &&
+        prevActiveAttrs.length >= effectiveCap
+      ) {
+        return { ok: false as const, reason: "cap" as const };
+      }
+
       const nextColumns = columns
         .filter((col) => nextActiveAttrs.includes(col))
         .concat(nextActiveAttrs.filter((col) => !columns.includes(col)));
@@ -96,6 +243,7 @@ export default function useVariant({
         prevActiveAttrs.length !== nextActiveAttrs.length;
 
       let nextVariantData: TVariantDataMap;
+      const removedUuids: string[] = [];
 
       if (dimensionChanged || Object.keys(variantData).length === 0) {
         const cartesian = buildCartesian(nextColumns, nextSelections);
@@ -104,6 +252,16 @@ export default function useVariant({
           if (combo.length === 0) continue;
           const key = createVariantDraftKey(combo);
           nextVariantData[key] = variantData[key] ?? { ...EMPTY_VARIANT_SEED };
+        }
+        // A dimension transition can only happen for going from 0 actives to
+        // 1 (bootstrap) or from 1 to 0 (teardown). In the teardown case all
+        // pre-existing rows are discarded; collect their uuids.
+        if (!isAdding) {
+          for (const [key, data] of Object.entries(variantData)) {
+            if (!nextVariantData[key] && data.uuid) {
+              removedUuids.push(data.uuid);
+            }
+          }
         }
       } else if (isAdding) {
         const attrIdx = nextColumns.indexOf(attribute);
@@ -125,6 +283,8 @@ export default function useVariant({
           const combo = parseComboKey(key);
           if (attrIdx < 0 || combo[attrIdx] !== value) {
             nextVariantData[key] = data;
+          } else if (data.uuid) {
+            removedUuids.push(data.uuid);
           }
         }
       }
@@ -132,22 +292,30 @@ export default function useVariant({
       setVariantSelections(nextSelections);
       setColumns(nextColumns);
       setVariantData(nextVariantData);
+      if (removedUuids.length > 0) {
+        setRemovedVariantUuids((prev) => {
+          const next = [...prev];
+          for (const uuid of removedUuids) {
+            if (!next.includes(uuid)) next.push(uuid);
+          }
+          return next;
+        });
+      }
+      return { ok: true as const };
     },
-    [columns, setVariantSelections, variantData, variantSelections],
+    [columns, effectiveCap, setVariantSelections, variantData, variantSelections],
   );
 
   const toggleValue = useCallback(
-    (attribute: string, value: string) => {
-      applyToggle(attribute, value);
-    },
+    (attribute: string, value: string) => applyToggle(attribute, value),
     [applyToggle],
   );
 
   const removeValue = useCallback(
     (attribute: string, value: string) => {
       const currentAttrValues = variantSelections[attribute] || [];
-      if (!currentAttrValues.includes(value)) return;
-      applyToggle(attribute, value);
+      if (!currentAttrValues.includes(value)) return { ok: false as const };
+      return applyToggle(attribute, value);
     },
     [applyToggle, variantSelections],
   );
@@ -210,10 +378,26 @@ export default function useVariant({
     setColumns(newOrder);
   };
 
+  const variantCountByValue = useMemo<
+    Record<string, Record<string, number>>
+  >(() => {
+    const map: Record<string, Record<string, number>> = {};
+    for (const row of rows) {
+      columns.forEach((col, idx) => {
+        const val = row.combo[idx];
+        if (!val) return;
+        if (!map[col]) map[col] = {};
+        map[col][val] = (map[col][val] ?? 0) + 1;
+      });
+    }
+    return map;
+  }, [columns, rows]);
+
   return {
     toggleValue,
     removeValue,
     combinations,
+    rows,
     variantData,
     handleVariantChange,
     handleImageUpload,
@@ -222,5 +406,13 @@ export default function useVariant({
     handleReorderColumns,
     setVariantData,
     setColumns,
+    addVariant,
+    generateMissingCombinations,
+    deleteRow,
+    bulkApply,
+    removedVariantUuids,
+    resetRemovedVariantUuids,
+    variantCountByValue,
+    attributeCap: effectiveCap,
   };
 }

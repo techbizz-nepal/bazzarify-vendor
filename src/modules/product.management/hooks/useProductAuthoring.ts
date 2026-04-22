@@ -70,6 +70,7 @@ export default function useProductAuthoring({
   const [variantImageIdMap, setVariantImageIdMap] = useState<
     Record<string, Record<string, string>>
   >({});
+  const [legacyAttributeCount, setLegacyAttributeCount] = useState<number>(0);
   const [submissionFeedback, setSubmissionFeedback] = useState<{
     summary: string;
     fieldErrors: Record<string, string[]>;
@@ -108,6 +109,8 @@ export default function useProductAuthoring({
   const variant = useVariant({
     variantSelections,
     setVariantSelections,
+    attributeCap:
+      mode === "update" ? Math.max(3, legacyAttributeCount) : 3,
     onExistingVariantImageRemove: async (combo, url) => {
       const key = createVariantDraftKey(combo);
       const uuid = variantImageIdMap[key]?.[url];
@@ -130,6 +133,7 @@ export default function useProductAuthoring({
     setRemovedVariantImageUuids({});
     variant.setVariantData({});
     variant.setColumns([]);
+    variant.resetRemovedVariantUuids();
   };
 
   const categoryChangeNeedsResetConfirmation = () =>
@@ -283,6 +287,7 @@ export default function useProductAuthoring({
       setVariantSelections,
       setColumns: variant.setColumns,
       setVariantImageIdMap,
+      setLegacyAttributeCount,
     });
   }, [
     category.setCategorySpecifications,
@@ -405,6 +410,13 @@ export default function useProductAuthoring({
           submission.formData.append(`removed_product_image_uuids[${index}]`, uuid);
         });
 
+        variant.removedVariantUuids.forEach((uuid, index) => {
+          submission.formData.append(
+            `removed_variant_uuids[${index}]`,
+            uuid,
+          );
+        });
+
         variant.combinations.forEach((combo, index) => {
           const key = createVariantDraftKey(combo);
           (removedVariantImageUuids[key] || []).forEach((uuid, removeIndex) => {
@@ -485,10 +497,13 @@ export default function useProductAuthoring({
       toggleValue: variant.toggleValue,
       removeValue: variant.removeValue,
       variantSelections,
+      attributeCap: variant.attributeCap,
+      variantCountByValue: variant.variantCountByValue,
     },
     variantState: {
       setVariantSelections,
       combinations: variant.combinations,
+      rows: variant.rows,
       variantData: variant.variantData,
       hasPendingExistingImageRemovals: Object.values(
         removedVariantImageUuids,
@@ -498,6 +513,11 @@ export default function useProductAuthoring({
       handleImageRemove: variant.handleImageRemove,
       columns: variant.columns,
       handleReorderColumns: variant.handleReorderColumns,
+      addVariant: variant.addVariant,
+      generateMissingCombinations: variant.generateMissingCombinations,
+      deleteRow: variant.deleteRow,
+      bulkApply: variant.bulkApply,
+      removedVariantUuids: variant.removedVariantUuids,
     },
     submissionState: {
       feedback: submissionFeedback,
@@ -526,6 +546,7 @@ interface HydrateEditProductArgs {
   setVariantImageIdMap: (
     value: Record<string, Record<string, string>>,
   ) => void;
+  setLegacyAttributeCount: Dispatch<SetStateAction<number>>;
 }
 
 function hydrateEditProduct({
@@ -545,6 +566,7 @@ function hydrateEditProduct({
   setVariantSelections,
   setColumns,
   setVariantImageIdMap,
+  setLegacyAttributeCount,
 }: HydrateEditProductArgs) {
   const { product } = editProductPayload;
   const imageUrls: string[] = [];
@@ -621,6 +643,16 @@ function hydrateEditProduct({
     selectedProductVariants: product.variants,
     categoryAttributes,
   });
+
+  const distinctAttributeUuids = new Set<string>();
+  product.variants.forEach((existingVariant) => {
+    existingVariant.attributes?.forEach((attr) => {
+      if (attr.attribute?.uuid) {
+        distinctAttributeUuids.add(attr.attribute.uuid);
+      }
+    });
+  });
+  setLegacyAttributeCount(distinctAttributeUuids.size);
 
   const nextVariantImageIdMap: Record<string, Record<string, string>> = {};
   product.variants.forEach((existingVariant) => {

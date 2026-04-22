@@ -248,15 +248,7 @@ function CreateContent({
               <ProductVariant
                 feedback={feedback}
                 selectorState={selectorState}
-                variantState={{
-                  setVariantSelections: variantState.setVariantSelections,
-                  combinations: variantState.combinations,
-                  variantData: variantState.variantData,
-                  handleVariantChange: variantState.handleVariantChange,
-                  handleImageUpload: variantState.handleImageUpload,
-                  handleImageRemove: variantState.handleImageRemove,
-                  columns: variantState.columns,
-                }}
+                variantState={variantState}
               />
             </ProductCard>
           )}

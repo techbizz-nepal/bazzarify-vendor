@@ -299,15 +299,29 @@ export interface IPaginatedData<T> {
   to: 15;
 }
 
+export type VariantToggleResult =
+  | { ok: true }
+  | { ok: false; reason?: "cap" };
+
+export interface VariantRow {
+  rowId: string;
+  combo: string[];
+  comboKey: string;
+  uuid?: string;
+}
+
 export interface VariantSelectorState {
   attributes: TAttribute[];
   variantSelections: Record<string, string[]>;
-  toggleValue: (attribute: string, value: string) => void;
-  removeValue: (attribute: string, value: string) => void;
+  toggleValue: (attribute: string, value: string) => VariantToggleResult;
+  removeValue: (attribute: string, value: string) => VariantToggleResult;
+  attributeCap: number;
+  variantCountByValue: Record<string, Record<string, number>>;
 }
 export interface VariantState {
   setVariantSelections: Dispatch<SetStateAction<Record<string, string[]>>>;
   combinations: string[][];
+  rows: VariantRow[];
   variantData: TVariantDataMap;
   hasPendingExistingImageRemovals?: boolean;
   handleVariantChange: <K extends keyof TVariant>(
@@ -319,6 +333,14 @@ export interface VariantState {
   handleImageRemove: (combo: string[], image: File | string | TImage) => void;
   columns: string[];
   handleReorderColumns?: (newOrder: string[]) => void;
+  addVariant: (combo: string[]) => void;
+  generateMissingCombinations: () => void;
+  deleteRow: (rowId: string) => void;
+  bulkApply: (
+    rowIds: string[],
+    patch: Partial<Pick<TVariant, "price" | "stock" | "available">>,
+  ) => void;
+  removedVariantUuids: string[];
 }
 
 export interface ProductSubmissionFeedback {
