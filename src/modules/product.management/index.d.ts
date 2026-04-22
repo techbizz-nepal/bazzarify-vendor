@@ -239,6 +239,15 @@ export type TProductImportTargetStorePayload = {
   stores: TProductImportTargetStore[];
 };
 
+export type TProductStoreFilterOption = {
+  value: string;
+  label: string;
+};
+
+export type TProductStoreFilterOptionPayload = {
+  options: TProductStoreFilterOption[];
+};
+
 export type TProductImportTableFilter = {
   type?: string;
   key: string;

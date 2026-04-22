@@ -19,6 +19,13 @@ export async function requireVendorStoreGuard(returnTo: string): Promise<void> {
     return;
   }
 
+  const isAdmin = authUser.roles.some(
+    (role) => role.name === "super-admin" || role.name === "admin",
+  );
+  if (isAdmin) {
+    return;
+  }
+
   if (!authUser.store) {
     redirect(buildStoreRequirementPath(returnTo));
   }

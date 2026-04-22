@@ -29,6 +29,16 @@ export const ServerDataTableFilterDefinitionSchema = z.discriminatedUnion(
       .strict(),
     z
       .object({
+        type: z.literal("async-select"),
+        key: z.string(),
+        label: z.string(),
+        placeholder: z.string().optional(),
+        source: z.string(),
+        selectedOption: ServerDataTableFilterOptionSchema.nullable().optional(),
+      })
+      .strict(),
+    z
+      .object({
         type: z.literal("date-range"),
         key: z.string(),
         label: z.string(),

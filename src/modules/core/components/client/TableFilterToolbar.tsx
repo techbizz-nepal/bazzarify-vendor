@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import AsyncFilterSelect from "@/modules/core/components/client/AsyncFilterSelect";
 import DateRangeFilter from "@/modules/core/components/client/DateRangeFilter";
 import {
   TServerDataTableFilterDefinition as FilterDefinition,
@@ -71,6 +72,17 @@ export default function TableFilterToolbar({
                   }}
                   maxMonths={filterDefinition.maxMonths}
                   disabled={isPending}
+                />
+              ) : filterDefinition.type === "async-select" ? (
+                <AsyncFilterSelect
+                  filterKey={filterDefinition.key}
+                  label={filterDefinition.label}
+                  placeholder={filterDefinition.placeholder}
+                  source={filterDefinition.source}
+                  value={filters[filterDefinition.key] ?? ""}
+                  selectedOption={filterDefinition.selectedOption}
+                  disabled={isPending}
+                  onChange={(value) => onFilterChange(filterDefinition.key, value)}
                 />
               ) : filterDefinition.type === "text" ? (
                 <Input

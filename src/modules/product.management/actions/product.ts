@@ -1,5 +1,6 @@
 "use server";
 
+import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { ApiResponse, IMetaData, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
@@ -8,9 +9,11 @@ import {
   TEditProductPayload,
   TProduct,
   TProductIndexPayload,
+  TProductStoreFilterOptionPayload,
   TShowProductPayload,
 } from "@/modules/product.management";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";
+import { ProductStoreFilterOptionPayloadSchema } from "@/modules/product.management/schemas/ProductFilterSchema";
 
 type ProductActionError = IMetaData & {
   details?: unknown;
@@ -45,6 +48,43 @@ export const actionGetProducts = async (
       return { error: responseData.metaData.error };
     }
     return responseData.data.payload;
+  } catch (error) {
+    return handleUnknownError(error);
+  }
+};
+
+export const actionGetProductStoreOptions = async (
+  search?: string,
+): Promise<TProductStoreFilterOptionPayload | IMetaData> => {
+  try {
+    const client = await authAxiosInstance();
+    const response = await client.get(
+      PRODUCT_MANAGEMENT_ROUTES.product.storeOptions.path,
+      {
+        params: search ? { search } : undefined,
+      },
+    );
+
+    const parsed = ApiResponseSchema(
+      ProductStoreFilterOptionPayloadSchema,
+    ).safeParse(response.data);
+
+    if (!parsed.success) {
+      throw new Error(
+        `Product store-options schema validation failed. ${parsed.error.message}`,
+      );
+    }
+
+    if (parsed.data.metaData.error || parsed.data.data.payload === null) {
+      return {
+        error:
+          typeof parsed.data.metaData.error === "string"
+            ? parsed.data.metaData.error
+            : "Unable to load stores.",
+      };
+    }
+
+    return parsed.data.data.payload;
   } catch (error) {
     return handleUnknownError(error);
   }
