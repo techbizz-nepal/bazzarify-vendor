@@ -6,7 +6,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -30,7 +29,6 @@ export type TSidebarGroupChild = {
 
 export type TSidebarGroupProps = {
   title: string;
-  defaultPath: string;
   pathMatch: string;
   icon: ReactNode;
   items: TSidebarGroupChild[];
@@ -52,7 +50,6 @@ function resolveActiveChildPath(
 
 export default function SidebarMenuGroupComponent({
   title,
-  defaultPath,
   pathMatch,
   icon,
   items,
@@ -74,23 +71,20 @@ export default function SidebarMenuGroupComponent({
       className="group/collapsible"
     >
       <SidebarMenuItem>
-        <SidebarMenuButton
-          asChild
-          tooltip={title}
-          className="py-6 font-medium hover:bg-sidebar-selected/15 hover:text-sidebar-foreground"
-        >
-          <Link href={defaultPath} onClick={() => setOpen(true)}>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton
+            tooltip={title}
+            isActive={groupActive}
+            aria-expanded={open}
+            className="py-6 font-medium hover:bg-sidebar-selected/15 hover:text-sidebar-foreground"
+          >
             {icon}
             <span>{title}</span>
-          </Link>
-        </SidebarMenuButton>
-        <CollapsibleTrigger asChild>
-          <SidebarMenuAction
-            aria-label={`Toggle ${title} section`}
-            className="inset-y-0 my-auto text-sidebar-foreground transition-transform duration-200 hover:bg-sidebar-selected/15 hover:text-sidebar-foreground data-[state=open]:rotate-90"
-          >
-            <ChevronRight />
-          </SidebarMenuAction>
+            <ChevronRight
+              aria-hidden
+              className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+            />
+          </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
           <SidebarMenuSub>

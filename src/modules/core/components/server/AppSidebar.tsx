@@ -124,7 +124,6 @@ export async function AppSidebar({ className }: { className?: string }) {
                     <SidebarMenuGroupComponent
                       key={entry.title}
                       title={entry.title}
-                      defaultPath={entry.defaultPath}
                       pathMatch={entry.pathMatch}
                       icon={<GroupIcon />}
                       items={entry.children.map((child) => {
