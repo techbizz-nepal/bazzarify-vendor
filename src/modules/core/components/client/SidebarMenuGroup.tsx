@@ -79,7 +79,7 @@ export default function SidebarMenuGroupComponent({
           tooltip={title}
           className="py-6 font-medium hover:bg-sidebar-selected/15 hover:text-sidebar-foreground"
         >
-          <Link href={defaultPath}>
+          <Link href={defaultPath} onClick={() => setOpen(true)}>
             {icon}
             <span>{title}</span>
           </Link>
@@ -87,7 +87,7 @@ export default function SidebarMenuGroupComponent({
         <CollapsibleTrigger asChild>
           <SidebarMenuAction
             aria-label={`Toggle ${title} section`}
-            className="top-3 text-sidebar-foreground transition-transform duration-200 hover:bg-sidebar-selected/15 hover:text-sidebar-foreground data-[state=open]:rotate-90"
+            className="inset-y-0 my-auto text-sidebar-foreground transition-transform duration-200 hover:bg-sidebar-selected/15 hover:text-sidebar-foreground data-[state=open]:rotate-90"
           >
             <ChevronRight />
           </SidebarMenuAction>
