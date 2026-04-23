@@ -11,7 +11,7 @@ export default function BackLinkButton({
   label,
 }: BackLinkButtonProps) {
   return (
-    <Button asChild variant="outline" size="sm">
+    <Button asChild size="sm">
       <Link href={href}>{label}</Link>
     </Button>
   );

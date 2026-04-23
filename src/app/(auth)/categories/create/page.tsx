@@ -1,27 +1,13 @@
 import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
-import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
 import Create from "@/modules/product.management/components/client/category/Create";
-import { redirect } from "next/navigation";
+import { requireAdminCategoryAccess } from "@/modules/product.management/utils/categoryAccess";
 
 export default async function CreateCategoryPage() {
-  const userUuid = await getSessionUserUUID(await getCookieStore());
-  const authUser = userUuid ? await getAuthUser(userUuid) : null;
-  const isAdmin =
-    authUser &&
-    typeof authUser === "object" &&
-    !("error" in authUser) &&
-    authUser.roles.some(
-      (role) => role.name === "super-admin" || role.name === "admin",
-    );
-
-  if (!isAdmin) {
-    redirect("/categories");
-  }
+  await requireAdminCategoryAccess("/products");
 
   const [categoryResponse, attributeResponse, specificationResponse] =
     await Promise.all([

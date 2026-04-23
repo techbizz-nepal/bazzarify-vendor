@@ -8,12 +8,12 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { getSessionUser } from "@/modules/auth/data/auth-service";
-import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
 import SidebarAccountMenu from "@/modules/core/components/client/SidebarAccountMenu";
+import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
 import SidebarMenuGroupComponent from "@/modules/core/components/client/SidebarMenuGroup";
 import { TMenuEntry } from "@/modules/core/data";
-import { cn } from "@/lib/utils";
 import { headers } from "next/headers";
 import Image from "next/image";
 import { FaHome, FaImage } from "react-icons/fa";
@@ -58,7 +58,6 @@ const adminNavigations: TMenuEntry[] = [
 
 const vendorNavigations: TMenuEntry[] = [
   { type: "link", title: "Dashboard", path: "/", icon: FaHome },
-  { type: "link", title: "Categories", path: "/categories", icon: TbCategory },
   productsGroup,
   { type: "link", title: "Sliders", path: "/sliders", icon: FaImage },
   { type: "link", title: "Orders", path: "/orders", icon: FaFirstOrder },

@@ -17,6 +17,10 @@ const category: IRoute["category"] = {
   update: {
     path: "/product-management/categories/:slug",
   },
+  image: {
+    path: "/product-management/categories/:slug/image",
+    method: "POST",
+  },
   viewParentRecursive: {
     path: "/product-management/categories/:slug/view-parent-recursive",
   },

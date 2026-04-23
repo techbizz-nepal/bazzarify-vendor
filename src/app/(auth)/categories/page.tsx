@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
-import { actionGetCategories } from "@/modules/product.management/actions/category";
 import { TCategory } from "@/modules/product.management";
-import { TableColumn } from "@/modules/core/components/client/DynamicTable";
-import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
-import { getCookieStore } from "@/modules/core/lib/utils.session";
+import { actionGetCategories } from "@/modules/product.management/actions/category";
+import { requireAdminCategoryAccess } from "@/modules/product.management/utils/categoryAccess";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa6";
 
@@ -22,15 +21,7 @@ export default async function CategoriesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const userUuid = await getSessionUserUUID(await getCookieStore());
-  const authUser = userUuid ? await getAuthUser(userUuid) : null;
-  const isAdmin =
-    authUser &&
-    typeof authUser === "object" &&
-    !("error" in authUser) &&
-    authUser.roles.some(
-      (role) => role.name === "super-admin" || role.name === "admin",
-    );
+  await requireAdminCategoryAccess("/products");
 
   const resolvedSearchParams = await searchParams;
   const flattenedParams = flattenSearchParams(resolvedSearchParams);
@@ -42,7 +33,9 @@ export default async function CategoriesPage({
   });
 
   const categories =
-    categoryResponse && typeof categoryResponse === "object" && "categories" in categoryResponse
+    categoryResponse &&
+    typeof categoryResponse === "object" &&
+    "categories" in categoryResponse
       ? categoryResponse.categories
       : null;
   const table =
@@ -58,14 +51,12 @@ export default async function CategoriesPage({
         title="Manage Categories"
         description="Manage categories with server-driven filters, pagination, and backend-owned query behavior."
         toolbarAction={
-          isAdmin ? (
-            <Button asChild size="sm">
-              <Link href="/categories/create">
-                <FaPlus className="mr-2" />
-                New Category
-              </Link>
-            </Button>
-          ) : null
+          <Button asChild size="sm">
+            <Link href="/categories/create">
+              <FaPlus className="mr-2" />
+              New Category
+            </Link>
+          </Button>
         }
         columns={categoryColumns}
         rows={categories?.data ?? []}
@@ -92,8 +83,9 @@ export default async function CategoriesPage({
         }}
         rowActions={[
           {
-            label: "Manage Schema",
+            label: "Edit",
             hrefTemplate: "/categories/:slug/view",
+            variant: "default",
           },
         ]}
       />

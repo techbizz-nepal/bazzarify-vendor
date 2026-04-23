@@ -1,6 +1,6 @@
-import type { SerializedEditorState } from "lexical";
 import type { TUser } from "@/modules/auth/domain/schemas/UserSchema";
 import type { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
+import type { SerializedEditorState } from "lexical";
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction } from "react";
 
 export type TSpecification = {
@@ -14,6 +14,10 @@ export type TCategory = {
   name: string;
   position?: string;
   slug: string;
+  image_base_path?: string;
+  image_base_url?: string;
+  icon_base_path?: string;
+  icon_base_url?: string;
   is_sellable?: boolean;
   attribute_count?: number;
   specification_count?: number;
@@ -308,9 +312,7 @@ export interface IPaginatedData<T> {
   to: 15;
 }
 
-export type VariantToggleResult =
-  | { ok: true }
-  | { ok: false; reason?: "cap" };
+export type VariantToggleResult = { ok: true } | { ok: false; reason?: "cap" };
 
 export interface VariantRow {
   rowId: string;

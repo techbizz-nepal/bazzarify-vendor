@@ -2,8 +2,8 @@
 
 import { ApiResponse, IMetaData, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
-import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
+import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
   TCategoryAuthoringContextPayload,
   TCategoryIndexPayload,
@@ -110,6 +110,28 @@ export const actionUpdateCategory = async (slug: string, body: object) => {
     ).patch(
       PRODUCT_MANAGEMENT_ROUTES.category.update.path.replace(":slug", slug),
       body,
+    );
+    return response.data;
+  } catch (error) {
+    return getValidationFeedback(error, "Please fix the highlighted fields.");
+  }
+};
+
+export const actionUploadCategoryImage = async (
+  slug: string,
+  body: FormData,
+) => {
+  try {
+    const response = await (
+      await authAxiosInstance()
+    ).post(
+      PRODUCT_MANAGEMENT_ROUTES.category.image.path.replace(":slug", slug),
+      body,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
     );
     return response.data;
   } catch (error) {
