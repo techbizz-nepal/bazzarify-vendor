@@ -5,7 +5,6 @@ import PageContainer from "@/modules/core/components/server/PageContainer";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { TCategory } from "@/modules/product.management";
 import { actionGetCategories } from "@/modules/product.management/actions/category";
-import { requireAdminCategoryAccess } from "@/modules/product.management/utils/categoryAccess";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa6";
 
@@ -21,8 +20,6 @@ export default async function CategoriesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireAdminCategoryAccess("/products");
-
   const resolvedSearchParams = await searchParams;
   const flattenedParams = flattenSearchParams(resolvedSearchParams);
   const page = Number(flattenedParams.page ?? "1");

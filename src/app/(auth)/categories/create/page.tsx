@@ -4,11 +4,8 @@ import { actionGetAttributes } from "@/modules/product.management/actions/attrib
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
 import Create from "@/modules/product.management/components/client/category/Create";
-import { requireAdminCategoryAccess } from "@/modules/product.management/utils/categoryAccess";
 
 export default async function CreateCategoryPage() {
-  await requireAdminCategoryAccess("/products");
-
   const [categoryResponse, attributeResponse, specificationResponse] =
     await Promise.all([
       actionGetCategories({
