@@ -34,7 +34,7 @@ const SEVERITY_STYLES: Record<
 
 export default function DashboardAttentionList({ items }: Props) {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold">
           Needs your attention

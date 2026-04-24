@@ -64,7 +64,7 @@ export default async function DashboardContainer({ searchParams }: Props) {
           {greeting} for the last {window.replace("d", " days")}.
         </p>
         <DashboardKpiGrid summary={result} />
-        <div className="grid gap-4 lg:grid-cols-5">
+        <div className="grid items-stretch gap-4 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <DashboardAttentionList items={result.attention} />
           </div>
