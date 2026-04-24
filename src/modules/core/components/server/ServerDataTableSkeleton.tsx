@@ -41,10 +41,7 @@ export default function ServerDataTableSkeleton({
           </div>
           <div className="space-y-3 p-4">
             {Array.from({ length: rowCount }).map((_, index) => (
-              <Skeleton
-                key={`row-skeleton-${index}`}
-                className="h-4 w-full"
-              />
+              <Skeleton key={`row-skeleton-${index}`} className="h-4 w-full" />
             ))}
           </div>
         </div>

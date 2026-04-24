@@ -1,7 +1,7 @@
 "use client";
 
-import Banner from "@/modules/guest/components/client/registration/Banner";
 import PasswordVerificationForm from "@/modules/guest/components/client/PasswordVerificationForm";
+import Banner from "@/modules/guest/components/client/registration/Banner";
 import RegistrationRequest from "@/modules/guest/components/client/registration/RegistrationRequest";
 import useVendorRegistration from "@/modules/guest/hooks/useVendorRegistration";
 import { useRouter } from "next/navigation";

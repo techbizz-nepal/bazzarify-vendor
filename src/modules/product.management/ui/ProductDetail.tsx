@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import ProductRichTextEditor from "@/modules/core/components/client/ProductRichTextEditor";
 import {
   ProductSubmissionFeedback,
@@ -26,8 +26,14 @@ export default function ProductDetail({
     onChange(synthetic);
   };
 
-  const descriptionError = getSubmissionFieldError(feedback ?? null, "description");
-  const highlightsError = getSubmissionFieldError(feedback ?? null, "highlights");
+  const descriptionError = getSubmissionFieldError(
+    feedback ?? null,
+    "description",
+  );
+  const highlightsError = getSubmissionFieldError(
+    feedback ?? null,
+    "highlights",
+  );
   const boxItemsError = getSubmissionFieldError(feedback ?? null, "box_items");
 
   return (
@@ -39,7 +45,10 @@ export default function ProductDetail({
         enableImages={true}
         value={productForm.description}
         handleOnChange={handleRteChange}
-        className={cn("rounded-lg border", descriptionError && "border-destructive")}
+        className={cn(
+          "rounded-lg border",
+          descriptionError && "border-destructive",
+        )}
         placeholder="Describe your product…"
       />
       {descriptionError && (
@@ -52,7 +61,10 @@ export default function ProductDetail({
         enableImages={true}
         value={productForm.highlights}
         handleOnChange={handleRteChange}
-        className={cn("rounded-lg border", highlightsError && "border-destructive")}
+        className={cn(
+          "rounded-lg border",
+          highlightsError && "border-destructive",
+        )}
         placeholder="Enter a minimum of three short highlights of the product"
       />
       {highlightsError && (
@@ -67,7 +79,9 @@ export default function ProductDetail({
         onChange={onChange}
         className={cn(boxItemsError && "border-destructive")}
       />
-      {boxItemsError && <p className="text-sm text-destructive">{boxItemsError}</p>}
+      {boxItemsError && (
+        <p className="text-sm text-destructive">{boxItemsError}</p>
+      )}
     </>
   );
 }

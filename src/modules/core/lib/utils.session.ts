@@ -1,6 +1,5 @@
 "use server";
 
-import { TSessionUserWithToken } from "@/modules/auth/domain/schemas/UserSchema";
 import { jwtVerify, SignJWT } from "jose";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
@@ -95,14 +94,6 @@ export async function deleteSession({
       secure: process.env.NODE_ENV === "production",
     });
   }
-}
-
-async function encrypt(payload: TSessionUserWithToken) {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(encodedKey);
 }
 
 async function decrypt(session: string | undefined = "") {

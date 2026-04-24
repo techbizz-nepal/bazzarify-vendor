@@ -12,7 +12,11 @@ import Link from "next/link";
 type TOrderIndexColumnParams = {
   statusOptions: TOrderStatusOption[];
   isUpdatingStatus: boolean;
-  onUpdateStatus: (orderUuid: string, statusCode: string, statusLabel: string) => void;
+  onUpdateStatus: (
+    orderUuid: string,
+    statusCode: string,
+    statusLabel: string,
+  ) => void;
 };
 
 export const orderIndexColumns = ({

@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
@@ -19,22 +19,32 @@ import {
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  TStoreOnboardingBulkApplyPreview,
+  TStoreOnboardingCategoryOption,
+  TStoreTypeOption,
+} from "@/modules/vendor/domain/schemas/storeOnboarding";
 import {
   actionApplyAdminStoreOnboardingBulk,
   actionPreviewAdminStoreOnboardingBulkApply,
   actionSearchAdminSellableCategories,
   actionUpdateAdminStoreOnboardingSet,
 } from "@/modules/vendor/domain/store-actions";
-import {
-  TStoreOnboardingBulkApplyPreview,
-  TStoreOnboardingCategoryOption,
-  TStoreTypeOption,
-} from "@/modules/vendor/domain/schemas/storeOnboarding";
 import { Check, ChevronsUpDown, LoaderCircle, X } from "lucide-react";
-import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 interface StoreOnboardingManagementProps {
@@ -90,8 +100,7 @@ export default function StoreOnboardingManagement({
     () =>
       storeTypeOptions.find(
         (storeType) => storeType.uuid === selectedStoreTypeUuid,
-      ) ??
-      null,
+      ) ?? null,
     [selectedStoreTypeUuid, storeTypeOptions],
   );
 
@@ -106,18 +115,11 @@ export default function StoreOnboardingManagement({
     setSearchResults([]);
     setSearchPage(1);
     setHasNextSearchPage(false);
+    setBulkPreview(null);
   };
 
   const selectedCategoryUuids = useMemo(
     () => selectedCategories.map((category) => category.uuid),
-    [selectedCategories],
-  );
-
-  const selectedCategoryNames = useMemo(
-    () =>
-      [...selectedCategories.map((category) => category.name)].sort((left, right) =>
-        left.localeCompare(right),
-      ),
     [selectedCategories],
   );
 
@@ -166,10 +168,7 @@ export default function StoreOnboardingManagement({
         categoryUuids: selectedCategories.map((category) => category.uuid),
       })
         .then((response) => {
-          if (
-            "metaData" in response ||
-            !("uuid" in response)
-          ) {
+          if ("metaData" in response || !("uuid" in response)) {
             toast.error(response.metaData.error);
             return;
           }
@@ -192,7 +191,7 @@ export default function StoreOnboardingManagement({
         })
         .finally(() => {
           setIsSaving(false);
-      });
+        });
     });
   };
 
@@ -200,20 +199,18 @@ export default function StoreOnboardingManagement({
     const search = deferredCategorySearch.trim();
 
     if (!isCategoryPickerOpen || search.length === 0) {
-      setSearchResults([]);
-      setSearchPage(1);
-      setHasNextSearchPage(false);
-      setIsSearchingCategories(false);
       return;
     }
 
-    setIsSearchingCategories(true);
+    const searchCategories = async () => {
+      setIsSearchingCategories(true);
 
-    void actionSearchAdminSellableCategories({
-      search,
-      page: searchPage,
-    })
-      .then((response) => {
+      try {
+        const response = await actionSearchAdminSellableCategories({
+          search,
+          page: searchPage,
+        });
+
         if ("error" in response) {
           setSearchResults([]);
           setHasNextSearchPage(false);
@@ -235,8 +232,7 @@ export default function StoreOnboardingManagement({
               ],
         );
         setHasNextSearchPage(response.hasNextPage);
-      })
-      .catch((error) => {
+      } catch (error) {
         const message =
           error instanceof Error
             ? error.message
@@ -244,15 +240,34 @@ export default function StoreOnboardingManagement({
         toast.error(message);
         setSearchResults([]);
         setHasNextSearchPage(false);
-      })
-      .finally(() => {
+      } finally {
         setIsSearchingCategories(false);
-      });
+      }
+    };
+
+    void searchCategories();
   }, [deferredCategorySearch, isCategoryPickerOpen, searchPage]);
 
   const handleCategorySearchChange = (value: string) => {
     setCategorySearch(value);
     setSearchPage(1);
+
+    if (value.trim().length === 0) {
+      setSearchResults([]);
+      setHasNextSearchPage(false);
+      setIsSearchingCategories(false);
+    }
+  };
+
+  const handleCategoryPickerOpenChange = (open: boolean) => {
+    setIsCategoryPickerOpen(open);
+
+    if (!open) {
+      setSearchResults([]);
+      setSearchPage(1);
+      setHasNextSearchPage(false);
+      setIsSearchingCategories(false);
+    }
   };
 
   const handleLoadMoreCategories = () => {
@@ -267,9 +282,8 @@ export default function StoreOnboardingManagement({
     setIsLoadingPreview(true);
 
     try {
-      const response = await actionPreviewAdminStoreOnboardingBulkApply(
-        storeTypeUuid,
-      );
+      const response =
+        await actionPreviewAdminStoreOnboardingBulkApply(storeTypeUuid);
 
       if ("metaData" in response) {
         setBulkPreview(null);
@@ -293,12 +307,9 @@ export default function StoreOnboardingManagement({
   };
 
   useEffect(() => {
-    if (!selectedStoreTypeUuid) {
-      setBulkPreview(null);
-      return;
+    if (selectedStoreTypeUuid) {
+      void loadBulkPreview(selectedStoreTypeUuid);
     }
-
-    void loadBulkPreview(selectedStoreTypeUuid);
   }, [selectedStoreTypeUuid]);
 
   const handleBulkApply = () => {
@@ -451,7 +462,7 @@ export default function StoreOnboardingManagement({
                   </div>
                   <Popover
                     open={isCategoryPickerOpen}
-                    onOpenChange={setIsCategoryPickerOpen}
+                    onOpenChange={handleCategoryPickerOpenChange}
                   >
                     <PopoverTrigger asChild>
                       <Button
@@ -489,9 +500,10 @@ export default function StoreOnboardingManagement({
                             <ScrollArea className="h-72">
                               <div className="p-1">
                                 {searchResults.map((category) => {
-                                  const isChecked = selectedCategoryUuids.includes(
-                                    category.uuid,
-                                  );
+                                  const isChecked =
+                                    selectedCategoryUuids.includes(
+                                      category.uuid,
+                                    );
 
                                   return (
                                     <CommandItem
@@ -572,7 +584,9 @@ export default function StoreOnboardingManagement({
                             <button
                               key={category.uuid}
                               type="button"
-                              onClick={() => handleToggleCategory(category, false)}
+                              onClick={() =>
+                                handleToggleCategory(category, false)
+                              }
                               className="inline-flex max-w-full items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-100"
                             >
                               <span className="truncate">{category.name}</span>
@@ -610,7 +624,9 @@ export default function StoreOnboardingManagement({
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
-                      onClick={() => void loadBulkPreview(selectedStoreType.uuid)}
+                      onClick={() =>
+                        void loadBulkPreview(selectedStoreType.uuid)
+                      }
                       disabled={isLoadingPreview}
                     >
                       {isLoadingPreview ? "Refreshing..." : "Refresh preview"}
@@ -683,9 +699,7 @@ export default function StoreOnboardingManagement({
                             </div>
                             <div className="text-right text-slate-600">
                               <div>{store.current_category_count} current</div>
-                              <div>
-                                {store.missing_category_count} missing
-                              </div>
+                              <div>{store.missing_category_count} missing</div>
                             </div>
                           </div>
                         ))}

@@ -3,7 +3,8 @@ import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/routes";
 import { NextResponse } from "next/server";
 
-const apiUrl = process.env.API_URL || "http://local-ne.larashops.local:8081/api/v1";
+const apiUrl =
+  process.env.API_URL || "http://local-ne.larashops.local:8081/api/v1";
 const appKey = process.env.APP_KEY || "";
 const appUrl = process.env.APP_URL || "http://localhost:3001";
 

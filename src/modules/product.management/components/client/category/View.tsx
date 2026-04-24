@@ -24,7 +24,7 @@ import CategoryCard from "@/modules/product.management/ui/CategoryCard";
 import CategorySpecificationsCard from "@/modules/product.management/ui/CategorySpecificationsCard";
 import { keepPreviousData, useQueries } from "@tanstack/react-query";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 const isSquareImage = (file: File): Promise<boolean> =>
@@ -56,20 +56,26 @@ function CategoryImagePanel({
 }) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!selectedImage) {
-      setPreviewUrl(null);
-      return;
+  const replacePreviewUrl = (url: string | null) => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
     }
 
-    const url = URL.createObjectURL(selectedImage);
+    previewUrlRef.current = url;
     setPreviewUrl(url);
+  };
 
-    return () => URL.revokeObjectURL(url);
-  }, [selectedImage]);
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
 
   const currentImageUrl =
     category?.image_base_url ?? category?.icon_base_url ?? null;
@@ -92,12 +98,14 @@ function CategoryImagePanel({
 
     if (!file) {
       setSelectedImage(null);
+      replacePreviewUrl(null);
       return;
     }
 
     if (!file.type.startsWith("image/")) {
       setImageError("Select an image file.");
       setSelectedImage(null);
+      replacePreviewUrl(null);
       return;
     }
 
@@ -107,10 +115,12 @@ function CategoryImagePanel({
         "Category images must use a square ratio to match the app placeholder.",
       );
       setSelectedImage(null);
+      replacePreviewUrl(null);
       return;
     }
 
     setSelectedImage(file);
+    replacePreviewUrl(URL.createObjectURL(file));
   };
 
   const handleUpload = () => {
@@ -133,6 +143,7 @@ function CategoryImagePanel({
       if (result && "data" in result && result.data.message === "success") {
         const nextCategory = result.data.payload.category as TCategory;
         setSelectedImage(null);
+        replacePreviewUrl(null);
         setImageError(null);
         onUploaded(nextCategory);
         toast.success("Category image updated successfully.");
@@ -256,6 +267,7 @@ function CategoryImagePanel({
                 variant="secondary"
                 onClick={() => {
                   setSelectedImage(null);
+                  replacePreviewUrl(null);
                   setImageError(null);
                 }}
               >
@@ -332,14 +344,6 @@ export default function View({ slug }: { slug: string }) {
   const effectiveSelectedSpecifications =
     selectedSpecifications ?? response.category?.specifications ?? [];
   const [categoryState, setCategoryState] = useState<TCategory | null>(null);
-
-  useEffect(() => {
-    if (response.category) {
-      setCategoryState(response.category);
-      setSelectedAttributes(null);
-      setSelectedSpecifications(null);
-    }
-  }, [response.category]);
 
   const handleAttributeChange = (uuid: string) => {
     setAttributeUpdateError(null);

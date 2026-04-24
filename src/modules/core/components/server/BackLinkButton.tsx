@@ -6,10 +6,7 @@ interface BackLinkButtonProps {
   label: string;
 }
 
-export default function BackLinkButton({
-  href,
-  label,
-}: BackLinkButtonProps) {
+export default function BackLinkButton({ href, label }: BackLinkButtonProps) {
   return (
     <Button asChild size="sm">
       <Link href={href}>{label}</Link>

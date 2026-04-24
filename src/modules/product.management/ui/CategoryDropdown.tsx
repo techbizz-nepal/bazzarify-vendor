@@ -48,7 +48,9 @@ export default function CategoryDropdown({
 }: ICategoryDropdown) {
   const currentCategory = selectedCategories.at(-1) ?? null;
   const isReadOnly = categoryChangeLocked && committedCategories.length > 0;
-  const selectedPath = selectedCategories.map((category) => category.name).join(" > ");
+  const selectedPath = selectedCategories
+    .map((category) => category.name)
+    .join(" > ");
   const committedPath = committedCategories
     .map((category) => category.name)
     .join(" > ");
@@ -92,7 +94,9 @@ export default function CategoryDropdown({
           aria-disabled="true"
         >
           <p className="truncate text-gray-500">
-            {committedCategories.length ? committedPath : "No category committed yet."}
+            {committedCategories.length
+              ? committedPath
+              : "No category committed yet."}
           </p>
         </div>
         {errorMessage && (

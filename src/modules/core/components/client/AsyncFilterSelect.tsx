@@ -9,10 +9,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { actionGetProductStoreOptions } from "@/modules/product.management/actions/product";
 import { TProductStoreFilterOption } from "@/modules/product.management";
+import { actionGetProductStoreOptions } from "@/modules/product.management/actions/product";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 
@@ -46,28 +50,10 @@ export default function AsyncFilterSelect({
   const [search, setSearch] = useState("");
   const [options, setOptions] =
     useState<TProductStoreFilterOption[]>(EMPTY_OPTIONS);
-  const [resolvedOption, setResolvedOption] = useState<{
-    value: string;
-    label: string;
-  } | null>(selectedOption);
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    setResolvedOption(selectedOption);
-  }, [selectedOption]);
-
-  useEffect(() => {
-    if (!value) {
-      setResolvedOption(null);
-      return;
-    }
-
-    const nextResolvedOption =
-      options.find((option) => option.value === value) ?? selectedOption ?? null;
-    if (nextResolvedOption) {
-      setResolvedOption(nextResolvedOption);
-    }
-  }, [options, selectedOption, value]);
+  const resolvedOption = value
+    ? (options.find((option) => option.value === value) ?? selectedOption)
+    : null;
 
   useEffect(() => {
     if (!open) {
@@ -102,7 +88,7 @@ export default function AsyncFilterSelect({
         >
           <span className="truncate">
             {resolvedOption?.label ??
-              (value ? value : placeholder ?? `Filter by ${label}`)}
+              (value ? value : (placeholder ?? `Filter by ${label}`))}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -125,7 +111,6 @@ export default function AsyncFilterSelect({
                   value={option.value}
                   onSelect={() => {
                     onChange(option.value);
-                    setResolvedOption(option);
                     setOpen(false);
                   }}
                 >

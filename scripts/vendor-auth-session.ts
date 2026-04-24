@@ -24,7 +24,10 @@ type VendorUserEnvelope = {
       user?: {
         uuid?: string;
         roles?: Array<{ name?: string }>;
-        store?: { uuid?: string | null; store_type_uuid?: string | null } | null;
+        store?: {
+          uuid?: string | null;
+          store_type_uuid?: string | null;
+        } | null;
       };
     } | null;
   };
@@ -144,7 +147,10 @@ function flattenMessage(value: unknown): string | null {
   return null;
 }
 
-async function writeOptionalArtifact(path: string | undefined, content: string) {
+async function writeOptionalArtifact(
+  path: string | undefined,
+  content: string,
+) {
   if (!path) {
     return;
   }
@@ -270,7 +276,9 @@ async function main() {
     JSON.stringify(
       {
         authenticated: true,
-        persona: options.persona ?? (options.useDevDefaults ? "vendor_no_store" : null),
+        persona:
+          options.persona ??
+          (options.useDevDefaults ? "vendor_no_store" : null),
         credential,
         userUUID,
         roles: user?.roles?.map((role) => role.name).filter(Boolean) ?? [],

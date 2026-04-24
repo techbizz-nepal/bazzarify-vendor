@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -20,6 +19,7 @@ import {
   buildStoreRemediationPath,
   sanitizeVendorReturnPath,
 } from "@/modules/vendor/domain/storeRequirementNavigation";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 interface StoreRequiredPageProps {
@@ -33,10 +33,7 @@ export default async function StoreRequiredPage({
 }: StoreRequiredPageProps) {
   const { returnTo } = await searchParams;
   const safeReturnTo = returnTo
-    ? sanitizeVendorReturnPath(
-        returnTo,
-        DEFAULT_STORE_REQUIREMENT_RETURN_PATH,
-      )
+    ? sanitizeVendorReturnPath(returnTo, DEFAULT_STORE_REQUIREMENT_RETURN_PATH)
     : null;
 
   const userUuid = await getSessionUserUUID(await getCookieStore());

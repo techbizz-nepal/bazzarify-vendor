@@ -1,15 +1,18 @@
+import {
+  getAuthUser,
+  getSessionUserUUID,
+} from "@/modules/auth/data/lib/auth-lib";
 import ErrorComponent from "@/modules/core/components/client/ErrorComponent";
 import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
-import ProductImportUploadForm from "@/modules/product.management/components/client/product-import/ProductImportUploadForm";
+import { TProductImportTargetStore } from "@/modules/product.management";
 import {
   actionGetActiveProductImport,
   actionGetProductImportGuide,
   actionGetProductImportTargetStores,
 } from "@/modules/product.management/actions/import";
-import { TProductImportTargetStore } from "@/modules/product.management";
+import ProductImportUploadForm from "@/modules/product.management/components/client/product-import/ProductImportUploadForm";
 import { redirect } from "next/navigation";
 
 export default async function NewProductImportPage() {
@@ -45,10 +48,10 @@ export default async function NewProductImportPage() {
   const authUser = userUuid ? await getAuthUser(userUuid) : null;
   const isAdmin = Boolean(
     authUser &&
-      !("error" in authUser) &&
-      authUser.roles.some(
-        (role) => role.name === "super-admin" || role.name === "admin",
-      ),
+    !("error" in authUser) &&
+    authUser.roles.some(
+      (role) => role.name === "super-admin" || role.name === "admin",
+    ),
   );
 
   let initialStoreOptions: TProductImportTargetStore[] = [];

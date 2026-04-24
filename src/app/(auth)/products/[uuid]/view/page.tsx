@@ -22,7 +22,9 @@ export default async function Page({ params }: IPageParams) {
     return (
       <PageContainer
         pageTitle="Product not found"
-        actionSlot={<BackLinkButton href="/products" label="Back to Products" />}
+        actionSlot={
+          <BackLinkButton href="/products" label="Back to Products" />
+        }
       >
         <Card className="border-destructive/40">
           <CardHeader className="flex-row items-center gap-2 space-y-0 pb-3">

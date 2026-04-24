@@ -19,7 +19,7 @@ import {
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 
 export type TSidebarGroupChild = {
   title: string;
@@ -58,15 +58,12 @@ export default function SidebarMenuGroupComponent({
   const groupActive = isNavGroupActive(pathname, pathMatch);
   const activeChildPath = resolveActiveChildPath(pathname, items);
   const [open, setOpen] = useState<boolean>(groupActive);
-
-  useEffect(() => {
-    if (groupActive) setOpen(true);
-  }, [groupActive]);
+  const isOpen = open || groupActive;
 
   return (
     <Collapsible
       asChild
-      open={open}
+      open={isOpen}
       onOpenChange={setOpen}
       className="group/collapsible"
     >
@@ -75,7 +72,7 @@ export default function SidebarMenuGroupComponent({
           <SidebarMenuButton
             tooltip={title}
             isActive={groupActive}
-            aria-expanded={open}
+            aria-expanded={isOpen}
             className="py-6 font-medium hover:bg-sidebar-selected/15 hover:text-sidebar-foreground"
           >
             {icon}

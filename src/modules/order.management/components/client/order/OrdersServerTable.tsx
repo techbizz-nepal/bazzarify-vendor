@@ -6,11 +6,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
+import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
-import { actionUpdateOrderStatus } from "@/modules/order.management/actions/actionUpdateOrderStatus";
 import { TOrderStatusOption } from "@/modules/order.management/actions/actionGetOrderStatuses";
+import { actionUpdateOrderStatus } from "@/modules/order.management/actions/actionUpdateOrderStatus";
 import { TOrderList } from "@/modules/order.management/schemas/orderSchema";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -66,7 +66,9 @@ export default function OrdersServerTable({
       render: (_, record) => {
         const counts = record as OrderListItem & OrderListCountFields;
         if (!canManageWholeOrder) {
-          return counts.visible_items_count ?? counts.visible_item_quantity ?? 0;
+          return (
+            counts.visible_items_count ?? counts.visible_item_quantity ?? 0
+          );
         }
 
         return counts.items_count ?? counts.item_count ?? 0;
@@ -99,7 +101,7 @@ export default function OrdersServerTable({
         const counts = record as OrderListItem & OrderListCountFields;
         const resolvedValue = canManageWholeOrder
           ? value
-          : counts.visible_grand_total ?? 0;
+          : (counts.visible_grand_total ?? 0);
 
         return typeof resolvedValue === "number"
           ? `$${resolvedValue.toFixed(2)}`

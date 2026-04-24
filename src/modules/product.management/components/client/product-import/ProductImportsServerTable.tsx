@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
+import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import type { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 import { TProductImportRecord } from "@/modules/product.management";
 import { actionCancelProductImport } from "@/modules/product.management/actions/import";
@@ -74,7 +74,8 @@ export default function ProductImportsServerTable({
       key: "progress_percentage",
       title: "Progress",
       align: "right",
-      render: (value) => (typeof value === "number" ? `${Math.round(value)}%` : "—"),
+      render: (value) =>
+        typeof value === "number" ? `${Math.round(value)}%` : "—",
     },
     {
       key: "created_at",
@@ -90,7 +91,8 @@ export default function ProductImportsServerTable({
     columns.splice(1, 0, {
       key: "target_store",
       title: "Store",
-      render: (_, record) => record.target_store?.name ?? record.target_store_uuid ?? "—",
+      render: (_, record) =>
+        record.target_store?.name ?? record.target_store_uuid ?? "—",
     });
   }
 
@@ -102,7 +104,8 @@ export default function ProductImportsServerTable({
       const canCancel =
         record.status !== null && CANCELLABLE_STATUSES.has(record.status);
       const canDownloadErrors =
-        record.status !== null && DOWNLOADABLE_ERROR_STATUSES.has(record.status);
+        record.status !== null &&
+        DOWNLOADABLE_ERROR_STATUSES.has(record.status);
 
       return (
         <div className="flex flex-wrap justify-end gap-2">
@@ -129,12 +132,20 @@ export default function ProductImportsServerTable({
                 if (!window.confirm("Cancel this import?")) return;
                 startCancel(async () => {
                   const result = await actionCancelProductImport(record.uuid);
-                  if (result && typeof result === "object" && "import" in result) {
+                  if (
+                    result &&
+                    typeof result === "object" &&
+                    "import" in result
+                  ) {
                     toast.success("Import cancelled.");
                     router.refresh();
                     return;
                   }
-                  if (result && typeof result === "object" && "summary" in result) {
+                  if (
+                    result &&
+                    typeof result === "object" &&
+                    "summary" in result
+                  ) {
                     toast.error(result.summary);
                     return;
                   }

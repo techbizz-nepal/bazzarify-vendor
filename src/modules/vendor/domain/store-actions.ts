@@ -7,21 +7,21 @@ import {
 } from "@/modules/auth/data/lib/auth-lib";
 import StoreCreatePayloadSchema from "@/modules/auth/domain/schemas/payloads/StoreCreatePayloadSchema";
 import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
+import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
-import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import postDataAndValidate from "@/modules/core/utils/postDataAndValidate";
+import { formattedIssues } from "@/modules/core/utils/zod.util";
 import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
 import type { TCategory } from "@/modules/product.management";
+import { actionGetCategories } from "@/modules/product.management/actions/category";
 import {
   StoreOnboardingBulkApplyPreviewSchema,
   StoreOnboardingBulkApplyResultSchema,
-  TStoreOnboardingCategoryOption,
   StoreTypeIndexPayloadSchema,
   StoreTypeOptionSchema,
+  TStoreOnboardingCategoryOption,
 } from "@/modules/vendor/domain/schemas/storeOnboarding";
-import { formattedIssues } from "@/modules/core/utils/zod.util";
-import { actionGetCategories } from "@/modules/product.management/actions/category";
 import { z } from "zod";
 
 export const actionSetBusinessAndEmail = async (
@@ -97,7 +97,9 @@ export const actionGetStoreTypeOptions = async () => {
 export const actionGetAdminStoreOnboardingStoreTypes = async () => {
   try {
     const instance = await authAxiosInstance();
-    const response = await instance.get("vendor/admin/store-onboarding/store-types");
+    const response = await instance.get(
+      "vendor/admin/store-onboarding/store-types",
+    );
     const parsed = ApiResponseSchema(StoreTypeIndexPayloadSchema).safeParse(
       response.data,
     );
@@ -218,7 +220,9 @@ export const actionPreviewAdminStoreOnboardingBulkApply = async (
     ).safeParse(response.data);
 
     if (!parsed.success) {
-      throw new Error("Admin onboarding bulk preview schema validation failed.");
+      throw new Error(
+        "Admin onboarding bulk preview schema validation failed.",
+      );
     }
 
     if (parsed.data.metaData.error || parsed.data.data.payload === null) {

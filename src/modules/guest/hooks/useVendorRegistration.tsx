@@ -1,6 +1,10 @@
 import { errorOptions } from "@/modules/core/constants/toast";
 import { SessionContext } from "@/modules/core/contexts/SessionContextProvider";
 import {
+  applyValidationFeedback,
+  getValidationFeedback,
+} from "@/modules/core/lib/utils.validationFeedback";
+import {
   actionRequestRegistration,
   actionVerifyRegistration,
 } from "@/modules/guest/actions/register";
@@ -22,10 +26,6 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { BaseSyntheticEvent, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  applyValidationFeedback,
-  getValidationFeedback,
-} from "@/modules/core/lib/utils.validationFeedback";
 
 export default function useVendorRegistration(router: AppRouterInstance) {
   const sessionCtx = use(SessionContext);
@@ -154,35 +154,35 @@ export default function useVendorRegistration(router: AppRouterInstance) {
     handleSetBusinessAndEmailSubmit,
   };
 }
-  const hasErrorMeta = (
-    response: Awaited<ReturnType<typeof actionVerifyRegistration>>,
-  ): response is Extract<
-    Awaited<ReturnType<typeof actionVerifyRegistration>>,
-    { metaData: { error: string } }
-  > =>
+const hasErrorMeta = (
+  response: Awaited<ReturnType<typeof actionVerifyRegistration>>,
+): response is Extract<
+  Awaited<ReturnType<typeof actionVerifyRegistration>>,
+  { metaData: { error: string } }
+> =>
+  typeof response === "object" &&
+  response !== null &&
+  "metaData" in response &&
+  typeof response.metaData?.error === "string" &&
+  response.metaData.error.length > 0;
+
+const getSuccessMessage = (
+  response: Awaited<ReturnType<typeof actionVerifyRegistration>>,
+) => {
+  if (
     typeof response === "object" &&
     response !== null &&
-    "metaData" in response &&
-    typeof response.metaData?.error === "string" &&
-    response.metaData.error.length > 0;
+    "data" in response &&
+    response.data &&
+    typeof response.data === "object" &&
+    "payload" in response.data &&
+    response.data.payload &&
+    !Array.isArray(response.data.payload) &&
+    "messageText" in response.data.payload &&
+    typeof response.data.payload.messageText === "string"
+  ) {
+    return response.data.payload.messageText;
+  }
 
-  const getSuccessMessage = (
-    response: Awaited<ReturnType<typeof actionVerifyRegistration>>,
-  ) => {
-    if (
-      typeof response === "object" &&
-      response !== null &&
-      "data" in response &&
-      response.data &&
-      typeof response.data === "object" &&
-      "payload" in response.data &&
-      response.data.payload &&
-      !Array.isArray(response.data.payload) &&
-      "messageText" in response.data.payload &&
-      typeof response.data.payload.messageText === "string"
-    ) {
-      return response.data.payload.messageText;
-    }
-
-    return "Signing you in...";
-  };
+  return "Signing you in...";
+};

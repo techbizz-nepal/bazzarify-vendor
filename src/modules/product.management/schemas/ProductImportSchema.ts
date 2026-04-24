@@ -123,10 +123,7 @@ export const ProductImportRowSchema = z
     // Backend (ProductImportPreflightValidator::addError) builds Record<string, string[]>
     // for INVALID rows; an empty PHP array (READY rows) JSON-encodes as [] not {}.
     errors: z
-      .union([
-        z.array(z.string()),
-        z.record(z.string(), z.array(z.string())),
-      ])
+      .union([z.array(z.string()), z.record(z.string(), z.array(z.string()))])
       .nullable(),
     // Backend (ProductImportPreflightValidator) emits array_values(array_unique(...))
     // of plain strings (or [] when no suggestions). Never a record.

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -18,6 +17,7 @@ import {
   buildStoreRequirementPath,
   sanitizeVendorReturnPath,
 } from "@/modules/vendor/domain/storeRequirementNavigation";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 interface StoreRemediationPageProps {
@@ -31,10 +31,7 @@ export default async function StoreRemediationPage({
 }: StoreRemediationPageProps) {
   const { returnTo } = await searchParams;
   const safeReturnTo = returnTo
-    ? sanitizeVendorReturnPath(
-        returnTo,
-        DEFAULT_STORE_REQUIREMENT_RETURN_PATH,
-      )
+    ? sanitizeVendorReturnPath(returnTo, DEFAULT_STORE_REQUIREMENT_RETURN_PATH)
     : null;
 
   const userUuid = await getSessionUserUUID(await getCookieStore());
@@ -87,7 +84,9 @@ export default async function StoreRemediationPage({
                 asChild
                 className="w-full sm:w-auto"
               >
-                <Link href={safeReturnTo ?? "/products"}>Retry status check</Link>
+                <Link href={safeReturnTo ?? "/products"}>
+                  Retry status check
+                </Link>
               </ThemedButton>
             </div>
           </CardContent>

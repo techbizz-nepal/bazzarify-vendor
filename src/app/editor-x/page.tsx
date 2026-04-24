@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { SerializedEditorState } from "lexical";
+import { useState } from "react";
 
 import { Editor } from "@/components/blocks/editor-x/editor";
 

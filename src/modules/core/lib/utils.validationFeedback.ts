@@ -1,6 +1,6 @@
-import { $ZodIssue } from "zod/v4/core";
-import { FieldPath, FieldValues, UseFormSetError } from "react-hook-form";
 import { createRemoteFeedbackError } from "@/modules/core/lib/utils.feedback";
+import { FieldPath, FieldValues, UseFormSetError } from "react-hook-form";
+import { $ZodIssue } from "zod/v4/core";
 
 export type ValidationFieldErrors = Record<string, string[]>;
 
@@ -59,9 +59,10 @@ export const getValidationFeedback = (
     return null;
   }
 
-  const target = "metaData" in input && isRecord(input.metaData)
-    ? input.metaData.error
-    : input;
+  const target =
+    "metaData" in input && isRecord(input.metaData)
+      ? input.metaData.error
+      : input;
 
   if (typeof target === "string") {
     return { summary: target, fieldErrors: {} };

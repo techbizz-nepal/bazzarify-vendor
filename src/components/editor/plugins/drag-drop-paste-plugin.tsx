@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -7,13 +7,13 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import { useEffect } from "react"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { DRAG_DROP_PASTE } from "@lexical/rich-text"
-import { isMimeType, mediaFileReader } from "@lexical/utils"
-import { COMMAND_PRIORITY_LOW } from "lexical"
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { DRAG_DROP_PASTE } from "@lexical/rich-text";
+import { isMimeType, mediaFileReader } from "@lexical/utils";
+import { COMMAND_PRIORITY_LOW } from "lexical";
+import { useEffect } from "react";
 
-import { INSERT_IMAGE_COMMAND } from "@/components/editor/plugins/images-plugin"
+import { INSERT_IMAGE_COMMAND } from "@/components/editor/plugins/images-plugin";
 
 const ACCEPTABLE_IMAGE_TYPES = [
   "image/",
@@ -21,32 +21,32 @@ const ACCEPTABLE_IMAGE_TYPES = [
   "image/heif",
   "image/gif",
   "image/webp",
-]
+];
 
 export function DragDropPastePlugin(): null {
-  const [editor] = useLexicalComposerContext()
+  const [editor] = useLexicalComposerContext();
   useEffect(() => {
     return editor.registerCommand(
       DRAG_DROP_PASTE,
       (files) => {
-        ;(async () => {
+        (async () => {
           const filesResult = await mediaFileReader(
             files,
-            [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
-          )
+            [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x),
+          );
           for (const { file, result } of filesResult) {
             if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
               editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
                 altText: file.name,
                 src: result,
-              })
+              });
             }
           }
-        })()
-        return true
+        })();
+        return true;
       },
-      COMMAND_PRIORITY_LOW
-    )
-  }, [editor])
-  return null
+      COMMAND_PRIORITY_LOW,
+    );
+  }, [editor]);
+  return null;
 }

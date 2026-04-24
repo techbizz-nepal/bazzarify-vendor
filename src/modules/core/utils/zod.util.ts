@@ -1,5 +1,5 @@
-import { $ZodIssue } from "zod/v4/core";
 import { z } from "zod";
+import { $ZodIssue } from "zod/v4/core";
 
 export const formattedIssues = (issues: $ZodIssue[]) =>
   issues.map((issue: $ZodIssue) => ({

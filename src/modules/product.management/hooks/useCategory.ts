@@ -1,7 +1,4 @@
-import {
-  TCategory,
-  TSpecification,
-} from "@/modules/product.management";
+import { TCategory, TSpecification } from "@/modules/product.management";
 import { useState } from "react";
 
 export default function useCategory() {

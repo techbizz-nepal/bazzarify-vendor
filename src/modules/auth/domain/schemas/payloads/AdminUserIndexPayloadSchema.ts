@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { SimplePaginatedSchema } from "@/modules/product.management/schemas/SimplePaginated";
 import { ServerDataTableMetaSchema } from "@/modules/core/domain/schemas/ServerDataTableMeta";
+import { SimplePaginatedSchema } from "@/modules/product.management/schemas/SimplePaginated";
+import { z } from "zod";
 
 export const AdminUserStoreSummarySchema = z
   .object({
@@ -21,7 +21,7 @@ export const AdminUserListItemSchema = z
     created_at: z.string().nullable(),
     roles: z.array(z.string()),
     has_store: z.boolean(),
-  store_status: z.enum(["no_store", "needs_categories", "ready"]),
+    store_status: z.enum(["no_store", "needs_categories", "ready"]),
     store: AdminUserStoreSummarySchema.nullable(),
   })
   .strip();
@@ -34,4 +34,6 @@ export const AdminUserIndexPayloadSchema = z
   .strip();
 
 export type TAdminUserListItem = z.infer<typeof AdminUserListItemSchema>;
-export type TAdminUserIndexPayload = z.infer<typeof AdminUserIndexPayloadSchema>;
+export type TAdminUserIndexPayload = z.infer<
+  typeof AdminUserIndexPayloadSchema
+>;

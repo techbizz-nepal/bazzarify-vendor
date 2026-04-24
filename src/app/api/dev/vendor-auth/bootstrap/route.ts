@@ -3,8 +3,8 @@ import SessionUserPayloadSchema from "@/modules/auth/domain/schemas/payloads/Ses
 import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
-import { createAuthCookieSession } from "@/modules/core/lib/utils.session";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
+import { createAuthCookieSession } from "@/modules/core/lib/utils.session";
 import { NextRequest, NextResponse } from "next/server";
 
 type PersonaName =
@@ -64,7 +64,9 @@ async function handleBootstrap(personaName?: string) {
     );
   }
 
-  const persona = personaName ? personas[personaName as PersonaName] : undefined;
+  const persona = personaName
+    ? personas[personaName as PersonaName]
+    : undefined;
   if (!persona) {
     return NextResponse.json(
       handleRemoteError(new Error("Unknown verification persona."), 400),

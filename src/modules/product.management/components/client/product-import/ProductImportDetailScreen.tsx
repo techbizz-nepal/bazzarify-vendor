@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import {
   TProductImportProcessPayload,
   TProductImportRecord,
@@ -30,7 +30,8 @@ import { toast } from "sonner";
 
 const flattenMessages = (value: unknown): string[] => {
   if (typeof value === "string") return value.trim() ? [value] : [];
-  if (Array.isArray(value)) return value.flatMap((entry) => flattenMessages(entry));
+  if (Array.isArray(value))
+    return value.flatMap((entry) => flattenMessages(entry));
   if (typeof value === "object" && value !== null) {
     return Object.values(value).flatMap((entry) => flattenMessages(entry));
   }
@@ -90,7 +91,8 @@ const buildProcessResultFromImport = (
               typeof entry.import_key === "string" ? entry.import_key : "",
             row_numbers: Array.isArray(entry.row_numbers)
               ? entry.row_numbers.filter(
-                  (value: unknown): value is number => typeof value === "number",
+                  (value: unknown): value is number =>
+                    typeof value === "number",
                 )
               : [],
             message: typeof entry.message === "string" ? entry.message : "",
@@ -129,7 +131,8 @@ export default function ProductImportDetailScreen({
   showResumedBanner,
 }: ProductImportDetailScreenProps) {
   const router = useRouter();
-  const [currentImport, setCurrentImport] = useState<TProductImportRecord>(initialImport);
+  const [currentImport, setCurrentImport] =
+    useState<TProductImportRecord>(initialImport);
   const [validatedRows, setValidatedRows] = useState<TProductImportRow[]>(
     initialRows ?? [],
   );
@@ -141,7 +144,12 @@ export default function ProductImportDetailScreen({
   const handleValidate = () => {
     startTransition(() => {
       void actionValidateProductImport(currentImport.uuid).then((result) => {
-        if (result && typeof result === "object" && "import" in result && "rows" in result) {
+        if (
+          result &&
+          typeof result === "object" &&
+          "import" in result &&
+          "rows" in result
+        ) {
           setCurrentImport(result.import);
           setValidatedRows(result.rows);
           setProcessResult(null);
@@ -166,7 +174,12 @@ export default function ProductImportDetailScreen({
   const handleProcess = () => {
     startTransition(() => {
       void actionProcessProductImport(currentImport.uuid).then((result) => {
-        if (result && typeof result === "object" && "import" in result && "result" in result) {
+        if (
+          result &&
+          typeof result === "object" &&
+          "import" in result &&
+          "result" in result
+        ) {
           setCurrentImport(result.import);
           if (result.result.status === "processing" || result.result.queued) {
             setProcessResult(null);
@@ -179,7 +192,8 @@ export default function ProductImportDetailScreen({
           setProcessResult(result.result);
           toast.success(
             result.result.idempotent_replay
-              ? result.result.message ?? "Returning the existing import result."
+              ? (result.result.message ??
+                  "Returning the existing import result.")
               : "Import processing finished.",
           );
           return;
@@ -240,7 +254,10 @@ export default function ProductImportDetailScreen({
           if (cancelled) return;
 
           if (!result || typeof result !== "object" || "error" in result) {
-            delayMs = Math.min(delayMs * POLL_BACKOFF_FACTOR, POLL_MAX_DELAY_MS);
+            delayMs = Math.min(
+              delayMs * POLL_BACKOFF_FACTOR,
+              POLL_MAX_DELAY_MS,
+            );
             schedulePoll(delayMs);
             return;
           }
@@ -343,7 +360,9 @@ export default function ProductImportDetailScreen({
               </div>
             </div>
             <div className="rounded-md border p-4">
-              <div className="text-sm text-muted-foreground">Valid / Invalid</div>
+              <div className="text-sm text-muted-foreground">
+                Valid / Invalid
+              </div>
               <div className="mt-2 text-2xl font-semibold">
                 {currentImport.valid_rows} / {currentImport.invalid_rows}
               </div>

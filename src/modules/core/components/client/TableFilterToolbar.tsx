@@ -2,11 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import AsyncFilterSelect from "@/modules/core/components/client/AsyncFilterSelect";
-import DateRangeFilter from "@/modules/core/components/client/DateRangeFilter";
-import {
-  TServerDataTableFilterDefinition as FilterDefinition,
-} from "@/modules/core/domain/schemas/ServerDataTableMeta";
 import {
   Select,
   SelectContent,
@@ -14,6 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import AsyncFilterSelect from "@/modules/core/components/client/AsyncFilterSelect";
+import DateRangeFilter from "@/modules/core/components/client/DateRangeFilter";
+import { TServerDataTableFilterDefinition as FilterDefinition } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 export type { FilterDefinition };
 
 interface TableFilterToolbarProps {
@@ -57,10 +55,7 @@ export default function TableFilterToolbar({
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {filterDefinitions.map((filterDefinition) => (
-            <div
-              key={filterDefinition.key}
-              className="flex items-center gap-2"
-            >
+            <div key={filterDefinition.key} className="flex items-center gap-2">
               {filterDefinition.type === "date-range" ? (
                 <DateRangeFilter
                   label={filterDefinition.label}
@@ -82,7 +77,9 @@ export default function TableFilterToolbar({
                   value={filters[filterDefinition.key] ?? ""}
                   selectedOption={filterDefinition.selectedOption}
                   disabled={isPending}
-                  onChange={(value) => onFilterChange(filterDefinition.key, value)}
+                  onChange={(value) =>
+                    onFilterChange(filterDefinition.key, value)
+                  }
                 />
               ) : filterDefinition.type === "text" ? (
                 <Input

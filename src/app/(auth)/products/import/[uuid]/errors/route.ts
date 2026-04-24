@@ -4,7 +4,8 @@ import { PRODUCT_MANAGEMENT_ROUTES } from "@/modules/product.management/config/r
 import axios from "axios";
 import { NextResponse } from "next/server";
 
-const apiUrl = process.env.API_URL || "http://local-ne.larashops.local:8081/api/v1";
+const apiUrl =
+  process.env.API_URL || "http://local-ne.larashops.local:8081/api/v1";
 const appKey = process.env.APP_KEY || "";
 
 type RouteContext = {
@@ -41,21 +42,31 @@ export async function GET(_request: Request, context: RouteContext) {
       );
     }
 
+    const contentType = response.headers["content-type"];
+    const contentDisposition = response.headers["content-disposition"];
+
     return new NextResponse(response.data, {
       status: 200,
       headers: {
         "Content-Type":
-          response.headers["content-type"] ?? "text/csv; charset=UTF-8",
+          typeof contentType === "string"
+            ? contentType
+            : "text/csv; charset=UTF-8",
         "Content-Disposition":
-          response.headers["content-disposition"] ??
-          `attachment; filename="product-import-${uuid}-errors.csv"`,
+          typeof contentDisposition === "string"
+            ? contentDisposition
+            : `attachment; filename="product-import-${uuid}-errors.csv"`,
       },
     });
   } catch (error) {
-    console.error("[product-import-error-report-proxy]", {
-      message:
-        error instanceof Error ? error.message : "Unknown error report proxy error",
-    });
+    console.error(
+      `[product-import-error-report-proxy] ${JSON.stringify({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unknown error report proxy error",
+      })}`,
+    );
 
     return NextResponse.json(
       { error: "Unable to download the import errors CSV." },

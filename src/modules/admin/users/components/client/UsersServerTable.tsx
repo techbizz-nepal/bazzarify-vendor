@@ -1,8 +1,8 @@
 "use client";
 
 import { TAdminUserListItem } from "@/modules/auth/domain/schemas/payloads/AdminUserIndexPayloadSchema";
-import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
+import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 
 const columns: TableColumn<TAdminUserListItem>[] = [

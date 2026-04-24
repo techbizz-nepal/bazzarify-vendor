@@ -1,9 +1,9 @@
-import PageContainer from "@/modules/core/components/server/PageContainer";
 import { getSessionUser } from "@/modules/auth/data/auth-service";
+import PageContainer from "@/modules/core/components/server/PageContainer";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
-import OrdersServerTable from "@/modules/order.management/components/client/order/OrdersServerTable";
 import { actionGetOrders } from "@/modules/order.management/actions/actionGetOrders";
 import { actionGetOrderStatuses } from "@/modules/order.management/actions/actionGetOrderStatuses";
+import OrdersServerTable from "@/modules/order.management/components/client/order/OrdersServerTable";
 
 export default async function OrdersPage({
   searchParams,
@@ -26,7 +26,9 @@ export default async function OrdersPage({
   ]);
 
   const orders =
-    ordersResponse && typeof ordersResponse === "object" && "orders" in ordersResponse
+    ordersResponse &&
+    typeof ordersResponse === "object" &&
+    "orders" in ordersResponse
       ? ordersResponse.orders
       : null;
   const table =
@@ -35,8 +37,9 @@ export default async function OrdersPage({
     "table" in ordersResponse
       ? ordersResponse.table
       : null;
-  const statusOptions =
-    Array.isArray(statusOptionsResponse) ? statusOptionsResponse : [];
+  const statusOptions = Array.isArray(statusOptionsResponse)
+    ? statusOptionsResponse
+    : [];
 
   return (
     <PageContainer pageTitle="Manage Orders">

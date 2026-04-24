@@ -1,7 +1,7 @@
-import { DiffIcon } from "lucide-react"
+import { DiffIcon } from "lucide-react";
 
-import { InsertEquationDialog } from "@/components/editor/plugins/equations-plugin"
-import { ComponentPickerOption } from "@/components/editor/plugins/picker/component-picker-option"
+import { InsertEquationDialog } from "@/components/editor/plugins/equations-plugin";
+import { ComponentPickerOption } from "@/components/editor/plugins/picker/component-picker-option";
 
 export function EquationPickerPlugin() {
   return new ComponentPickerOption("Equation", {
@@ -11,5 +11,5 @@ export function EquationPickerPlugin() {
       showModal("Insert Equation", (onClose) => (
         <InsertEquationDialog activeEditor={editor} onClose={onClose} />
       )),
-  })
+  });
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,9 +18,14 @@ import {
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import {
   TProductImportGuidePayload,
   TProductImportTargetStore,
@@ -73,9 +77,8 @@ export default function ProductImportUploadForm({
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [imageArchiveFile, setImageArchiveFile] = useState<File | null>(null);
   const [feedback, setFeedback] = useState<ValidationFeedback | null>(null);
-  const [storeOptions, setStoreOptions] = useState<TProductImportTargetStore[]>(
-    initialStoreOptions,
-  );
+  const [storeOptions, setStoreOptions] =
+    useState<TProductImportTargetStore[]>(initialStoreOptions);
   const [storeSearch, setStoreSearch] = useState("");
   const [selectedStoreUuid, setSelectedStoreUuid] = useState(
     guidePayload.eligibility.target_store?.uuid ?? "",
@@ -201,7 +204,9 @@ export default function ProductImportUploadForm({
 
   return (
     <div className="space-y-4">
-      <Card className={!eligibility.can_initiate ? "border-destructive" : undefined}>
+      <Card
+        className={!eligibility.can_initiate ? "border-destructive" : undefined}
+      >
         <CardHeader className="pb-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-1">
@@ -258,7 +263,10 @@ export default function ProductImportUploadForm({
           {eligibility.target_store_required ? (
             <div className="space-y-2">
               <Label>Target Store</Label>
-              <Popover open={isStorePickerOpen} onOpenChange={setIsStorePickerOpen}>
+              <Popover
+                open={isStorePickerOpen}
+                onOpenChange={setIsStorePickerOpen}
+              >
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
@@ -316,8 +324,8 @@ export default function ProductImportUploadForm({
                             <div className="flex flex-col">
                               <span>{store.name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {store.slug} ·{" "}
-                                {store.sellable_category_count} sellable categories
+                                {store.slug} · {store.sellable_category_count}{" "}
+                                sellable categories
                                 {!store.product_authoring_ready
                                   ? " · not ready"
                                   : ""}
@@ -333,19 +341,25 @@ export default function ProductImportUploadForm({
               {storeError ? (
                 <p className="text-sm text-destructive">{storeError}</p>
               ) : initialStoreOptionsError ? (
-                <p className="text-sm text-destructive">{initialStoreOptionsError}</p>
+                <p className="text-sm text-destructive">
+                  {initialStoreOptionsError}
+                </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Only stores with sellable assigned categories are valid import targets.
+                  Only stores with sellable assigned categories are valid import
+                  targets.
                 </p>
               )}
             </div>
           ) : vendorTargetStore ? (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border bg-muted/30 px-3 py-2 text-sm">
               <span className="font-medium">{vendorTargetStore.name}</span>
-              <span className="text-muted-foreground">{vendorTargetStore.slug}</span>
               <span className="text-muted-foreground">
-                · {vendorTargetStore.sellable_category_count} sellable categories
+                {vendorTargetStore.slug}
+              </span>
+              <span className="text-muted-foreground">
+                · {vendorTargetStore.sellable_category_count} sellable
+                categories
               </span>
               <span
                 className={cn(
@@ -367,13 +381,17 @@ export default function ProductImportUploadForm({
               <span className="font-medium">{uploadBlockedReason.message}</span>
               {uploadBlockedReason.code === "store_required" ? (
                 <Button asChild variant="outline" size="sm">
-                  <Link href={buildStoreRequirementPath("/products/imports/new")}>
+                  <Link
+                    href={buildStoreRequirementPath("/products/imports/new")}
+                  >
                     Create Your Store
                   </Link>
                 </Button>
               ) : uploadBlockedReason.code === "store_not_ready" ? (
                 <Button asChild variant="outline" size="sm">
-                  <Link href={buildStoreRemediationPath("/products/imports/new")}>
+                  <Link
+                    href={buildStoreRemediationPath("/products/imports/new")}
+                  >
                     Fix Store Readiness
                   </Link>
                 </Button>
@@ -385,24 +403,33 @@ export default function ProductImportUploadForm({
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="space-y-1">
               <div className="font-medium">
-                One <code className="rounded bg-amber-100 px-1">import_key</code> = one product
+                One{" "}
+                <code className="rounded bg-amber-100 px-1">import_key</code> =
+                one product
               </div>
               <div className="text-xs">
-                Rows sharing the same <code className="rounded bg-amber-100 px-1">import_key</code> describe
-                variants of a single product and must (a) stay contiguous in the CSV and
-                (b) keep these <strong>product-level columns identical</strong> on every row:
-                {" "}
-                <code className="rounded bg-amber-100 px-1">category_slug</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">name</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">description</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">highlights</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">box_items</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">base_price</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">product_sku</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">product_image_filenames</code>,
-                {" "}<code className="rounded bg-amber-100 px-1">specifications_json</code>.
-                {" "}Only the <code className="rounded bg-amber-100 px-1">variant_*</code> columns
-                should differ between rows.
+                Rows sharing the same{" "}
+                <code className="rounded bg-amber-100 px-1">import_key</code>{" "}
+                describe variants of a single product and must (a) stay
+                contiguous in the CSV and (b) keep these{" "}
+                <strong>product-level columns identical</strong> on every row:{" "}
+                <code className="rounded bg-amber-100 px-1">category_slug</code>
+                , <code className="rounded bg-amber-100 px-1">name</code>,{" "}
+                <code className="rounded bg-amber-100 px-1">description</code>,{" "}
+                <code className="rounded bg-amber-100 px-1">highlights</code>,{" "}
+                <code className="rounded bg-amber-100 px-1">box_items</code>,{" "}
+                <code className="rounded bg-amber-100 px-1">base_price</code>,{" "}
+                <code className="rounded bg-amber-100 px-1">product_sku</code>,{" "}
+                <code className="rounded bg-amber-100 px-1">
+                  product_image_filenames
+                </code>
+                ,{" "}
+                <code className="rounded bg-amber-100 px-1">
+                  specifications_json
+                </code>
+                . Only the{" "}
+                <code className="rounded bg-amber-100 px-1">variant_*</code>{" "}
+                columns should differ between rows.
               </div>
             </div>
           </div>
@@ -439,7 +466,8 @@ export default function ProductImportUploadForm({
               <Label htmlFor="product-import-zip">
                 Image ZIP{" "}
                 <span className="text-xs text-muted-foreground">
-                  (≤ {guidePayload.guide.constraints.image_archive_max_size_mb} MB, optional)
+                  (≤ {guidePayload.guide.constraints.image_archive_max_size_mb}{" "}
+                  MB, optional)
                 </span>
               </Label>
               <Input
@@ -549,11 +577,17 @@ export default function ProductImportUploadForm({
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Tip: to add more variants, copy the first row for that product and only change the{" "}
-                  <code className="rounded bg-muted px-1 font-mono">variant_*</code> columns. Changing
-                  any product-level column between rows sharing the same{" "}
-                  <code className="rounded bg-muted px-1 font-mono">import_key</code> rejects the whole
-                  group.
+                  Tip: to add more variants, copy the first row for that product
+                  and only change the{" "}
+                  <code className="rounded bg-muted px-1 font-mono">
+                    variant_*
+                  </code>{" "}
+                  columns. Changing any product-level column between rows
+                  sharing the same{" "}
+                  <code className="rounded bg-muted px-1 font-mono">
+                    import_key
+                  </code>{" "}
+                  rejects the whole group.
                 </p>
               </div>
             </TabsContent>

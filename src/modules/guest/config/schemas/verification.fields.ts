@@ -30,14 +30,17 @@ export const passwordConfirmationField = z
   });
 
 export const withConfirmedPassword = <T extends z.ZodRawShape>(shape: T) =>
-  z.object(shape).refine((data) => {
-    const values = data as {
-      password: string;
-      password_confirmation: string;
-    };
+  z.object(shape).refine(
+    (data) => {
+      const values = data as {
+        password: string;
+        password_confirmation: string;
+      };
 
-    return values.password === values.password_confirmation;
-  }, {
-    message: "Passwords do not match",
-    path: ["password_confirmation"],
-  });
+      return values.password === values.password_confirmation;
+    },
+    {
+      message: "Passwords do not match",
+      path: ["password_confirmation"],
+    },
+  );

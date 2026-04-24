@@ -15,7 +15,7 @@ export function getJsonOrString(value: string | null) {
   if (!value) return value;
   try {
     return JSON.parse(value);
-  } catch (error) {
+  } catch {
     return value;
   }
 }

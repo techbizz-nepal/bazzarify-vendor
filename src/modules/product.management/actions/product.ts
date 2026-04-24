@@ -1,7 +1,7 @@
 "use server";
 
-import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { ApiResponse, IMetaData, TURLSearchParams } from "@/modules/core";
+import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
@@ -157,7 +157,10 @@ export const actionUpdateProductStatus = async (
   const client = await authAxiosInstance();
   try {
     const response = await client.patch(
-      PRODUCT_MANAGEMENT_ROUTES.product.updateStatus.path.replace(":uuid", uuid),
+      PRODUCT_MANAGEMENT_ROUTES.product.updateStatus.path.replace(
+        ":uuid",
+        uuid,
+      ),
       { status },
     );
     const responseData = response.data as ApiResponse<{ product: TProduct }>;

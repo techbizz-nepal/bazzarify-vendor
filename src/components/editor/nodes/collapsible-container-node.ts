@@ -10,93 +10,93 @@ import {
   NodeKey,
   SerializedElementNode,
   Spread,
-} from "lexical"
+} from "lexical";
 
-import { IS_CHROME } from "@/components/editor/shared/environment"
-import { invariant } from "@/components/editor/shared/invariant"
-import { setDomHiddenUntilFound } from "@/components/editor/utils/collapsible"
+import { IS_CHROME } from "@/components/editor/shared/environment";
+import { invariant } from "@/components/editor/shared/invariant";
+import { setDomHiddenUntilFound } from "@/components/editor/utils/collapsible";
 
 type SerializedCollapsibleContainerNode = Spread<
   {
-    open: boolean
+    open: boolean;
   },
   SerializedElementNode
->
+>;
 
 export function $convertDetailsElement(
-  domNode: HTMLDetailsElement
+  domNode: HTMLDetailsElement,
 ): DOMConversionOutput | null {
-  const isOpen = domNode.open !== undefined ? domNode.open : true
-  const node = $createCollapsibleContainerNode(isOpen)
+  const isOpen = domNode.open !== undefined ? domNode.open : true;
+  const node = $createCollapsibleContainerNode(isOpen);
   return {
     node,
-  }
+  };
 }
 
 export class CollapsibleContainerNode extends ElementNode {
-  __open: boolean
+  __open: boolean;
 
   constructor(open: boolean, key?: NodeKey) {
-    super(key)
-    this.__open = open
+    super(key);
+    this.__open = open;
   }
 
   static getType(): string {
-    return "collapsible-container"
+    return "collapsible-container";
   }
 
   static clone(node: CollapsibleContainerNode): CollapsibleContainerNode {
-    return new CollapsibleContainerNode(node.__open, node.__key)
+    return new CollapsibleContainerNode(node.__open, node.__key);
   }
 
   createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
     // details is not well supported in Chrome #5582
-    let dom: HTMLElement
+    let dom: HTMLElement;
     if (IS_CHROME) {
-      dom = document.createElement("div")
-      dom.setAttribute("open", "")
+      dom = document.createElement("div");
+      dom.setAttribute("open", "");
     } else {
-      const detailsDom = document.createElement("details")
-      detailsDom.open = this.__open
+      const detailsDom = document.createElement("details");
+      detailsDom.open = this.__open;
       detailsDom.addEventListener("toggle", () => {
-        const open = editor.getEditorState().read(() => this.getOpen())
+        const open = editor.getEditorState().read(() => this.getOpen());
         if (open !== detailsDom.open) {
-          editor.update(() => this.toggleOpen())
+          editor.update(() => this.toggleOpen());
         }
-      })
-      dom = detailsDom
+      });
+      dom = detailsDom;
     }
-    dom.classList.add("Collapsible__container")
+    dom.classList.add("Collapsible__container");
 
-    return dom
+    return dom;
   }
 
   updateDOM(
     prevNode: CollapsibleContainerNode,
-    dom: HTMLDetailsElement
+    dom: HTMLDetailsElement,
   ): boolean {
-    const currentOpen = this.__open
+    const currentOpen = this.__open;
     if (prevNode.__open !== currentOpen) {
       // details is not well supported in Chrome #5582
       if (IS_CHROME) {
-        const contentDom = dom.children[1]
+        const contentDom = dom.children[1];
         invariant(
           isHTMLElement(contentDom),
-          "Expected contentDom to be an HTMLElement"
-        )
+          "Expected contentDom to be an HTMLElement",
+        );
         if (currentOpen) {
-          dom.setAttribute("open", "")
-          contentDom.hidden = false
+          dom.setAttribute("open", "");
+          contentDom.hidden = false;
         } else {
-          dom.removeAttribute("open")
-          setDomHiddenUntilFound(contentDom)
+          dom.removeAttribute("open");
+          setDomHiddenUntilFound(contentDom);
         }
       } else {
-        dom.open = this.__open
+        dom.open = this.__open;
       }
     }
 
-    return false
+    return false;
   }
 
   static importDOM(): DOMConversionMap<HTMLDetailsElement> | null {
@@ -105,23 +105,23 @@ export class CollapsibleContainerNode extends ElementNode {
         return {
           conversion: $convertDetailsElement,
           priority: 1,
-        }
+        };
       },
-    }
+    };
   }
 
   static importJSON(
-    serializedNode: SerializedCollapsibleContainerNode
+    serializedNode: SerializedCollapsibleContainerNode,
   ): CollapsibleContainerNode {
-    const node = $createCollapsibleContainerNode(serializedNode.open)
-    return node
+    const node = $createCollapsibleContainerNode(serializedNode.open);
+    return node;
   }
 
   exportDOM(): DOMExportOutput {
-    const element = document.createElement("details")
-    element.classList.add("Collapsible__container")
-    element.setAttribute("open", this.__open.toString())
-    return { element }
+    const element = document.createElement("details");
+    element.classList.add("Collapsible__container");
+    element.setAttribute("open", this.__open.toString());
+    return { element };
   }
 
   exportJSON(): SerializedCollapsibleContainerNode {
@@ -130,31 +130,31 @@ export class CollapsibleContainerNode extends ElementNode {
       open: this.__open,
       type: "collapsible-container",
       version: 1,
-    }
+    };
   }
 
   setOpen(open: boolean): void {
-    const writable = this.getWritable()
-    writable.__open = open
+    const writable = this.getWritable();
+    writable.__open = open;
   }
 
   getOpen(): boolean {
-    return this.getLatest().__open
+    return this.getLatest().__open;
   }
 
   toggleOpen(): void {
-    this.setOpen(!this.getOpen())
+    this.setOpen(!this.getOpen());
   }
 }
 
 export function $createCollapsibleContainerNode(
-  isOpen: boolean
+  isOpen: boolean,
 ): CollapsibleContainerNode {
-  return new CollapsibleContainerNode(isOpen)
+  return new CollapsibleContainerNode(isOpen);
 }
 
 export function $isCollapsibleContainerNode(
-  node: LexicalNode | null | undefined
+  node: LexicalNode | null | undefined,
 ): node is CollapsibleContainerNode {
-  return node instanceof CollapsibleContainerNode
+  return node instanceof CollapsibleContainerNode;
 }

@@ -11,10 +11,7 @@ export const handleRemoteError = (
   error: unknown,
   code: number | undefined = 500,
 ) => {
-  const feedback = extractRemoteErrorFeedback(
-    error,
-    "Something went wrong!",
-  );
+  const feedback = extractRemoteErrorFeedback(error, "Something went wrong!");
   return {
     data: {
       payload: [],

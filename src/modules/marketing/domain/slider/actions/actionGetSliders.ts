@@ -1,7 +1,7 @@
 "use server";
 
-import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { TURLSearchParams } from "@/modules/core";
+import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
 import { SLIDER_MANAGEMENT_ROUTES } from "@/modules/marketing/domain/slider/routes/slider-management";
@@ -26,23 +26,27 @@ const buildSliderSearchParams = (
   );
 };
 
-export const actionGetSliders = async (params?: FormData | TURLSearchParams) => {
+export const actionGetSliders = async (
+  params?: FormData | TURLSearchParams,
+) => {
   try {
     const searchParams = buildSliderSearchParams(params);
     const client = await authAxiosInstance();
     const response = await client.get(
       [SLIDER_MANAGEMENT_ROUTES.index.path, searchParams].join("?"),
     );
-    const parsed = ApiResponseSchema(SliderIndexResponsePayloadSchema).safeParse(
-      response.data,
-    );
+    const parsed = ApiResponseSchema(
+      SliderIndexResponsePayloadSchema,
+    ).safeParse(response.data);
 
     if (!parsed.success) {
       throw new Error("Slider index schema validation failed.");
     }
 
     if (parsed.data.metaData.error || parsed.data.data.payload === null) {
-      return { error: parsed.data.metaData.error ?? "Unable to fetch sliders." };
+      return {
+        error: parsed.data.metaData.error ?? "Unable to fetch sliders.",
+      };
     }
 
     return parsed.data.data.payload;

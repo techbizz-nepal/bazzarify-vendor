@@ -3,11 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TDashboardRecentItem } from "@/modules/dashboard/schemas/dashboard-summary-schema";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import {
-  FileSpreadsheet,
-  PackageOpen,
-  ShoppingBag,
-} from "lucide-react";
+import { FileSpreadsheet, PackageOpen, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 

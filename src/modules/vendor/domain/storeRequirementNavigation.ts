@@ -26,9 +26,7 @@ export const buildStoreRequirementPath = (returnTo: string) => {
 };
 
 export const buildStoreRemediationPath = (returnTo?: string | null) => {
-  const safeReturnTo = returnTo
-    ? sanitizeVendorReturnPath(returnTo)
-    : null;
+  const safeReturnTo = returnTo ? sanitizeVendorReturnPath(returnTo) : null;
 
   if (!safeReturnTo) {
     return STORE_REMEDIATION_PATH;
@@ -44,9 +42,7 @@ export const buildStoreRemediationPath = (returnTo?: string | null) => {
 export const DEFAULT_STORE_REQUIREMENT_RETURN_PATH =
   DEFAULT_VENDOR_PRODUCT_PATH;
 
-export const resolvePostStoreCreationPath = (
-  returnTo?: string | null,
-) => {
+export const resolvePostStoreCreationPath = (returnTo?: string | null) => {
   if (!returnTo) {
     return STORE_CREATED_SUCCESS_PATH;
   }

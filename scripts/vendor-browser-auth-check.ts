@@ -69,7 +69,11 @@ function parseArgs(argv: string[]): CliOptions {
       options.expectPath = undefined;
     }
 
-    if (current === "--auth-mode" && next && (next === "cookie" || next === "ui")) {
+    if (
+      current === "--auth-mode" &&
+      next &&
+      (next === "cookie" || next === "ui")
+    ) {
       options.authMode = next;
       index += 1;
       continue;
@@ -94,7 +98,9 @@ async function createAuthenticatedBrowserSession(persona: string) {
 
   const payload = JSON.parse(stdout) as SessionPayload;
   if (!payload.authenticated || !payload.sessionCookie) {
-    throw new Error(`Unable to create browser session for persona: ${persona}.`);
+    throw new Error(
+      `Unable to create browser session for persona: ${persona}.`,
+    );
   }
 
   return payload.sessionCookie;

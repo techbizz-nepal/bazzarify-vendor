@@ -63,11 +63,7 @@ export default function SliderDeleteScreen() {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isPending}
-            >
+            <Button type="button" variant="outline" disabled={isPending}>
               Cancel
             </Button>
           </DialogClose>

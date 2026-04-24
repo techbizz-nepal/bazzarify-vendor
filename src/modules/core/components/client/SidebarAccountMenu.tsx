@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ChevronUp, CircleAlert, LogOut, Settings, Store } from "lucide-react";
+import Link from "next/link";
 
 import {
   DropdownMenu,
@@ -65,7 +65,11 @@ export default function SidebarAccountMenu({
           <ChevronUp className="text-sidebar-selected/80 size-4 shrink-0" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" side="top" className="w-72 rounded-2xl p-2">
+      <DropdownMenuContent
+        align="end"
+        side="top"
+        className="w-72 rounded-2xl p-2"
+      >
         <DropdownMenuLabel className="rounded-xl px-3 py-3">
           <div className="flex items-start gap-3">
             <div className="bg-sidebar-selected text-sidebar-selected-foreground flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
@@ -79,7 +83,9 @@ export default function SidebarAccountMenu({
                 {identitySummary}
               </p>
               {email ? (
-                <p className="text-muted-foreground truncate text-xs">{email}</p>
+                <p className="text-muted-foreground truncate text-xs">
+                  {email}
+                </p>
               ) : null}
               <p className="text-muted-foreground truncate text-xs">
                 {roleSummary}

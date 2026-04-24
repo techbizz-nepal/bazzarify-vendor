@@ -3,8 +3,8 @@ import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
-import { actionGetProducts } from "@/modules/product.management/actions/product";
 import { TProduct } from "@/modules/product.management";
+import { actionGetProducts } from "@/modules/product.management/actions/product";
 import { requireVendorStoreGuard } from "@/modules/vendor/domain/requireVendorStoreGuard";
 import { Upload } from "lucide-react";
 import Link from "next/link";
@@ -115,7 +115,11 @@ export default async function ProductsPage({
           hasPreviousPage: Boolean(products?.prev_page_url),
         }}
         rowActions={[
-          { label: "View", hrefTemplate: "/products/:uuid", variant: "outline" },
+          {
+            label: "View",
+            hrefTemplate: "/products/:uuid",
+            variant: "outline",
+          },
           {
             label: "Edit",
             hrefTemplate: "/products/:uuid/edit",

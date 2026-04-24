@@ -1,12 +1,12 @@
-import PageContainer from "@/modules/core/components/server/PageContainer";
+import UsersServerTable from "@/modules/admin/users/components/client/UsersServerTable";
 import {
   getAuthUser,
   getSessionUserUUID,
 } from "@/modules/auth/data/lib/auth-lib";
 import { actionGetUsers } from "@/modules/auth/domain/auth-actions";
+import PageContainer from "@/modules/core/components/server/PageContainer";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
-import UsersServerTable from "@/modules/admin/users/components/client/UsersServerTable";
 import { redirect } from "next/navigation";
 
 export default async function UsersPage({
@@ -38,11 +38,15 @@ export default async function UsersPage({
     page: Number.isFinite(page) && page > 0 ? page : 1,
   });
   const rows =
-    usersResponse && typeof usersResponse === "object" && "users" in usersResponse
+    usersResponse &&
+    typeof usersResponse === "object" &&
+    "users" in usersResponse
       ? (usersResponse.users.data ?? [])
       : [];
   const users =
-    usersResponse && typeof usersResponse === "object" && "users" in usersResponse
+    usersResponse &&
+    typeof usersResponse === "object" &&
+    "users" in usersResponse
       ? usersResponse.users
       : null;
   const table =

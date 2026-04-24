@@ -13,7 +13,9 @@ export interface TOrderStatusOption {
 export const actionGetOrderStatuses = async () => {
   try {
     const client = await authAxiosInstance();
-    const response = await client.get(ORDER_MANAGEMENT_ROUTES.order.statuses.path);
+    const response = await client.get(
+      ORDER_MANAGEMENT_ROUTES.order.statuses.path,
+    );
     const responseData = response.data;
 
     if (responseData.metaData.error) {

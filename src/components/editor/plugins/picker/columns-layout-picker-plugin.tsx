@@ -1,7 +1,7 @@
-import { Columns3Icon } from "lucide-react"
+import { Columns3Icon } from "lucide-react";
 
-import { InsertLayoutDialog } from "@/components/editor/plugins/layout-plugin"
-import { ComponentPickerOption } from "@/components/editor/plugins/picker/component-picker-option"
+import { InsertLayoutDialog } from "@/components/editor/plugins/layout-plugin";
+import { ComponentPickerOption } from "@/components/editor/plugins/picker/component-picker-option";
 
 export function ColumnsLayoutPickerPlugin() {
   return new ComponentPickerOption("Columns Layout", {
@@ -11,5 +11,5 @@ export function ColumnsLayoutPickerPlugin() {
       showModal("Insert Columns Layout", (onClose) => (
         <InsertLayoutDialog activeEditor={editor} onClose={onClose} />
       )),
-  })
+  });
 }

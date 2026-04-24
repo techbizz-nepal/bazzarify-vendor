@@ -1,11 +1,14 @@
+import {
+  getAuthUser,
+  getSessionUserUUID,
+} from "@/modules/auth/data/lib/auth-lib";
 import ErrorComponent from "@/modules/core/components/client/ErrorComponent";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import { flattenSearchParams } from "@/modules/core/utils/searchParams";
-import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
-import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
-import ProductImportsServerTable from "@/modules/product.management/components/client/product-import/ProductImportsServerTable";
+import { getCookieStore } from "@/modules/core/lib/utils.session";
+import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { actionGetProductImports } from "@/modules/product.management/actions/import";
+import ProductImportsServerTable from "@/modules/product.management/components/client/product-import/ProductImportsServerTable";
 
 export default async function ProductImportsPage({
   searchParams,
@@ -34,10 +37,10 @@ export default async function ProductImportsPage({
   const authUser = userUuid ? await getAuthUser(userUuid) : null;
   const canManageAcrossStores = Boolean(
     authUser &&
-      !("error" in authUser) &&
-      authUser.roles.some(
-        (role) => role.name === "super-admin" || role.name === "admin",
-      ),
+    !("error" in authUser) &&
+    authUser.roles.some(
+      (role) => role.name === "super-admin" || role.name === "admin",
+    ),
   );
 
   const imports = response.imports;

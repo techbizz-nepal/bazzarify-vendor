@@ -60,7 +60,7 @@ export default function CreateForm() {
         <FormField
           control={form.control}
           name="files"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Upload images</FormLabel>
               <FormControl>

@@ -30,8 +30,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toTitleCase } from "@/modules/core/utils";
-import ItemCell from "@/modules/order.management/components/client/orderItem/ItemCell";
 import { actionUpdateOrderItemFulfillment } from "@/modules/order.management/actions/actionUpdateOrderItemFulfillment";
+import ItemCell from "@/modules/order.management/components/client/orderItem/ItemCell";
 import useOrderShow from "@/modules/order.management/hooks/order/useOrderShow";
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
 import { useRouter } from "next/navigation";
@@ -170,7 +170,9 @@ export default function Show({
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
-              {canManageWholeOrder ? "Payment information" : "Your Store Totals"}
+              {canManageWholeOrder
+                ? "Payment information"
+                : "Your Store Totals"}
             </CardTitle>
             <CardDescription>
               {canManageWholeOrder
@@ -180,7 +182,8 @@ export default function Show({
           </CardHeader>
           <CardContent>
             <p>
-              Sub Total: {canManageWholeOrder ? order.sub_total : scopedTotals.sub_total}
+              Sub Total:{" "}
+              {canManageWholeOrder ? order.sub_total : scopedTotals.sub_total}
             </p>
             <p>
               Discount:{" "}
@@ -188,7 +191,10 @@ export default function Show({
                 ? order.discount_total
                 : scopedTotals.discount_total}
             </p>
-            <p>Tax: {canManageWholeOrder ? order.tax_total : scopedTotals.tax_total}</p>
+            <p>
+              Tax:{" "}
+              {canManageWholeOrder ? order.tax_total : scopedTotals.tax_total}
+            </p>
             {canManageWholeOrder ? (
               <>
                 <p>Shipping: {order.shipping_total}</p>
@@ -220,7 +226,9 @@ export default function Show({
                   <TableHead>Discount</TableHead>
                   <TableHead>Shipping fee</TableHead>
                   <TableHead>Total</TableHead>
-                  {!canManageWholeOrder ? <TableHead>Item Actions</TableHead> : null}
+                  {!canManageWholeOrder ? (
+                    <TableHead>Item Actions</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -268,7 +276,8 @@ export default function Show({
                             size="sm"
                             variant="default"
                             disabled={
-                              isItemActionPending || itemRemainingQuantity(item) === 0
+                              isItemActionPending ||
+                              itemRemainingQuantity(item) === 0
                             }
                             onClick={() => {
                               startItemAction(async () => {
@@ -292,7 +301,8 @@ export default function Show({
                             size="sm"
                             variant="outline"
                             disabled={
-                              isItemActionPending || itemRemainingQuantity(item) === 0
+                              isItemActionPending ||
+                              itemRemainingQuantity(item) === 0
                             }
                             onClick={() => {
                               startItemAction(async () => {
@@ -322,19 +332,25 @@ export default function Show({
                 <TableRow>
                   <TableCell className="text-left">Sub Total</TableCell>
                   <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
-                    {canManageWholeOrder ? order.sub_total : scopedTotals.sub_total}
+                    {canManageWholeOrder
+                      ? order.sub_total
+                      : scopedTotals.sub_total}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Discount</TableCell>
                   <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
-                    {canManageWholeOrder ? order.discount_total : scopedTotals.discount_total}
+                    {canManageWholeOrder
+                      ? order.discount_total
+                      : scopedTotals.discount_total}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="text-left">Tax</TableCell>
                   <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
-                    {canManageWholeOrder ? order.tax_total : scopedTotals.tax_total}
+                    {canManageWholeOrder
+                      ? order.tax_total
+                      : scopedTotals.tax_total}
                   </TableCell>
                 </TableRow>
                 {canManageWholeOrder ? (
@@ -356,11 +372,15 @@ export default function Show({
                   <>
                     <TableRow>
                       <TableCell className="text-left">Shipping</TableCell>
-                      <TableCell colSpan={6}>{scopedTotals.shipping_total}</TableCell>
+                      <TableCell colSpan={6}>
+                        {scopedTotals.shipping_total}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="text-left">Your Total</TableCell>
-                      <TableCell colSpan={6}>{scopedTotals.grand_total}</TableCell>
+                      <TableCell colSpan={6}>
+                        {scopedTotals.grand_total}
+                      </TableCell>
                     </TableRow>
                   </>
                 )}

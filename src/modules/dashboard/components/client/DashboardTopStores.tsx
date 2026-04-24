@@ -32,10 +32,7 @@ export default function DashboardTopStores({ stores }: Props) {
               className="flex items-center justify-between gap-3 py-2 text-sm"
             >
               <span className="flex items-center gap-2">
-                <Store
-                  className="text-muted-foreground size-4"
-                  aria-hidden
-                />
+                <Store className="text-muted-foreground size-4" aria-hidden />
                 <span className="font-medium">{store.name}</span>
               </span>
               <span className="text-muted-foreground flex items-center gap-4 tabular-nums">

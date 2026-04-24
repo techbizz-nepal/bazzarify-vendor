@@ -1,6 +1,6 @@
-import StoreOnboardingManagement from "@/modules/vendor/components/client/StoreOnboardingManagement";
 import { getSessionUser } from "@/modules/auth/data/auth-service";
 import PageContainer from "@/modules/core/components/server/PageContainer";
+import StoreOnboardingManagement from "@/modules/vendor/components/client/StoreOnboardingManagement";
 import { actionGetAdminStoreOnboardingStoreTypes } from "@/modules/vendor/domain/store-actions";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

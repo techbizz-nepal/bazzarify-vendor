@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
@@ -19,8 +19,13 @@ import {
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
   TAttribute,
@@ -28,7 +33,6 @@ import {
   TSpecification,
 } from "@/modules/product.management";
 import { actionCreateCategory } from "@/modules/product.management/actions/category";
-import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
@@ -88,8 +92,12 @@ export default function Create({
   const router = useRouter();
   const [name, setName] = useState("");
   const [parentUuid, setParentUuid] = useState<string>("");
-  const [selectedAttributeUuids, setSelectedAttributeUuids] = useState<string[]>([]);
-  const [selectedSpecificationUuids, setSelectedSpecificationUuids] = useState<string[]>([]);
+  const [selectedAttributeUuids, setSelectedAttributeUuids] = useState<
+    string[]
+  >([]);
+  const [selectedSpecificationUuids, setSelectedSpecificationUuids] = useState<
+    string[]
+  >([]);
   const [feedback, setFeedback] = useState<CategoryFeedback>(null);
   const [isParentPickerOpen, setIsParentPickerOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -109,7 +117,12 @@ export default function Create({
   const isSellable = selectedAttributeUuids.length > 0;
   const nameError = getFieldError(feedback, "name");
   const parentError = getFieldError(feedback, "parent_uuid");
-  const attributeError = getFieldError(feedback, "attributes", "attributes.0", "attributes.*");
+  const attributeError = getFieldError(
+    feedback,
+    "attributes",
+    "attributes.0",
+    "attributes.*",
+  );
   const specificationError = getFieldError(
     feedback,
     "specifications",
@@ -169,7 +182,10 @@ export default function Create({
           "summary" in result &&
           "fieldErrors" in result
             ? result
-            : getValidationFeedback(result, "Please fix the highlighted fields.");
+            : getValidationFeedback(
+                result,
+                "Please fix the highlighted fields.",
+              );
 
         setFeedback(nextFeedback);
         toast.error(nextFeedback?.summary ?? "Unable to create category.");
@@ -332,11 +348,11 @@ export default function Create({
                   <Checkbox
                     checked={selectedAttributeUuids.includes(attribute.uuid)}
                     onCheckedChange={() =>
-                      toggleSelection(attribute.uuid, setSelectedAttributeUuids, [
-                        "attributes",
-                        "attributes.0",
-                        "attributes.*",
-                      ])
+                      toggleSelection(
+                        attribute.uuid,
+                        setSelectedAttributeUuids,
+                        ["attributes", "attributes.0", "attributes.*"],
+                      )
                     }
                   />
                   <div className="space-y-1">
@@ -386,7 +402,11 @@ export default function Create({
                       toggleSelection(
                         specification.uuid,
                         setSelectedSpecificationUuids,
-                        ["specifications", "specifications.0", "specifications.*"],
+                        [
+                          "specifications",
+                          "specifications.0",
+                          "specifications.*",
+                        ],
                       )
                     }
                   />
@@ -406,7 +426,11 @@ export default function Create({
       </Card>
 
       <div className="flex items-center justify-end gap-3">
-        <Button type="button" variant="outline" onClick={() => router.push("/categories")}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.push("/categories")}
+        >
           Cancel
         </Button>
         <Button type="button" onClick={handleSubmit} disabled={isPending}>

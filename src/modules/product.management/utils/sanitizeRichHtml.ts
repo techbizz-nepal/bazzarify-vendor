@@ -61,8 +61,7 @@ const VOID_TAGS = new Set(["br", "img"]);
 
 const SAFE_URL_RE = /^(https?:|mailto:|tel:|\/|#)/i;
 
-const TAG_RE =
-  /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:\s+[^>]*?)?)\s*(\/?)>/g;
+const TAG_RE = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:\s+[^>]*?)?)\s*(\/?)>/g;
 
 const ATTR_RE =
   /([a-zA-Z_:][a-zA-Z0-9_:.\-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>"']+)))?/g;
@@ -95,10 +94,7 @@ const parseAttrs = (raw: string): [string, string][] => {
   return out;
 };
 
-const renderAllowedAttrs = (
-  tag: string,
-  attrs: [string, string][],
-): string => {
+const renderAllowedAttrs = (tag: string, attrs: [string, string][]): string => {
   const allowlist = ALLOWED_ATTRS[tag] ?? [];
   if (allowlist.length === 0) return "";
   const parts: string[] = [];

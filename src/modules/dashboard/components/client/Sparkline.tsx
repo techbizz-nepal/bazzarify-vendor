@@ -43,7 +43,8 @@ export default function Sparkline({
   });
 
   const pathD =
-    "M " + points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" L ");
+    "M " +
+    points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" L ");
 
   const areaD = `${pathD} L ${width.toFixed(2)},${height} L 0,${height} Z`;
 

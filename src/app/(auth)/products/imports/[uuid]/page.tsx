@@ -1,8 +1,8 @@
 import ErrorComponent from "@/modules/core/components/client/ErrorComponent";
 import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import ProductImportDetailScreen from "@/modules/product.management/components/client/product-import/ProductImportDetailScreen";
 import { actionGetProductImport } from "@/modules/product.management/actions/import";
+import ProductImportDetailScreen from "@/modules/product.management/components/client/product-import/ProductImportDetailScreen";
 
 export default async function ProductImportDetailPage({
   params,

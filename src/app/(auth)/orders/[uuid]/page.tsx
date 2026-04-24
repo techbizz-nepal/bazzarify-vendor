@@ -1,7 +1,7 @@
-import { actionGetOrder } from "@/modules/order.management/actions/actionGetOrder";
+import { getSessionUser } from "@/modules/auth/data/auth-service";
 import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
-import { getSessionUser } from "@/modules/auth/data/auth-service";
+import { actionGetOrder } from "@/modules/order.management/actions/actionGetOrder";
 import Show from "@/modules/order.management/components/client/order/Show";
 import { Suspense } from "react";
 

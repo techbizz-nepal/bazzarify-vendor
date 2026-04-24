@@ -10,11 +10,11 @@ import {
 import SessionUserPayloadSchema from "@/modules/auth/domain/schemas/payloads/SessionUserPayloadSchema";
 import { TSessionUser } from "@/modules/auth/domain/schemas/UserSchema";
 import { TURLSearchParams } from "@/modules/core";
+import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { IApiMetaData } from "@/modules/core/schemas/response";
 import { fetchAuthDataAndValidate } from "@/modules/core/utils/fetchAuthDataAndValidate";
 import { handleError } from "@/modules/core/utils/jsonResponse.utils";
-import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { formattedIssues } from "@/modules/core/utils/zod.util";
 
 export const actionGetUser = async (): Promise<TSessionUser | IApiMetaData> => {
@@ -40,7 +40,11 @@ export const actionGetUsers = async (
         ? new URLSearchParams(params as unknown as Record<string, string>)
         : new URLSearchParams(
             Object.entries(params ?? {}).flatMap(([key, value]) => {
-              if (key === "filter" && typeof value === "object" && value !== null) {
+              if (
+                key === "filter" &&
+                typeof value === "object" &&
+                value !== null
+              ) {
                 return Object.entries(value as Record<string, string>).flatMap(
                   ([filterKey, filterValue]) =>
                     filterValue ? [[`filter[${filterKey}]`, filterValue]] : [],
@@ -54,8 +58,10 @@ export const actionGetUsers = async (
               return [[key, String(value)]];
             }),
           );
-    const response = await axios.get(["auth/admin/users", searchParams].join("?"), {
-    });
+    const response = await axios.get(
+      ["auth/admin/users", searchParams].join("?"),
+      {},
+    );
     const parsed = ApiResponseSchema(AdminUserIndexPayloadSchema).safeParse(
       response.data,
     );

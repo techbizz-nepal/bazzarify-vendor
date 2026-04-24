@@ -131,9 +131,8 @@ export default function ServerDataTable<T>({
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const [draftFilters, setDraftFilters] = useState<Record<string, string>>(
-    initialFilters,
-  );
+  const [draftFilters, setDraftFilters] =
+    useState<Record<string, string>>(initialFilters);
 
   const paginationSummary = useMemo(() => {
     if (pagination.from == null || pagination.to == null) {

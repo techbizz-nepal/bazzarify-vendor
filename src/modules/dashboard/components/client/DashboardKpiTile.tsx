@@ -59,7 +59,11 @@ export default function DashboardKpiTile({
   };
 
   const ArrowIcon =
-    tone === "up" ? ArrowUpRight : tone === "down" ? ArrowDownRight : ArrowRight;
+    tone === "up"
+      ? ArrowUpRight
+      : tone === "down"
+        ? ArrowDownRight
+        : ArrowRight;
 
   return (
     <Card className="relative overflow-hidden">

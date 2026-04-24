@@ -33,7 +33,7 @@ export default function SliderStatusText({ slider }: Props) {
           <Button variant="outline">Update Status</Button>
         </PopoverTrigger>
         <PopoverContent className="w-32 flex flex-col space-y-3">
-          {Object.entries(SliderStatus).map(([key, value]) => (
+          {Object.values(SliderStatus).map((value) => (
             <Button
               key={value}
               id={value}

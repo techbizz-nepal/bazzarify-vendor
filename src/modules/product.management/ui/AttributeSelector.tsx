@@ -71,12 +71,8 @@ export default function AttributeSelector({
   );
 
   const attemptToggle = (attributeName: string, value: string) => {
-    const isActivatingNewDimension =
-      !(selections[attributeName] || []).length;
-    if (
-      isActivatingNewDimension &&
-      activeAttrCount >= attributeCap
-    ) {
+    const isActivatingNewDimension = !(selections[attributeName] || []).length;
+    if (isActivatingNewDimension && activeAttrCount >= attributeCap) {
       toast.error(
         `A product can have at most ${attributeCap} attribute dimensions.`,
       );

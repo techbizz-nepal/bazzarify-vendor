@@ -18,7 +18,6 @@ import {
 import ContentSkeleton from "@/modules/core/components/server/ContentSkeleton";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { TAttribute, TSpecification } from "@/modules/product.management";
-import { random } from "nanoid";
 
 interface ICategorySpecificationsCard {
   specifications: TSpecification[];
@@ -53,7 +52,7 @@ const CategorySpecificationsCard = ({
 }: ICategorySpecificationsCard) => {
   const renderSkeletonRows = () =>
     Array.from({ length: 9 }).map((_, index) => (
-      <ContentSkeleton key={random(3).toString()} />
+      <ContentSkeleton key={index} />
     ));
 
   return (

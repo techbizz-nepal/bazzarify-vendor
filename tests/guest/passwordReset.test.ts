@@ -1,10 +1,10 @@
-import assert from "node:assert/strict";
-import { ResetPasswordFormSchema } from "../../src/modules/guest/config/schemas/reset.password.form";
-import { ResetPasswordVerificationFormSchema } from "../../src/modules/guest/config/schemas/reset.password.verification.form";
+import { ResetPasswordFormSchema } from "@/modules/guest/config/schemas/reset.password.form";
+import { ResetPasswordVerificationFormSchema } from "@/modules/guest/config/schemas/reset.password.verification.form";
 import {
   buildPasswordResetVerificationHref,
   toPasswordResetVerificationPayload,
-} from "../../src/modules/guest/utils/passwordReset";
+} from "@/modules/guest/utils/passwordReset";
+import assert from "node:assert/strict";
 
 const validResetRequest = ResetPasswordFormSchema.safeParse({
   email: "vendor@example.com",

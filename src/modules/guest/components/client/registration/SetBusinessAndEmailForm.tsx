@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
-import useStoreSetupForm from "@/modules/vendor/hooks/useStoreSetupForm";
 import { TStoreTypeOption } from "@/modules/vendor/domain/schemas/storeOnboarding";
+import useStoreSetupForm from "@/modules/vendor/hooks/useStoreSetupForm";
 import { useRouter } from "next/navigation";
 
 interface SetBusinessAndEmailProps {
@@ -33,13 +33,11 @@ const SetBusinessAndEmail = ({
   storeTypeOptions = [],
 }: SetBusinessAndEmailProps) => {
   const router = useRouter();
-  const {
-    storeSetupForm: form,
-    handleStoreSetupSubmit: onSubmit,
-  } = useStoreSetupForm(router, {
-    redirectTo,
-    hasStoreTypeOptions: storeTypeOptions.length > 0,
-  });
+  const { storeSetupForm: form, handleStoreSetupSubmit: onSubmit } =
+    useStoreSetupForm(router, {
+      redirectTo,
+      hasStoreTypeOptions: storeTypeOptions.length > 0,
+    });
 
   const selectedStoreTypeUuid = form.watch("store_type_uuid");
   const selectedStoreType = storeTypeOptions.find(
@@ -178,7 +176,9 @@ const SetBusinessAndEmail = ({
           />
           <ThemedButton
             className={cn(`text-md w-full cursor-pointer py-6`)}
-            disabled={form.formState.isSubmitting || storeTypeOptions.length === 0}
+            disabled={
+              form.formState.isSubmitting || storeTypeOptions.length === 0
+            }
           >
             Submit
           </ThemedButton>

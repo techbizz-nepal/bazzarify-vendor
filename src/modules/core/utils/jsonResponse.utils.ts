@@ -1,14 +1,8 @@
 import {
-  IApiData,
   IApiMetaData,
   IApiResponse,
 } from "@/modules/core/schemas/response";
 import { AxiosError, isAxiosError } from "axios";
-
-interface ISuccessResponse<T> {
-  data: IApiData<T>;
-  status: number;
-}
 
 export const handleError = (error: unknown) => {
   const metaData: IApiMetaData = {

@@ -1,9 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
 import {
   ArrowLeft,
   Check,
@@ -14,6 +10,10 @@ import {
   Settings2,
   X,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -319,11 +319,7 @@ export default function ProductInspectionView({ productPayload }: Props) {
 
   const specEntries: [string, string][] = (() => {
     const specs = product.specifications as unknown;
-    if (
-      !specs ||
-      typeof specs !== "object" ||
-      Array.isArray(specs)
-    ) {
+    if (!specs || typeof specs !== "object" || Array.isArray(specs)) {
       return [];
     }
     return Object.entries(specs as Record<string, unknown>)
@@ -730,7 +726,9 @@ export default function ProductInspectionView({ productPayload }: Props) {
                           });
                         }
                         return (
-                          <TableRow key={variant.uuid ?? `${idx}-${variant.name}`}>
+                          <TableRow
+                            key={variant.uuid ?? `${idx}-${variant.name}`}
+                          >
                             <TableCell className="text-muted-foreground">
                               {idx + 1}
                             </TableCell>
@@ -807,7 +805,6 @@ export default function ProductInspectionView({ productPayload }: Props) {
               )}
             </CardContent>
           </Card>
-
         </div>
       </TooltipProvider>
     </PageContainer>

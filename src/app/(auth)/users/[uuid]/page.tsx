@@ -1,6 +1,6 @@
-import PageContainer from "@/modules/core/components/server/PageContainer";
-import { actionGetUserByUuid } from "@/modules/auth/domain/auth-actions";
 import UserDetailView from "@/modules/admin/users/components/server/UserDetailView";
+import { actionGetUserByUuid } from "@/modules/auth/domain/auth-actions";
+import PageContainer from "@/modules/core/components/server/PageContainer";
 import { notFound, redirect } from "next/navigation";
 
 export default async function UserDetailPage({
@@ -24,7 +24,9 @@ export default async function UserDetailPage({
   }
 
   return (
-    <PageContainer pageTitle={`User ${response.user.name ?? response.user.email ?? uuid}`}>
+    <PageContainer
+      pageTitle={`User ${response.user.name ?? response.user.email ?? uuid}`}
+    >
       <UserDetailView user={response.user} />
     </PageContainer>
   );

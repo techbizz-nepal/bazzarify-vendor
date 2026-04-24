@@ -29,7 +29,10 @@ export const actionUpdateOrderItemFulfillment = async (
     return responseData.data.payload;
   } catch (error) {
     if (isAxiosError(error)) {
-      console.log("error updating order item fulfillment: ", error?.response?.data);
+      console.log(
+        "error updating order item fulfillment: ",
+        error?.response?.data,
+      );
     } else {
       console.log("error updating order item fulfillment: ", error);
     }

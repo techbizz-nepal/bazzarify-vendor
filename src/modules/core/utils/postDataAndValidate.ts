@@ -39,10 +39,7 @@ export default async function postDataAndValidate<TData, TResponse>(
   const { data: payloadData, metaData } = parsed.data;
 
   if (payloadData.payload === null || metaData.error) {
-    throw createRemoteFeedbackError(
-      { metaData },
-      "API returned null payload",
-    );
+    throw createRemoteFeedbackError({ metaData }, "API returned null payload");
   }
   return payloadData.payload;
 }

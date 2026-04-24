@@ -1,19 +1,19 @@
 import { IMetaData } from "@/modules/core";
 import { fromZodIssues } from "@/modules/core/lib/utils.validationFeedback";
-import { z } from "zod";
-import { actionViewCategoryAuthoringContext } from "@/modules/product.management/actions/category";
 import {
-  TCategoryAuthoringContextPayload,
   ProductSubmissionFeedback,
   TAttribute,
+  TCategoryAuthoringContextPayload,
   TVariantDataMap,
   TVariantPayload,
 } from "@/modules/product.management";
+import { actionViewCategoryAuthoringContext } from "@/modules/product.management/actions/category";
 import {
   appendFormDataVariants,
   createVariantsPayload,
   updateVariantValidity,
 } from "@/modules/product.management/utils/productForm";
+import { z } from "zod";
 
 export type ProductSubmissionFailure =
   | {
@@ -71,7 +71,10 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
 }: PrepareProductSubmissionInput<TSchema>):
   | ProductSubmissionFailure
   | ProductSubmissionSuccess<z.infer<TSchema>> => {
-  const { updated, allValid } = updateVariantValidity(combinations, variantData);
+  const { updated, allValid } = updateVariantValidity(
+    combinations,
+    variantData,
+  );
 
   if (!allValid) {
     return {
@@ -79,7 +82,8 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
       kind: "variants",
       message: "Please fill stock, price, SKU, images for variants.",
       feedback: {
-        summary: "Please complete the required variant fields before submitting.",
+        summary:
+          "Please complete the required variant fields before submitting.",
         fieldErrors: {},
       },
       updatedVariantData: updated,
@@ -115,19 +119,19 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
 
   const formData = new FormData();
 
-  Object.entries(
-    validationResult.data as Record<string, unknown>,
-  ).forEach(([key, value]) => {
-    if (key === "variants") {
-      return;
-    }
+  Object.entries(validationResult.data as Record<string, unknown>).forEach(
+    ([key, value]) => {
+      if (key === "variants") {
+        return;
+      }
 
-    if (key === "sku" && typeof value === "string" && value.trim() === "") {
-      return;
-    }
+      if (key === "sku" && typeof value === "string" && value.trim() === "") {
+        return;
+      }
 
-    formData.append(key, String(value));
-  });
+      formData.append(key, String(value));
+    },
+  );
 
   uploadedProductImages.forEach((image) => formData.append("images[]", image));
   Object.entries(specifications).forEach(([key, value]) => {

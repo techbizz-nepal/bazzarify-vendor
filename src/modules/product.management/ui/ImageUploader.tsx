@@ -1,9 +1,9 @@
+import { cn } from "@/lib/utils";
 import {
   MAX_FILE_SIZE_MB,
   MAX_PRODUCT_IMAGES_COUNT,
 } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { validateImage } from "@/modules/product.management/utils/productForm";
-import { cn } from "@/lib/utils";
 import { CirclePlus, X } from "lucide-react";
 import NextImage from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -192,47 +192,47 @@ export default function ImageUploader({
       )}
     >
       <div className="flex items-center space-x-4">
-      <input
-        name="files[]"
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleFileChange}
-        className="hidden"
-      />
-      <div className="flex flex-wrap gap-4">
-        {previews.map((p, index) => (
-          <div key={index} className="relative">
-            {brokenUrls[p.url] ? (
-              <div className="flex h-20 w-20 items-center justify-center rounded border border-dashed text-center text-xs text-muted-foreground">
-                Image unavailable
-              </div>
-            ) : (
-              <NextImage
-                width={100}
-                height={100}
-                src={p.url}
-                alt={`preview-${index}`}
-                className="h-20 w-20 rounded border object-cover"
-                onError={() =>
-                  setBrokenUrls((prev) => ({ ...prev, [p.url]: true }))
-                }
-              />
-            )}
-            <button
-              type="button"
-              onClick={() => handleRemoveImage(index)}
-              className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow"
-            >
-              <X className="w-4 h-4 text-red-500" />
-            </button>
-          </div>
-        ))}
-      </div>
-      <div onClick={handleIconClick}>
-        <CirclePlus width={80} height={80} />
-      </div>
+        <input
+          name="files[]"
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <div className="flex flex-wrap gap-4">
+          {previews.map((p, index) => (
+            <div key={index} className="relative">
+              {brokenUrls[p.url] ? (
+                <div className="flex h-20 w-20 items-center justify-center rounded border border-dashed text-center text-xs text-muted-foreground">
+                  Image unavailable
+                </div>
+              ) : (
+                <NextImage
+                  width={100}
+                  height={100}
+                  src={p.url}
+                  alt={`preview-${index}`}
+                  className="h-20 w-20 rounded border object-cover"
+                  onError={() =>
+                    setBrokenUrls((prev) => ({ ...prev, [p.url]: true }))
+                  }
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(index)}
+                className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow"
+              >
+                <X className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div onClick={handleIconClick}>
+          <CirclePlus width={80} height={80} />
+        </div>
       </div>
       {errorMessage && (
         <p className="mt-3 text-sm text-destructive">{errorMessage}</p>

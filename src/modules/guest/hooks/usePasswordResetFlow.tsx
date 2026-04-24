@@ -95,11 +95,7 @@ export function usePasswordResetRequestFlow() {
   };
 }
 
-export function usePasswordResetVerificationFlow({
-  phone,
-}: {
-  phone: string;
-}) {
+export function usePasswordResetVerificationFlow({ phone }: { phone: string }) {
   const router = useRouter();
   const form = useForm<ResetPasswordVerificationFormValues>({
     resolver: zodResolver(ResetPasswordVerificationFormSchema),

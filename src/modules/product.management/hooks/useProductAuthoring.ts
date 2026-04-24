@@ -1,3 +1,4 @@
+import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
   ProductAuthoringController,
   TAttribute,
@@ -7,7 +8,6 @@ import {
   TSpecification,
   TVariantDataMap,
 } from "@/modules/product.management";
-import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
   actionStoreProducts,
   actionUpdateProducts,
@@ -25,15 +25,15 @@ import useCategory from "@/modules/product.management/hooks/useCategory";
 import useProduct from "@/modules/product.management/hooks/useProduct";
 import useVariant from "@/modules/product.management/hooks/useVariant";
 import { fillSelectedProductVariantData } from "@/modules/product.management/utils/editProductUtils";
+import {
+  loadProductCategoryContext,
+  prepareProductSubmission,
+} from "@/modules/product.management/utils/productAuthoring";
 import { lexicalJsonToHtml } from "@/modules/product.management/utils/richTextEditorUtils";
 import {
   createVariantDraftKey,
   resolveVariantOptionValuesFromAttributes,
 } from "@/modules/product.management/utils/variantDraft";
-import {
-  loadProductCategoryContext,
-  prepareProductSubmission,
-} from "@/modules/product.management/utils/productAuthoring";
 import { omit } from "lodash-es";
 import { useRouter } from "next/navigation";
 import {
@@ -109,8 +109,7 @@ export default function useProductAuthoring({
   const variant = useVariant({
     variantSelections,
     setVariantSelections,
-    attributeCap:
-      mode === "update" ? Math.max(3, legacyAttributeCount) : 3,
+    attributeCap: mode === "update" ? Math.max(3, legacyAttributeCount) : 3,
     onExistingVariantImageRemove: async (combo, url) => {
       const key = createVariantDraftKey(combo);
       const uuid = variantImageIdMap[key]?.[url];
@@ -211,7 +210,9 @@ export default function useProductAuthoring({
       return;
     }
 
-    const categoryContext = await loadProductCategoryContext(selectedCategory.slug);
+    const categoryContext = await loadProductCategoryContext(
+      selectedCategory.slug,
+    );
     if ("error" in categoryContext) {
       toast.error(categoryContext.error);
       return;
@@ -264,7 +265,9 @@ export default function useProductAuthoring({
       return;
     }
 
-    if (hydratedEditProductUuidRef.current === editProductPayload.product.uuid) {
+    if (
+      hydratedEditProductUuidRef.current === editProductPayload.product.uuid
+    ) {
       return;
     }
 
@@ -314,10 +317,7 @@ export default function useProductAuthoring({
       return;
     }
 
-    if (
-      mode === "create" &&
-      product.uploadedProductImages.length === 0
-    ) {
+    if (mode === "create" && product.uploadedProductImages.length === 0) {
       const feedback: {
         summary: string;
         fieldErrors: Record<string, string[]>;
@@ -381,13 +381,13 @@ export default function useProductAuthoring({
               base_price: String(product.productForm.base_price),
               description: product.productForm.description,
               highlights: product.productForm.highlights,
-            box_items: product.productForm.box_items,
-          },
-          productSku: product.productForm.sku,
-          committedCategoryUuid: category.committedCategory?.uuid,
-          combinations: variant.combinations,
-          columns: variant.columns,
-          variantData: variant.variantData,
+              box_items: product.productForm.box_items,
+            },
+            productSku: product.productForm.sku,
+            committedCategoryUuid: category.committedCategory?.uuid,
+            combinations: variant.combinations,
+            columns: variant.columns,
+            variantData: variant.variantData,
             uploadedProductImages: product.uploadedProductImages,
             specifications: specificationValues,
             categoryAttributes,
@@ -401,20 +401,22 @@ export default function useProductAuthoring({
     }
 
     setSubmissionFeedback(null);
-    toast.info(mode === "create" ? "Uploading product..." : "Updating product...");
+    toast.info(
+      mode === "create" ? "Uploading product..." : "Updating product...",
+    );
     setIsSubmitting(true);
 
     try {
       if (mode === "update") {
         removedProductImageUuids.forEach((uuid, index) => {
-          submission.formData.append(`removed_product_image_uuids[${index}]`, uuid);
+          submission.formData.append(
+            `removed_product_image_uuids[${index}]`,
+            uuid,
+          );
         });
 
         variant.removedVariantUuids.forEach((uuid, index) => {
-          submission.formData.append(
-            `removed_variant_uuids[${index}]`,
-            uuid,
-          );
+          submission.formData.append(`removed_variant_uuids[${index}]`, uuid);
         });
 
         variant.combinations.forEach((combo, index) => {
@@ -543,9 +545,7 @@ interface HydrateEditProductArgs {
   setVariantData: Dispatch<SetStateAction<TVariantDataMap>>;
   setVariantSelections: Dispatch<SetStateAction<Record<string, string[]>>>;
   setColumns: Dispatch<SetStateAction<string[]>>;
-  setVariantImageIdMap: (
-    value: Record<string, Record<string, string>>,
-  ) => void;
+  setVariantImageIdMap: (value: Record<string, Record<string, string>>) => void;
   setLegacyAttributeCount: Dispatch<SetStateAction<number>>;
 }
 

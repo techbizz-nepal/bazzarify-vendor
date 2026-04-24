@@ -4,6 +4,7 @@ import ApiResponseSchema from "@/modules/core/domain/schemas/ApiResponse";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
+import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
   TProductImportActivePayload,
   TProductImportGuidePayload,
@@ -24,7 +25,6 @@ import {
   ProductImportUploadPayloadSchema,
   ProductImportValidationPayloadSchema,
 } from "@/modules/product.management/schemas/ProductImportSchema";
-import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import { isAxiosError } from "axios";
 import { z } from "zod";
 
@@ -65,9 +65,7 @@ function throwSchemaFailure(
   parsedError: z.ZodError,
   label: string,
 ): never {
-  throw new Error(
-    `${label} [${marker}] ${z.prettifyError(parsedError)}`,
-  );
+  throw new Error(`${label} [${marker}] ${z.prettifyError(parsedError)}`);
 }
 
 const normalizeActionError = (
@@ -114,7 +112,9 @@ export const actionGetProductImportGuide = async (): Promise<
 
 export const actionGetProductImportTargetStores = async (
   search?: string,
-): Promise<TProductImportTargetStorePayload | ReturnType<typeof handleUnknownError>> => {
+): Promise<
+  TProductImportTargetStorePayload | ReturnType<typeof handleUnknownError>
+> => {
   try {
     const client = await authAxiosInstance();
     const response = await client.get(
@@ -190,10 +190,11 @@ export const actionCreateProductImport = async (
           response.data,
           "Please fix the highlighted import fields.",
         ) ?? {
-          error: extractRemoteErrorFeedback(
-            response.data,
-            "Unable to upload import package.",
-          )?.error ?? "Unable to upload import package.",
+          error:
+            extractRemoteErrorFeedback(
+              response.data,
+              "Unable to upload import package.",
+            )?.error ?? "Unable to upload import package.",
         }
       );
     }
@@ -202,8 +203,11 @@ export const actionCreateProductImport = async (
   } catch (error) {
     if (isAxiosError(error) && error.response?.data) {
       const activeImportParsed = ProductImportActiveImportErrorSchema.safeParse(
-        (error.response.data as { metaData?: { error?: { active_import?: unknown } } })
-          ?.metaData?.error?.active_import,
+        (
+          error.response.data as {
+            metaData?: { error?: { active_import?: unknown } };
+          }
+        )?.metaData?.error?.active_import,
       );
       if (activeImportParsed.success) {
         return {
@@ -227,7 +231,9 @@ export const actionCreateProductImport = async (
 
 export const actionGetProductImports = async (
   params?: Record<string, string | string[] | undefined>,
-): Promise<TProductImportListPayload | ReturnType<typeof handleUnknownError>> => {
+): Promise<
+  TProductImportListPayload | ReturnType<typeof handleUnknownError>
+> => {
   try {
     const client = await authAxiosInstance();
     const response = await client.get(
@@ -263,7 +269,9 @@ export const actionGetProductImports = async (
 
 export const actionGetActiveProductImport = async (
   storeUuid?: string,
-): Promise<TProductImportActivePayload | ReturnType<typeof handleUnknownError>> => {
+): Promise<
+  TProductImportActivePayload | ReturnType<typeof handleUnknownError>
+> => {
   try {
     const client = await authAxiosInstance();
     const response = await client.get(
@@ -273,9 +281,9 @@ export const actionGetActiveProductImport = async (
       },
     );
 
-    const parsed = ApiResponseSchema(ProductImportActivePayloadSchema).safeParse(
-      response.data,
-    );
+    const parsed = ApiResponseSchema(
+      ProductImportActivePayloadSchema,
+    ).safeParse(response.data);
 
     if (!parsed.success) {
       throwSchemaFailure(
@@ -305,12 +313,15 @@ export const actionCancelProductImport = async (
   try {
     const client = await authAxiosInstance();
     const response = await client.post(
-      PRODUCT_MANAGEMENT_ROUTES.product.importCancel.path.replace(":uuid", uuid),
+      PRODUCT_MANAGEMENT_ROUTES.product.importCancel.path.replace(
+        ":uuid",
+        uuid,
+      ),
     );
 
-    const parsed = ApiResponseSchema(ProductImportUploadPayloadSchema).safeParse(
-      response.data,
-    );
+    const parsed = ApiResponseSchema(
+      ProductImportUploadPayloadSchema,
+    ).safeParse(response.data);
 
     if (!parsed.success) {
       throwSchemaFailure(
@@ -337,7 +348,10 @@ export const actionValidateProductImport = async (
   try {
     const client = await authAxiosInstance();
     const response = await client.post(
-      PRODUCT_MANAGEMENT_ROUTES.product.importValidate.path.replace(":uuid", uuid),
+      PRODUCT_MANAGEMENT_ROUTES.product.importValidate.path.replace(
+        ":uuid",
+        uuid,
+      ),
     );
 
     const parsed = ApiResponseSchema(
@@ -365,7 +379,9 @@ export const actionValidateProductImport = async (
 
 export const actionGetProductImport = async (
   uuid: string,
-): Promise<TProductImportUploadPayload | ReturnType<typeof handleUnknownError>> => {
+): Promise<
+  TProductImportUploadPayload | ReturnType<typeof handleUnknownError>
+> => {
   try {
     const client = await authAxiosInstance();
     const response = await client.get(
@@ -385,7 +401,10 @@ export const actionGetProductImport = async (
     }
 
     if (parsed.data.metaData.error || parsed.data.data.payload === null) {
-      return normalizeActionError(response.data, "Unable to fetch import status.");
+      return normalizeActionError(
+        response.data,
+        "Unable to fetch import status.",
+      );
     }
 
     return parsed.data.data.payload;
@@ -401,7 +420,10 @@ export const actionProcessProductImport = async (
   try {
     const client = await authAxiosInstance();
     const response = await client.post(
-      PRODUCT_MANAGEMENT_ROUTES.product.importProcess.path.replace(":uuid", uuid),
+      PRODUCT_MANAGEMENT_ROUTES.product.importProcess.path.replace(
+        ":uuid",
+        uuid,
+      ),
     );
 
     const parsed = ApiResponseSchema(

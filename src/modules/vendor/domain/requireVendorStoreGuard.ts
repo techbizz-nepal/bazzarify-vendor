@@ -1,6 +1,9 @@
 import "server-only";
 
-import { getAuthUser, getSessionUserUUID } from "@/modules/auth/data/lib/auth-lib";
+import {
+  getAuthUser,
+  getSessionUserUUID,
+} from "@/modules/auth/data/lib/auth-lib";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
 import {
   buildStoreRemediationPath,

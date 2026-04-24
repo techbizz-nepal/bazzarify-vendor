@@ -1,12 +1,12 @@
 import { FieldLegend, FieldSet } from "@/components/ui/field";
 
 export default function DateFilter({
-                                     label,
-                                     fromValue,
-                                     toValue,
-                                     onFromChange,
-                                     onToChange,
-                                   }: {
+  label,
+  fromValue,
+  toValue,
+  onFromChange,
+  onToChange,
+}: {
   label: string;
   fromValue: string;
   toValue: string;

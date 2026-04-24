@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -15,6 +14,7 @@ import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { actionGetStoreTypeOptions } from "@/modules/vendor/domain/store-actions";
 import { buildStoreRemediationPath } from "@/modules/vendor/domain/storeRequirementNavigation";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function StoreCreatedPage() {

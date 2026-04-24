@@ -1,5 +1,5 @@
-import { SimplePaginatedSchema } from "@/modules/core/schemas/SimplePaginated";
 import { ServerDataTableMetaSchema } from "@/modules/core/domain/schemas/ServerDataTableMeta";
+import { SimplePaginatedSchema } from "@/modules/core/schemas/SimplePaginated";
 import { OrderListItemSchema } from "@/modules/order.management/schemas/orderSchema";
 import { z } from "zod";
 

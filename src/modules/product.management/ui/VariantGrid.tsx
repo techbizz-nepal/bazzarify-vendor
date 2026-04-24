@@ -1,6 +1,3 @@
-import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,6 +8,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
 import {
   ProductSubmissionFeedback,
@@ -20,15 +20,15 @@ import {
   VariantRow,
 } from "@/modules/product.management";
 import {
-  getSubmissionFieldError,
-  hasSubmissionFieldPrefix,
-} from "@/modules/product.management/utils/productSubmissionFeedback";
-import {
   MAX_FILE_SIZE_MB,
   MAX_VARIANT_IMAGE_COUNT,
 } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { resolveStorageImageUrl } from "@/modules/product.management/utils/imageUrl";
 import { validateImage } from "@/modules/product.management/utils/productForm";
+import {
+  getSubmissionFieldError,
+  hasSubmissionFieldPrefix,
+} from "@/modules/product.management/utils/productSubmissionFeedback";
 import { CirclePlus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
@@ -226,7 +226,9 @@ export default function VariantGrid({
               <th className="border px-2 py-2 w-10 text-center">
                 <Checkbox
                   aria-label="Select all variants"
-                  checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                  checked={
+                    allSelected ? true : someSelected ? "indeterminate" : false
+                  }
                   onCheckedChange={(value) => toggleSelectAll(value === true)}
                 />
               </th>
@@ -303,7 +305,7 @@ export default function VariantGrid({
                       }
                     />
                   </td>
-                  {effectiveColumns.map((col, i) => (
+                  {effectiveColumns.map((col) => (
                     <td key={col} className="border px-4 py-2">
                       {comboMap[col] || ""}
                     </td>
@@ -322,7 +324,9 @@ export default function VariantGrid({
                       onChange={(e) => onChange(combo, "stock", e.target.value)}
                     />
                     {stockError && (
-                      <p className="mt-1 text-xs text-destructive">{stockError}</p>
+                      <p className="mt-1 text-xs text-destructive">
+                        {stockError}
+                      </p>
                     )}
                   </td>
                   <td className="border px-2 py-1">
@@ -339,7 +343,9 @@ export default function VariantGrid({
                       onChange={(e) => onChange(combo, "price", e.target.value)}
                     />
                     {priceError && (
-                      <p className="mt-1 text-xs text-destructive">{priceError}</p>
+                      <p className="mt-1 text-xs text-destructive">
+                        {priceError}
+                      </p>
                     )}
                   </td>
                   <td className="border px-2 py-1">
@@ -406,7 +412,9 @@ export default function VariantGrid({
                       </div>
                     </div>
                     {imagesError && (
-                      <p className="mt-1 text-xs text-destructive">{imagesError}</p>
+                      <p className="mt-1 text-xs text-destructive">
+                        {imagesError}
+                      </p>
                     )}
                   </td>
                   <td className="border px-2 py-1 text-center">

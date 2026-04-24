@@ -35,13 +35,17 @@ export default function UserDetailView({ user }: { user: TAdminUserDetail }) {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Store Context</CardTitle>
-          <CardDescription>Available when the actor is vendor-linked.</CardDescription>
+          <CardDescription>
+            Available when the actor is vendor-linked.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           {user.store ? (
             <>
               <p>Store Name: {renderValue(user.store.name)}</p>
-              <p>Store Type: {renderValue(user.store.store_type_name ?? null)}</p>
+              <p>
+                Store Type: {renderValue(user.store.store_type_name ?? null)}
+              </p>
               <p>Store Email: {renderValue(user.store.email)}</p>
               <p>Store Phone: {renderValue(user.store.phone)}</p>
               <p>Slug: {renderValue(user.store.slug)}</p>
@@ -57,7 +61,9 @@ export default function UserDetailView({ user }: { user: TAdminUserDetail }) {
               </p>
             </>
           ) : (
-            <p className="text-muted-foreground">No store is linked to this user.</p>
+            <p className="text-muted-foreground">
+              No store is linked to this user.
+            </p>
           )}
         </CardContent>
       </Card>

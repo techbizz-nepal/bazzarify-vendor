@@ -2,8 +2,8 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IMetaData } from "@/modules/core";
 import { cn } from "@/lib/utils";
+import { IMetaData } from "@/modules/core";
 import ErrorComponent from "@/modules/core/components/client/ErrorComponent";
 import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
@@ -77,16 +77,19 @@ function EditContent({
   const specificationErrors = specificationState.categorySpecifications.some(
     (specification) =>
       Boolean(
-        getSubmissionFieldError(feedback, `specifications.${specification.key}`),
+        getSubmissionFieldError(
+          feedback,
+          `specifications.${specification.key}`,
+        ),
       ),
   );
   const basicInfoError = Boolean(
     nameError ||
-      basePriceError ||
-      skuError ||
-      getSubmissionFieldError(feedback, "description") ||
-      getSubmissionFieldError(feedback, "highlights") ||
-      getSubmissionFieldError(feedback, "box_items"),
+    basePriceError ||
+    skuError ||
+    getSubmissionFieldError(feedback, "description") ||
+    getSubmissionFieldError(feedback, "highlights") ||
+    getSubmissionFieldError(feedback, "box_items"),
   );
   return (
     <PageContainer
@@ -103,7 +106,10 @@ function EditContent({
             value={basicState.productForm.name}
             onChange={basicState.onProductFormInputChange}
             name="name"
-            className={cn("focus-visible:ring-primary", nameError && "border-destructive")}
+            className={cn(
+              "focus-visible:ring-primary",
+              nameError && "border-destructive",
+            )}
             type="text"
             id="name"
             placeholder="Ex. Nikon Coolpix A300 Digital Camera"
@@ -131,7 +137,10 @@ function EditContent({
             value={basicState.productForm.sku}
             onChange={basicState.onProductFormInputChange}
             name="sku"
-            className={cn("focus-visible:ring-primary", skuError && "border-destructive")}
+            className={cn(
+              "focus-visible:ring-primary",
+              skuError && "border-destructive",
+            )}
             type="text"
             id="sku"
             placeholder="NCADC"
@@ -144,7 +153,10 @@ function EditContent({
           />
         </div>
       </ProductCard>
-      <ProductCard title="Category" className={categoryError ? "border-destructive" : undefined}>
+      <ProductCard
+        title="Category"
+        className={categoryError ? "border-destructive" : undefined}
+      >
         <CategoryDropdown
           selectedCategories={categoryState.selectedCategories}
           committedCategories={categoryState.committedCategories}
@@ -225,56 +237,63 @@ function EditContent({
               className={specificationErrors ? "border-destructive" : undefined}
             >
               <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-                {specificationState.categorySpecifications.map((specification) => (
-                  <div className="flex-col space-y-3" key={specification.uuid}>
-                    <Label
-                      htmlFor={`specification-value-`.concat(specification.key)}
+                {specificationState.categorySpecifications.map(
+                  (specification) => (
+                    <div
+                      className="flex-col space-y-3"
+                      key={specification.uuid}
                     >
-                      {specification.key.replaceAll("-", " ")}
-                    </Label>
-                    {specification.type === "text" && (
-                      <>
-                        <Input
-                          name={`specifications[${specification.key}]`}
-                          id={`specification-value-`.concat(specification.key)}
-                          type={specification.type}
-                          required={true}
-                          className={cn(
-                            "focus-visible:ring-primary",
-                            getSubmissionFieldError(
-                              feedback,
-                              `specifications.${specification.key}`,
-                            ) && "border-destructive",
-                          )}
-                          value={
-                            specificationState.specificationValues[
-                              specification.key
-                            ] || ""
-                          }
-                          onChange={(e) =>
-                            specificationState.handleSpecificationChange(
+                      <Label
+                        htmlFor={`specification-value-`.concat(
+                          specification.key,
+                        )}
+                      >
+                        {specification.key.replaceAll("-", " ")}
+                      </Label>
+                      {specification.type === "text" && (
+                        <>
+                          <Input
+                            name={`specifications[${specification.key}]`}
+                            id={`specification-value-`.concat(
                               specification.key,
-                              e.target.value,
-                            )
-                          }
-                        />
-                        {getSubmissionFieldError(
-                          feedback,
-                          `specifications.${specification.key}`,
-                        ) && (
-                          <p className="text-sm text-destructive">
-                            {
+                            )}
+                            type={specification.type}
+                            required={true}
+                            className={cn(
+                              "focus-visible:ring-primary",
                               getSubmissionFieldError(
                                 feedback,
                                 `specifications.${specification.key}`,
+                              ) && "border-destructive",
+                            )}
+                            value={
+                              specificationState.specificationValues[
+                                specification.key
+                              ] || ""
+                            }
+                            onChange={(e) =>
+                              specificationState.handleSpecificationChange(
+                                specification.key,
+                                e.target.value,
                               )
                             }
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
+                          />
+                          {getSubmissionFieldError(
+                            feedback,
+                            `specifications.${specification.key}`,
+                          ) && (
+                            <p className="text-sm text-destructive">
+                              {getSubmissionFieldError(
+                                feedback,
+                                `specifications.${specification.key}`,
+                              )}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ),
+                )}
               </div>
             </ProductCard>
           )}

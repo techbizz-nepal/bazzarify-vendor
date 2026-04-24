@@ -30,8 +30,8 @@ const CategoryCard = ({
               isLoading
                 ? "bg-muted text-muted-foreground"
                 : isSellable
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground",
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground",
             ].join(" ")}
           >
             {isLoading ? "Loading" : isSellable ? "Sellable" : "Browsable only"}

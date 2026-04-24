@@ -30,4 +30,6 @@ export const AdminUserDetailPayloadSchema = z
   .strip();
 
 export type TAdminUserDetail = z.infer<typeof AdminUserDetailSchema>;
-export type TAdminUserDetailPayload = z.infer<typeof AdminUserDetailPayloadSchema>;
+export type TAdminUserDetailPayload = z.infer<
+  typeof AdminUserDetailPayloadSchema
+>;
