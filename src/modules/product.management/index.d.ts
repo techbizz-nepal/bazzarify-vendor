@@ -18,6 +18,7 @@ export type TCategory = {
   image_base_url?: string;
   icon_base_path?: string;
   icon_base_url?: string;
+  images?: TImage[] | null;
   is_sellable?: boolean;
   attribute_count?: number;
   specification_count?: number;

@@ -22,6 +22,7 @@ import { actionGetSpecifications } from "@/modules/product.management/actions/sp
 import CategoryAttributesCard from "@/modules/product.management/ui/CategoryAttributesCard";
 import CategoryCard from "@/modules/product.management/ui/CategoryCard";
 import CategorySpecificationsCard from "@/modules/product.management/ui/CategorySpecificationsCard";
+import { resolveStorageImageUrl } from "@/modules/product.management/utils/imageUrl";
 import { keepPreviousData, useQueries } from "@tanstack/react-query";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -78,10 +79,15 @@ function CategoryImagePanel({
   }, []);
 
   const currentImageUrl =
-    category?.image_base_url ?? category?.icon_base_url ?? null;
+    category?.images?.[0] && (category.image_base_url ?? category.icon_base_url)
+      ? resolveStorageImageUrl(
+          category.images[0],
+          category.image_base_url ?? category.icon_base_url,
+        )
+      : null;
   const currentImageLabel = isLoading
     ? "Loading category image"
-    : category?.image_base_url
+    : category?.images?.length
       ? "Current category image"
       : "No category image";
   const initials = category?.name
