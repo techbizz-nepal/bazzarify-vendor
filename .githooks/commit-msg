@@ -1,0 +1,38 @@
+#!/bin/sh
+
+MSG_FILE="$1"
+
+if [ -z "$MSG_FILE" ] || [ ! -f "$MSG_FILE" ]; then
+  exit 0
+fi
+
+python3 - "$MSG_FILE" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+pattern = re.compile(
+    r"^\s*(Made-with:\s+.*Cursor.*|Generated\s+(?:by|with)\s+Cursor.*)$",
+    re.IGNORECASE,
+)
+
+lines = path.read_text().splitlines()
+filtered = [line for line in lines if not pattern.match(line)]
+
+while len(filtered) >= 2 and filtered[-1] == "" and filtered[-2] == "":
+    filtered.pop()
+
+content = "\n".join(filtered).rstrip()
+if content:
+    path.write_text(f"{content}\n")
+else:
+    path.write_text("")
+PY
+
+if ! LC_ALL=C grep -Eq '^[[:space:]]*[^#[:space:]]' "$MSG_FILE"; then
+  echo "Commit rejected: commit message is empty after removing forbidden trailers." >&2
+  exit 1
+fi
+
+exit 0
