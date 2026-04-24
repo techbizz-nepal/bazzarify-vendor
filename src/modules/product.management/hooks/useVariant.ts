@@ -5,8 +5,7 @@ import {
 } from "@/modules/product.management";
 import { MAX_VARIANT_IMAGE_COUNT } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
 import { createVariantDraftKey } from "@/modules/product.management/utils/variantDraft";
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import React, { useCallback, useMemo, useState } from "react";
 
 interface useVariantProps {
   variantSelections: Record<string, string[]>;
@@ -65,7 +64,7 @@ const buildCartesian = (
     [[]],
   );
 
-const generateTmpRowId = () => `tmp-${uuidv4()}`;
+const createTmpRowId = (comboKey: string) => `tmp-${comboKey}`;
 
 export default function useVariant({
   variantSelections,
@@ -78,26 +77,6 @@ export default function useVariant({
   const [variantData, setVariantData] = useState<TVariantDataMap>({});
   const [removedVariantUuids, setRemovedVariantUuids] = useState<string[]>([]);
 
-  // Stable row-id allocations keyed by comboKey. Persists across attribute
-  // toggles so a tmp row keeps its identity (and thus its refs / images /
-  // field state) even when other dimensions change shape.
-  const rowIdsRef = useRef<Record<string, string>>({});
-
-  const getRowId = useCallback(
-    (comboKey: string, uuid: string | undefined): string => {
-      if (uuid) {
-        return uuid;
-      }
-      let id = rowIdsRef.current[comboKey];
-      if (!id) {
-        id = generateTmpRowId();
-        rowIdsRef.current[comboKey] = id;
-      }
-      return id;
-    },
-    [],
-  );
-
   // Grid rows derive from actual entries in `variantData`, never from a
   // synthetic cartesian product of selections. See Variant Editor Parity
   // invariant. Row identity is UUID (server) or stable tmp-id (session).
@@ -108,7 +87,7 @@ export default function useVariant({
       if (combo.length === 0) continue;
       const uuid = variantData[comboKey]?.uuid;
       const row: VariantRow = {
-        rowId: getRowId(comboKey, uuid),
+        rowId: uuid ?? createTmpRowId(comboKey),
         combo,
         comboKey,
       };
@@ -116,7 +95,7 @@ export default function useVariant({
       result.push(row);
     }
     return result;
-  }, [getRowId, variantData]);
+  }, [variantData]);
 
   const combinations = useMemo<string[][]>(
     () => rows.map((row) => row.combo),
@@ -160,18 +139,13 @@ export default function useVariant({
     setVariantData((prev) => {
       const next: TVariantDataMap = {};
       let removedUuid: string | undefined;
-      let removedKey: string | undefined;
       for (const [key, data] of Object.entries(prev)) {
-        const candidateRowId = data.uuid ?? rowIdsRef.current[key];
+        const candidateRowId = data.uuid ?? createTmpRowId(key);
         if (candidateRowId === rowId) {
           removedUuid = data.uuid;
-          removedKey = key;
           continue;
         }
         next[key] = data;
-      }
-      if (removedKey) {
-        delete rowIdsRef.current[removedKey];
       }
       if (removedUuid) {
         setRemovedVariantUuids((ids) =>
@@ -183,13 +157,16 @@ export default function useVariant({
   }, []);
 
   const bulkApply = useCallback(
-    (rowIds: string[], patch: Partial<Pick<TVariant, "price" | "stock" | "available">>) => {
+    (
+      rowIds: string[],
+      patch: Partial<Pick<TVariant, "price" | "stock" | "available">>,
+    ) => {
       if (rowIds.length === 0) return;
       const rowIdSet = new Set(rowIds);
       setVariantData((prev) => {
         const next: TVariantDataMap = { ...prev };
         for (const [key, data] of Object.entries(prev)) {
-          const candidateRowId = data.uuid ?? rowIdsRef.current[key];
+          const candidateRowId = data.uuid ?? createTmpRowId(key);
           if (!candidateRowId || !rowIdSet.has(candidateRowId)) continue;
           next[key] = { ...data, ...patch };
         }
@@ -303,7 +280,13 @@ export default function useVariant({
       }
       return { ok: true as const };
     },
-    [columns, effectiveCap, setVariantSelections, variantData, variantSelections],
+    [
+      columns,
+      effectiveCap,
+      setVariantSelections,
+      variantData,
+      variantSelections,
+    ],
   );
 
   const toggleValue = useCallback(
