@@ -117,7 +117,7 @@ export const actionUpdateCategory = async (slug: string, body: object) => {
   }
 };
 
-export const actionUploadCategoryImage = async (
+export const actionUploadCategoryIcon = async (
   slug: string,
   body: FormData,
 ) => {
@@ -125,7 +125,7 @@ export const actionUploadCategoryImage = async (
     const response = await (
       await authAxiosInstance()
     ).post(
-      PRODUCT_MANAGEMENT_ROUTES.category.image.path.replace(":slug", slug),
+      PRODUCT_MANAGEMENT_ROUTES.category.icon.path.replace(":slug", slug),
       body,
       {
         headers: {

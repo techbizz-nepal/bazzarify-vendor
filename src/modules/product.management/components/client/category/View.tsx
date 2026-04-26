@@ -15,7 +15,7 @@ import {
 import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
 import {
   actionUpdateCategory,
-  actionUploadCategoryImage,
+  actionUploadCategoryIcon,
   actionViewCategory,
 } from "@/modules/product.management/actions/category";
 import { actionGetSpecifications } from "@/modules/product.management/actions/specification";
@@ -46,7 +46,7 @@ const isSquareImage = (file: File): Promise<boolean> =>
     image.src = objectUrl;
   });
 
-function CategoryImagePanel({
+function CategoryIconPanel({
   category,
   isLoading = false,
   onUploaded,
@@ -55,11 +55,11 @@ function CategoryImagePanel({
   isLoading?: boolean;
   onUploaded: (next: TCategory) => void;
 }) {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedIcon, setSelectedIcon] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageError, setImageError] = useState<string | null>(null);
+  const [iconError, setIconError] = useState<string | null>(null);
 
   const replacePreviewUrl = (url: string | null) => {
     if (previewUrlRef.current) {
@@ -78,18 +78,15 @@ function CategoryImagePanel({
     };
   }, []);
 
-  const currentImageUrl =
-    category?.images?.[0] && (category.image_base_url ?? category.icon_base_url)
-      ? resolveStorageImageUrl(
-          category.images[0],
-          category.image_base_url ?? category.icon_base_url,
-        )
+  const currentIconUrl =
+    category?.images?.[0] && category.icon_base_url
+      ? resolveStorageImageUrl(category.images[0], category.icon_base_url)
       : null;
-  const currentImageLabel = isLoading
-    ? "Loading category image"
+  const currentIconLabel = isLoading
+    ? "Loading category icon"
     : category?.images?.length
-      ? "Current category image"
-      : "No category image";
+      ? "Current category icon"
+      : "No category icon";
   const initials = category?.name
     ?.split(/\s+/)
     .filter(Boolean)
@@ -100,32 +97,32 @@ function CategoryImagePanel({
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     event.target.value = "";
-    setImageError(null);
+    setIconError(null);
 
     if (!file) {
-      setSelectedImage(null);
+      setSelectedIcon(null);
       replacePreviewUrl(null);
       return;
     }
 
     if (!file.type.startsWith("image/")) {
-      setImageError("Select an image file.");
-      setSelectedImage(null);
+      setIconError("Select an image file.");
+      setSelectedIcon(null);
       replacePreviewUrl(null);
       return;
     }
 
     const validRatio = await isSquareImage(file);
     if (!validRatio) {
-      setImageError(
-        "Category images must use a square ratio to match the app placeholder.",
+      setIconError(
+        "Category icons must use a square ratio to match the app placeholder.",
       );
-      setSelectedImage(null);
+      setSelectedIcon(null);
       replacePreviewUrl(null);
       return;
     }
 
-    setSelectedImage(file);
+    setSelectedIcon(file);
     replacePreviewUrl(URL.createObjectURL(file));
   };
 
@@ -134,25 +131,25 @@ function CategoryImagePanel({
       return;
     }
 
-    if (!selectedImage) {
-      setImageError("Choose an image before submitting.");
+    if (!selectedIcon) {
+      setIconError("Choose an icon before submitting.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("image", selectedImage);
+    formData.append("icon", selectedIcon);
 
     setIsSubmitting(true);
-    void actionUploadCategoryImage(category.slug, formData).then((result) => {
+    void actionUploadCategoryIcon(category.slug, formData).then((result) => {
       setIsSubmitting(false);
 
       if (result && "data" in result && result.data.message === "success") {
         const nextCategory = result.data.payload.category as TCategory;
-        setSelectedImage(null);
+        setSelectedIcon(null);
         replacePreviewUrl(null);
-        setImageError(null);
+        setIconError(null);
         onUploaded(nextCategory);
-        toast.success("Category image updated successfully.");
+        toast.success("Category icon updated successfully.");
         return;
       }
 
@@ -165,24 +162,24 @@ function CategoryImagePanel({
           : getValidationFeedback(result, "Please fix the highlighted fields.");
 
       const nextError =
-        feedback?.fieldErrors?.image?.[0] ??
-        feedback?.fieldErrors?.image_file?.[0] ??
+        feedback?.fieldErrors?.icon?.[0] ??
+        feedback?.fieldErrors?.icon_file?.[0] ??
         feedback?.summary ??
-        "Unable to update category image.";
-      setImageError(nextError);
+        "Unable to update category icon.";
+      setIconError(nextError);
       toast.error(nextError);
     });
   };
 
-  const renderImage = previewUrl ?? currentImageUrl;
+  const renderIcon = previewUrl ?? currentIconUrl;
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-lg">Image</CardTitle>
+          <CardTitle className="text-lg">Icon</CardTitle>
           <span className="text-xs text-muted-foreground">
-            {currentImageLabel}
+            {currentIconLabel}
           </span>
         </div>
       </CardHeader>
@@ -200,12 +197,12 @@ function CategoryImagePanel({
             <div
               className={cn(
                 "flex h-28 w-28 items-center justify-center overflow-hidden rounded-xl border",
-                !renderImage && "bg-primary text-primary-foreground",
+                !renderIcon && "bg-primary text-primary-foreground",
               )}
             >
-              {renderImage && category ? (
+              {renderIcon && category ? (
                 <Image
-                  src={renderImage}
+                  src={renderIcon}
                   alt={category.name}
                   width={112}
                   loading="eager"
@@ -218,12 +215,12 @@ function CategoryImagePanel({
             </div>
             <div className="space-y-1 text-sm text-muted-foreground">
               <p>
-                Upload a square image to match the category placeholder used in
+                Upload a square icon to match the category placeholder used in
                 the app.
               </p>
               <p>
-                Existing image, if any, is shown above. The upload only updates
-                the image asset.
+                Existing icon, if any, is shown above. The upload only updates
+                the category icon.
               </p>
             </div>
           </div>
@@ -238,20 +235,20 @@ function CategoryImagePanel({
             </div>
           ) : (
             <>
-              <Label htmlFor="category-image">Category Image</Label>
+              <Label htmlFor="category-icon">Category Icon</Label>
               <Input
-                id="category-image"
+                id="category-icon"
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
               />
               {previewUrl ? (
                 <p className="text-xs text-muted-foreground">
-                  Selected image preview is ready for upload.
+                  Selected icon preview is ready for upload.
                 </p>
               ) : null}
-              {imageError ? (
-                <p className="text-sm text-destructive">{imageError}</p>
+              {iconError ? (
+                <p className="text-sm text-destructive">{iconError}</p>
               ) : null}
             </>
           )}
@@ -265,16 +262,16 @@ function CategoryImagePanel({
         ) : (
           <div className="flex items-center gap-3">
             <Button onClick={handleUpload} disabled={isSubmitting}>
-              {isSubmitting ? "Uploading..." : "Upload Image"}
+              {isSubmitting ? "Uploading..." : "Upload Icon"}
             </Button>
-            {selectedImage ? (
+            {selectedIcon ? (
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => {
-                  setSelectedImage(null);
+                  setSelectedIcon(null);
                   replacePreviewUrl(null);
-                  setImageError(null);
+                  setIconError(null);
                 }}
               >
                 Clear
@@ -444,7 +441,7 @@ export default function View({ slug }: { slug: string }) {
         }
         isLoading={isCategoryLoading}
       />
-      <CategoryImagePanel
+      <CategoryIconPanel
         category={currentCategory}
         isLoading={isCategoryLoading}
         onUploaded={(nextCategory) => setCategoryState(nextCategory)}

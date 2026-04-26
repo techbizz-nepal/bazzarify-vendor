@@ -10,6 +10,8 @@ export const CategoryCore = z
     slug: z.string(),
     image_base_path: z.string(),
     image_base_url: z.string(),
+    icon_base_path: z.string(),
+    icon_base_url: z.string(),
     specifications: z.array(z.string()).optional(),
     attributes: z.array(z.string()).optional(),
   })
