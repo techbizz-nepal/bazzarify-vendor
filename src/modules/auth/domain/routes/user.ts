@@ -7,6 +7,10 @@ const users: IRoute["user"] = {
   getByKey: {
     path: "auth/admin/users/:uuid",
   },
+  updateRole: {
+    path: "auth/admin/users/:uuid/role",
+    method: "PATCH",
+  },
 };
 
 export default users;

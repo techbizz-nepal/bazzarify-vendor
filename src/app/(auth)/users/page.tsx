@@ -10,9 +10,9 @@ import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { redirect } from "next/navigation";
 
-const CONSUMER_ROLE = "consumer";
 const DISALLOWED_FILTER_KEYS = new Set([
   "filter[role]",
+  "filter[role_scope]",
   "filter[has_store]",
   "filter[store_status]",
 ]);
@@ -61,7 +61,7 @@ export default async function UsersPage({
         ([key]) => !DISALLOWED_FILTER_KEYS.has(key),
       ),
     ),
-    "filter[role]": CONSUMER_ROLE,
+    "filter[role_scope]": "consumer_or_roleless",
   };
   const page = Number(flattenedParams.page ?? "1");
   const usersResponse = await actionGetUsers({
@@ -104,8 +104,8 @@ export default async function UsersPage({
           Object.entries(flattenedParams).filter(([key]) => key !== "page"),
         )}
         title="Manage Consumers"
-        description="Browse consumer accounts with email and phone search plus server-driven pagination."
-        emptyMessage="No consumers found for the current filters."
+        description="Browse consumer accounts and unresolved roleless users with email and phone search plus server-driven pagination."
+        emptyMessage="No consumers or unresolved user accounts found for the current filters."
         pagination={{
           currentPage: Number(users?.current_page ?? 1),
           perPage: users?.per_page ? Number(users.per_page) : null,

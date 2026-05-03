@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import AdminUserRoleManagementCard from "@/modules/admin/users/components/client/AdminUserRoleManagementCard";
 import { TAdminUserDetail } from "@/modules/auth/domain/schemas/payloads/AdminUserDetailPayloadSchema";
 
 function renderValue(value: string | null | undefined) {
@@ -48,6 +49,12 @@ export default function UserDetailView({
           <p>Updated At: {renderValue(user.updated_at)}</p>
         </CardContent>
       </Card>
+      <AdminUserRoleManagementCard
+        userUuid={user.uuid}
+        roles={user.roles}
+        hasStore={user.has_store}
+        audience={audience}
+      />
       {isVendorView ? (
         <Card>
           <CardHeader>
