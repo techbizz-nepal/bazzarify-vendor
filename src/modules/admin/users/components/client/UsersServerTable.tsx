@@ -5,11 +5,14 @@ import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import ServerDataTable from "@/modules/core/components/client/ServerDataTable";
 import { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 
-const columns: TableColumn<TAdminUserListItem>[] = [
+const identityColumns: TableColumn<TAdminUserListItem>[] = [
   { key: "name", title: "Name" },
   { key: "email", title: "Email" },
   { key: "phone", title: "Phone" },
   { key: "authType", title: "Auth Type" },
+];
+
+const vendorColumns: TableColumn<TAdminUserListItem>[] = [
   {
     key: "roles",
     title: "Roles",
@@ -33,10 +36,20 @@ const columns: TableColumn<TAdminUserListItem>[] = [
   { key: "created_at", title: "Created At" },
 ];
 
+const consumerColumns: TableColumn<TAdminUserListItem>[] = [
+  ...identityColumns,
+  { key: "created_at", title: "Created At" },
+];
+
 interface UsersServerTableProps {
   rows: TAdminUserListItem[];
   table: TServerDataTableMeta;
   initialFilters: Record<string, string>;
+  title?: string;
+  description?: string;
+  emptyMessage?: string;
+  detailHrefTemplate?: string;
+  showVendorColumns?: boolean;
   pagination: {
     currentPage: number;
     perPage?: number | null;
@@ -51,20 +64,29 @@ export default function UsersServerTable({
   rows,
   table,
   initialFilters,
+  title = "Manage Users",
+  description = "Browse platform users with backend-owned filters and server-driven pagination.",
+  emptyMessage = "No users found for the current filters.",
+  detailHrefTemplate = "/users/:uuid",
+  showVendorColumns = false,
   pagination,
 }: UsersServerTableProps) {
   return (
     <ServerDataTable
-      title="Manage Users"
-      description="Browse platform users with backend-owned filters and server-driven pagination."
-      columns={columns}
+      title={title}
+      description={description}
+      columns={
+        showVendorColumns
+          ? [...identityColumns, ...vendorColumns]
+          : consumerColumns
+      }
       rows={rows}
-      emptyMessage="No users found for the current filters."
+      emptyMessage={emptyMessage}
       table={table}
       initialFilters={initialFilters}
       pagination={pagination}
       rowActions={[
-        { label: "View", hrefTemplate: "/users/:uuid", variant: "default" },
+        { label: "View", hrefTemplate: detailHrefTemplate, variant: "default" },
       ]}
     />
   );

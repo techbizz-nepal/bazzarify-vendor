@@ -3,7 +3,7 @@ import { actionGetUserByUuid } from "@/modules/auth/domain/auth-actions";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import { notFound, redirect } from "next/navigation";
 
-export default async function UserDetailPage({
+export default async function VendorDetailPage({
   params,
 }: {
   params: Promise<{ uuid: string }>;
@@ -25,9 +25,9 @@ export default async function UserDetailPage({
 
   return (
     <PageContainer
-      pageTitle={`User ${response.user.name ?? response.user.email ?? uuid}`}
+      pageTitle={`Vendor ${response.user.name ?? response.user.email ?? uuid}`}
     >
-      <UserDetailView user={response.user} audience="consumer" />
+      <UserDetailView user={response.user} audience="vendor" />
     </PageContainer>
   );
 }

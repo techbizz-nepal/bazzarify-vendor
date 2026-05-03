@@ -21,6 +21,7 @@ import {
   FaFileImport,
   FaFirstOrder,
   FaProductHunt,
+  FaStore,
   FaUsers,
 } from "react-icons/fa6";
 import { TbCategory } from "react-icons/tb";
@@ -54,6 +55,7 @@ const adminNavigations: TMenuEntry[] = [
   productsGroup,
   { type: "link", title: "Orders", path: "/orders", icon: FaFirstOrder },
   { type: "link", title: "Users", path: "/users", icon: FaUsers },
+  { type: "link", title: "Vendors", path: "/vendors", icon: FaStore },
 ];
 
 const vendorNavigations: TMenuEntry[] = [
@@ -64,7 +66,12 @@ const vendorNavigations: TMenuEntry[] = [
 ];
 
 function isEntryVisible(entry: TMenuEntry, isSuperAdmin: boolean): boolean {
-  if (entry.type === "link" && entry.path === "/users") return isSuperAdmin;
+  if (
+    entry.type === "link" &&
+    (entry.path === "/users" || entry.path === "/vendors")
+  ) {
+    return isSuperAdmin;
+  }
   return true;
 }
 

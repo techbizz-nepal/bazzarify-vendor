@@ -10,12 +10,8 @@ import { getCookieStore } from "@/modules/core/lib/utils.session";
 import { flattenSearchParams } from "@/modules/core/utils/searchParams";
 import { redirect } from "next/navigation";
 
-const CONSUMER_ROLE = "consumer";
-const DISALLOWED_FILTER_KEYS = new Set([
-  "filter[role]",
-  "filter[has_store]",
-  "filter[store_status]",
-]);
+const VENDOR_ROLE = "vendor";
+const DISALLOWED_FILTER_KEYS = new Set(["filter[role]"]);
 
 function stripRoleFilter(
   table: TServerDataTableMeta | null,
@@ -32,7 +28,7 @@ function stripRoleFilter(
   };
 }
 
-export default async function UsersPage({
+export default async function VendorsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -61,7 +57,7 @@ export default async function UsersPage({
         ([key]) => !DISALLOWED_FILTER_KEYS.has(key),
       ),
     ),
-    "filter[role]": CONSUMER_ROLE,
+    "filter[role]": VENDOR_ROLE,
   };
   const page = Number(flattenedParams.page ?? "1");
   const usersResponse = await actionGetUsers({
@@ -88,14 +84,14 @@ export default async function UsersPage({
       : null;
 
   return (
-    <PageContainer pageTitle="Manage Consumers">
+    <PageContainer pageTitle="Manage Vendors">
       <UsersServerTable
         rows={rows}
         table={
           table ?? {
             search: {
               queryKey: "filter[name]",
-              placeholder: "Search consumers by name, email, or phone...",
+              placeholder: "Search vendors by name, email, or phone...",
             },
             filters: [],
           }
@@ -103,9 +99,11 @@ export default async function UsersPage({
         initialFilters={Object.fromEntries(
           Object.entries(flattenedParams).filter(([key]) => key !== "page"),
         )}
-        title="Manage Consumers"
-        description="Browse consumer accounts with email and phone search plus server-driven pagination."
-        emptyMessage="No consumers found for the current filters."
+        title="Manage Vendors"
+        description="Browse vendor accounts with email and phone search plus server-driven pagination."
+        emptyMessage="No vendors found for the current filters."
+        detailHrefTemplate="/vendors/:uuid"
+        showVendorColumns={true}
         pagination={{
           currentPage: Number(users?.current_page ?? 1),
           perPage: users?.per_page ? Number(users.per_page) : null,
