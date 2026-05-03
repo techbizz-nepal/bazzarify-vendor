@@ -38,10 +38,14 @@ export default function OptionlessSkuEditor({
   onUpload,
   onImageRemove,
 }: OptionlessSkuEditorProps) {
-  const skuError = getSubmissionFieldError(feedback, "variants.0.sku");
-  const stockError = getSubmissionFieldError(feedback, "variants.0.stock");
-  const priceError = getSubmissionFieldError(feedback, "variants.0.price");
-  const imagesError = getSubmissionFieldError(feedback, "variants.0.images");
+  const submissionFeedback = feedback ?? null;
+  const skuError = getSubmissionFieldError(submissionFeedback, "variants.0.sku");
+  const stockError = getSubmissionFieldError(submissionFeedback, "variants.0.stock");
+  const priceError = getSubmissionFieldError(submissionFeedback, "variants.0.price");
+  const imagesError = getSubmissionFieldError(
+    submissionFeedback,
+    "variants.0.images",
+  );
 
   const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) {

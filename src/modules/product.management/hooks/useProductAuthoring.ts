@@ -4,6 +4,7 @@ import {
   TAttribute,
   TCategory,
   TEditProductPayload,
+  TImage,
   TProductForm,
   TSpecification,
   TVariant,
@@ -235,7 +236,7 @@ export default function useProductAuthoring({
   };
 
   const handleOptionlessVariantImageRemove = async (
-    image: File | string,
+    image: File | string | TImage,
   ): Promise<void> => {
     setOptionlessVariant((previous) => ({
       ...previous,
