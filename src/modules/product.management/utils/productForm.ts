@@ -15,6 +15,8 @@ import {
 import slugify from "slugify";
 import { toast } from "sonner";
 
+export const OPTIONLESS_VARIANT_KEY = createVariantDraftKey([]);
+
 const normalizeVariantSkuSegment = (value: string) =>
   slugify(value, {
     lower: false,
@@ -37,6 +39,10 @@ export const deriveVariantSku = (
 
 export const isValidVariant = (variant: TVariant): boolean => {
   return !!(variant.stock && variant.price && variant.images?.length);
+};
+
+export const isValidOptionlessVariant = (variant: TVariant): boolean => {
+  return !!(variant.stock && variant.price && variant.sku);
 };
 
 export const updateVariantValidity = (
@@ -84,6 +90,26 @@ export const createVariantsPayload = (
     };
   });
 };
+
+export const createOptionlessVariantPayload = ({
+  productName,
+  productSku,
+  variant,
+}: {
+  productName: string;
+  productSku: string;
+  variant: TVariant;
+}): TVariantPayload[] => [
+  {
+    uuid: variant.uuid,
+    name: productName.trim() || productSku.trim() || String(variant.sku || ""),
+    stock: variant.stock || "0",
+    price: variant.price || "",
+    sku: String(variant.sku || ""),
+    images: variant.images,
+    available: variant.available ?? true,
+  },
+];
 
 export const appendFormDataVariants = (
   formData: FormData,

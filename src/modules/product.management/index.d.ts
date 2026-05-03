@@ -92,6 +92,7 @@ export type TAttribute = {
 export interface TVariant {
   uuid?: string;
   name: string;
+  sku?: string;
   image_base_path?: string;
   image_base_url?: string;
   stock?: string;
@@ -105,6 +106,7 @@ export type TVariantDataMap = Record<string, TVariant>;
 export type TVariantPayload = {
   uuid?: string;
   name: string;
+  sku?: string;
   stock?: string;
   price?: string;
   images?: (string | File | TImage)[];
@@ -404,6 +406,22 @@ export interface ProductAuthoringSubmissionState {
   handleSubmit: () => Promise<void>;
 }
 
+export interface ProductOptionModeState {
+  hasCustomerSelectableOptions: boolean;
+  canSwitchMode: boolean;
+  modeLockedMessage?: string;
+  optionlessVariant: TVariant;
+  setHasCustomerSelectableOptions: (value: boolean) => void;
+  handleOptionlessVariantChange: <K extends keyof TVariant>(
+    field: K,
+    value: TVariant[K],
+  ) => void;
+  handleOptionlessVariantImageUpload: (files: FileList) => void;
+  handleOptionlessVariantImageRemove: (
+    image: File | string | TImage,
+  ) => Promise<void>;
+}
+
 export interface ProductAuthoringController {
   basicState: ProductAuthoringBasicState;
   categoryState: ProductAuthoringCategoryState;
@@ -411,6 +429,7 @@ export interface ProductAuthoringController {
   specificationState: ProductAuthoringSpecificationState;
   selectorState: VariantSelectorState;
   variantState: VariantState;
+  optionModeState: ProductOptionModeState;
   submissionState: ProductAuthoringSubmissionState;
 }
 

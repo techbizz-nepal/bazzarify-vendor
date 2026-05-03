@@ -12,6 +12,7 @@ import { TCategoryIndexPayload } from "@/modules/product.management";
 import useCreateProduct from "@/modules/product.management/hooks/useCreateProduct";
 import CategoryDropdown from "@/modules/product.management/ui/CategoryDropdown";
 import ImageUploader from "@/modules/product.management/ui/ImageUploader";
+import OptionlessSkuEditor from "@/modules/product.management/ui/OptionlessSkuEditor";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import ProductDetail from "@/modules/product.management/ui/ProductDetail";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
@@ -42,6 +43,7 @@ function CreateContent({
     specificationState,
     selectorState,
     variantState,
+    optionModeState,
     submissionState,
   } = useCreateProduct();
   const feedback = submissionState.feedback;
@@ -262,18 +264,68 @@ function CreateContent({
           {/*** Product Specifications ends ***/}
 
           {/*** Product variants starts ***/}
-          {selectorState.attributes?.length > 0 && (
-            <ProductCard
-              title="Variants"
-              className={variantsError ? "border-destructive" : undefined}
-            >
-              <ProductVariant
-                feedback={feedback}
-                selectorState={selectorState}
-                variantState={variantState}
-              />
-            </ProductCard>
-          )}
+          <ProductCard
+            title="Customer Options"
+            className={variantsError ? "border-destructive" : undefined}
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Does this product have customer-selectable options?
+              </p>
+              <div className="flex gap-3">
+                <ThemedButton
+                  type="button"
+                  variant={
+                    optionModeState.hasCustomerSelectableOptions
+                      ? "default"
+                      : "outline"
+                  }
+                  onClick={() =>
+                    optionModeState.setHasCustomerSelectableOptions(true)
+                  }
+                >
+                  Yes
+                </ThemedButton>
+                <ThemedButton
+                  type="button"
+                  variant={
+                    optionModeState.hasCustomerSelectableOptions
+                      ? "outline"
+                      : "default"
+                  }
+                  onClick={() =>
+                    optionModeState.setHasCustomerSelectableOptions(false)
+                  }
+                >
+                  No
+                </ThemedButton>
+              </div>
+              {optionModeState.hasCustomerSelectableOptions ? (
+                selectorState.attributes?.length > 0 ? (
+                  <ProductVariant
+                    feedback={feedback}
+                    selectorState={selectorState}
+                    variantState={variantState}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    This category has no customer-selectable attributes, so use
+                    the internal SKU mode instead.
+                  </p>
+                )
+              ) : (
+                <OptionlessSkuEditor
+                  variant={optionModeState.optionlessVariant}
+                  feedback={feedback}
+                  onChange={optionModeState.handleOptionlessVariantChange}
+                  onUpload={optionModeState.handleOptionlessVariantImageUpload}
+                  onImageRemove={
+                    optionModeState.handleOptionlessVariantImageRemove
+                  }
+                />
+              )}
+            </div>
+          </ProductCard>
           {/*** Product variants ends ***/}
           <div className="pb-10">
             {feedback && (

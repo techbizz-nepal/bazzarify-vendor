@@ -6,6 +6,7 @@ import {
   TEditProductPayload,
   TProductForm,
   TSpecification,
+  TVariant,
   TVariantDataMap,
 } from "@/modules/product.management";
 import {
@@ -29,6 +30,8 @@ import {
   loadProductCategoryContext,
   prepareProductSubmission,
 } from "@/modules/product.management/utils/productAuthoring";
+import { resolveStorageImageUrl } from "@/modules/product.management/utils/imageUrl";
+import { OPTIONLESS_VARIANT_KEY } from "@/modules/product.management/utils/productForm";
 import { lexicalJsonToHtml } from "@/modules/product.management/utils/richTextEditorUtils";
 import {
   createVariantDraftKey,
@@ -82,6 +85,17 @@ export default function useProductAuthoring({
   const [removedVariantImageUuids, setRemovedVariantImageUuids] = useState<
     Record<string, string[]>
   >({});
+  const [hasCustomerSelectableOptions, setHasCustomerSelectableOptions] =
+    useState(mode === "create");
+  const [optionlessVariant, setOptionlessVariant] = useState<TVariant>({
+    name: "",
+    sku: "",
+    stock: "",
+    price: "",
+    available: true,
+    images: [],
+    isValid: false,
+  });
   const hydratedEditProductUuidRef = useRef<string | null>(null);
 
   const clearSubmissionFieldError = (field: string) => {
@@ -149,6 +163,85 @@ export default function useProductAuthoring({
       event.target.name as keyof TProductForm,
       event.target.value,
     );
+
+    if (!hasCustomerSelectableOptions && event.target.name === "base_price") {
+      setOptionlessVariant((previous) => ({
+        ...previous,
+        price: event.target.value,
+      }));
+    }
+  };
+
+  const persistedEditHasCustomerSelectableOptions =
+    mode === "update" && editProductPayload
+      ? productUsesCustomerSelectableOptions(editProductPayload.product)
+      : null;
+
+  const handleOptionModeChange = (value: boolean) => {
+    if (
+      mode === "update" &&
+      persistedEditHasCustomerSelectableOptions !== null &&
+      value !== persistedEditHasCustomerSelectableOptions
+    ) {
+      toast.error(
+        "Switching between no-options and customer-selectable option modes is not supported while editing this product yet.",
+      );
+      return;
+    }
+
+    setSubmissionFeedback(null);
+    setHasCustomerSelectableOptions(value);
+
+    if (!value) {
+      setOptionlessVariant((previous) => ({
+        ...previous,
+        name: product.productForm.name || previous.name,
+        price: String(product.productForm.base_price || previous.price || ""),
+      }));
+    }
+  };
+
+  const handleOptionlessVariantChange = <K extends keyof TVariant>(
+    field: K,
+    value: TVariant[K],
+  ) => {
+    setSubmissionFeedback(null);
+    setOptionlessVariant((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+
+    if (field === "price" && typeof value === "string") {
+      product.handleProductForm("base_price", value);
+    }
+  };
+
+  const handleOptionlessVariantImageUpload = (files: FileList) => {
+    const existingImages = optionlessVariant.images || [];
+    const remaining = Math.max(0, MAX_VARIANT_IMAGE_COUNT - existingImages.length);
+    if (remaining <= 0) {
+      toast.error(`Maximum ${MAX_VARIANT_IMAGE_COUNT} images allowed per SKU.`);
+      return;
+    }
+
+    const nextFiles = Array.from(files)
+      .filter((file) => file instanceof File)
+      .slice(0, remaining);
+
+    setOptionlessVariant((previous) => ({
+      ...previous,
+      images: [...(previous.images || []), ...nextFiles],
+    }));
+  };
+
+  const handleOptionlessVariantImageRemove = async (
+    image: File | string,
+  ): Promise<void> => {
+    setOptionlessVariant((previous) => ({
+      ...previous,
+      images:
+        previous.images?.filter((candidate) => candidate !== image) || [],
+    }));
   };
 
   const handleSpecificationChange = (key: string, value: string) => {
@@ -291,6 +384,8 @@ export default function useProductAuthoring({
       setColumns: variant.setColumns,
       setVariantImageIdMap,
       setLegacyAttributeCount,
+      setHasCustomerSelectableOptions,
+      setOptionlessVariant,
     });
   }, [
     category.setCategorySpecifications,
@@ -358,40 +453,83 @@ export default function useProductAuthoring({
     }
 
     const submission =
-      mode === "create"
-        ? prepareProductSubmission({
-            schema: CreateProductSchema,
-            product: omit(product.productForm, "uuid"),
-            productSku: product.productForm.sku,
-            committedCategoryUuid: category.committedCategory?.uuid,
-            combinations: variant.combinations,
-            columns: variant.columns,
-            variantData: variant.variantData,
-            uploadedProductImages: product.uploadedProductImages,
-            specifications: specificationValues,
-            categoryAttributes,
-          })
-        : prepareProductSubmission({
-            schema: UpdateProductSchema,
-            product: {
-              type: "retail",
-              uuid: product.productForm.uuid,
-              sku: product.productForm.sku,
-              name: product.productForm.name,
-              base_price: String(product.productForm.base_price),
-              description: product.productForm.description,
-              highlights: product.productForm.highlights,
-              box_items: product.productForm.box_items,
-            },
-            productSku: product.productForm.sku,
-            committedCategoryUuid: category.committedCategory?.uuid,
-            combinations: variant.combinations,
-            columns: variant.columns,
-            variantData: variant.variantData,
-            uploadedProductImages: product.uploadedProductImages,
-            specifications: specificationValues,
-            categoryAttributes,
-          });
+      hasCustomerSelectableOptions
+        ? mode === "create"
+          ? prepareProductSubmission({
+              schema: CreateProductSchema,
+              product: omit(product.productForm, "uuid"),
+              productSku: product.productForm.sku,
+              committedCategoryUuid: category.committedCategory?.uuid,
+              hasCustomerSelectableOptions,
+              combinations: variant.combinations,
+              columns: variant.columns,
+              variantData: variant.variantData,
+              uploadedProductImages: product.uploadedProductImages,
+              specifications: specificationValues,
+              categoryAttributes,
+            })
+          : prepareProductSubmission({
+              schema: UpdateProductSchema,
+              product: {
+                type: "retail",
+                uuid: product.productForm.uuid,
+                sku: product.productForm.sku,
+                name: product.productForm.name,
+                base_price: String(product.productForm.base_price),
+                description: product.productForm.description,
+                highlights: product.productForm.highlights,
+                box_items: product.productForm.box_items,
+              },
+              productSku: product.productForm.sku,
+              committedCategoryUuid: category.committedCategory?.uuid,
+              hasCustomerSelectableOptions,
+              combinations: variant.combinations,
+              columns: variant.columns,
+              variantData: variant.variantData,
+              uploadedProductImages: product.uploadedProductImages,
+              specifications: specificationValues,
+              categoryAttributes,
+            })
+        : mode === "create"
+          ? prepareProductSubmission({
+              schema: CreateProductSchema,
+              product: omit(product.productForm, "uuid"),
+              productSku: product.productForm.sku,
+              committedCategoryUuid: category.committedCategory?.uuid,
+              hasCustomerSelectableOptions,
+              combinations: [],
+              columns: [],
+              variantData: {
+                [OPTIONLESS_VARIANT_KEY]: optionlessVariant,
+              },
+              uploadedProductImages: product.uploadedProductImages,
+              specifications: specificationValues,
+              categoryAttributes,
+            })
+          : prepareProductSubmission({
+              schema: UpdateProductSchema,
+              product: {
+                type: "retail",
+                uuid: product.productForm.uuid,
+                sku: product.productForm.sku,
+                name: product.productForm.name,
+                base_price: String(product.productForm.base_price),
+                description: product.productForm.description,
+                highlights: product.productForm.highlights,
+                box_items: product.productForm.box_items,
+              },
+              productSku: product.productForm.sku,
+              committedCategoryUuid: category.committedCategory?.uuid,
+              hasCustomerSelectableOptions,
+              combinations: [],
+              columns: [],
+              variantData: {
+                [OPTIONLESS_VARIANT_KEY]: optionlessVariant,
+              },
+              uploadedProductImages: product.uploadedProductImages,
+              specifications: specificationValues,
+              categoryAttributes,
+            });
 
     variant.setVariantData(submission.updatedVariantData);
     if (!submission.ok) {
@@ -521,6 +659,21 @@ export default function useProductAuthoring({
       bulkApply: variant.bulkApply,
       removedVariantUuids: variant.removedVariantUuids,
     },
+    optionModeState: {
+      hasCustomerSelectableOptions,
+      canSwitchMode:
+        persistedEditHasCustomerSelectableOptions === null ||
+        persistedEditHasCustomerSelectableOptions === hasCustomerSelectableOptions,
+      modeLockedMessage:
+        mode === "update"
+          ? "Switching between no-options and customer-selectable option modes is not supported while editing this product yet."
+          : undefined,
+      optionlessVariant,
+      setHasCustomerSelectableOptions: handleOptionModeChange,
+      handleOptionlessVariantChange,
+      handleOptionlessVariantImageUpload,
+      handleOptionlessVariantImageRemove,
+    },
     submissionState: {
       feedback: submissionFeedback,
       isSubmitting,
@@ -547,6 +700,8 @@ interface HydrateEditProductArgs {
   setColumns: Dispatch<SetStateAction<string[]>>;
   setVariantImageIdMap: (value: Record<string, Record<string, string>>) => void;
   setLegacyAttributeCount: Dispatch<SetStateAction<number>>;
+  setHasCustomerSelectableOptions: Dispatch<SetStateAction<boolean>>;
+  setOptionlessVariant: Dispatch<SetStateAction<TVariant>>;
 }
 
 function hydrateEditProduct({
@@ -567,6 +722,8 @@ function hydrateEditProduct({
   setColumns,
   setVariantImageIdMap,
   setLegacyAttributeCount,
+  setHasCustomerSelectableOptions,
+  setOptionlessVariant,
 }: HydrateEditProductArgs) {
   const { product } = editProductPayload;
   const imageUrls: string[] = [];
@@ -632,9 +789,22 @@ function hydrateEditProduct({
   setCategorySpecifications(categorySpecifications);
   setCategoryAttributes(categoryAttributes);
 
+  const optionlessVariant = getOptionlessVariant(product.variants);
+  if (optionlessVariant) {
+    setHasCustomerSelectableOptions(false);
+    setVariantSelections({});
+    setColumns([]);
+    setVariantData({});
+    setLegacyAttributeCount(0);
+    setOptionlessVariant(normalizeOptionlessVariant(optionlessVariant));
+    return;
+  }
+
   if (!categoryAttributes.length) {
     return;
   }
+
+  setHasCustomerSelectableOptions(true);
 
   fillSelectedProductVariantData({
     setVariantData: setVariantData as never,
@@ -698,6 +868,62 @@ function hydrateEditProduct({
   });
 
   setVariantImageIdMap(nextVariantImageIdMap);
+}
+
+function productUsesCustomerSelectableOptions(product: TEditProductPayload["product"]) {
+  return !getOptionlessVariant(product.variants);
+}
+
+function getOptionlessVariant(variants: TVariant[] = []) {
+  if (variants.length !== 1) {
+    return null;
+  }
+
+  const [variant] = variants;
+
+  return (variant.attributes?.length || 0) === 0 ? variant : null;
+}
+
+function normalizeOptionlessVariant(variant: TVariant): TVariant {
+  const normalizedImages = (variant.images || [])
+    .map((image) => {
+      if (image instanceof File) {
+        return image;
+      }
+
+      if (
+        image &&
+        typeof image === "object" &&
+        "file" in (image as Record<string, unknown>) &&
+        typeof (image as { file?: unknown }).file === "string"
+      ) {
+        return resolveStorageImageUrl(
+          image as { file: string; uuid: string },
+          variant.image_base_url,
+        );
+      }
+
+      if (typeof image === "string") {
+        return resolveStorageImageUrl(image, variant.image_base_url);
+      }
+
+      return String(image);
+    })
+    .slice(0, MAX_VARIANT_IMAGE_COUNT);
+
+  return {
+    ...variant,
+    sku: variant.sku || "",
+    stock:
+      variant.stock === undefined || variant.stock === null
+        ? ""
+        : String(variant.stock),
+    price:
+      variant.price === undefined || variant.price === null
+        ? ""
+        : String(variant.price),
+    images: normalizedImages as TVariant["images"],
+  };
 }
 
 function normalizeCategoryPath(categories: TCategory[]): TCategory[] {

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const VariantDraftSchema = z.object({
   uuid: z.uuid().optional(),
-  name: z.string().min(1, "Variant name is required"),
+  name: z.string().min(1, "SKU name is required"),
   stock: z.string().min(1, "Variant stock is required"),
   price: z.string().min(1, "Variant price is required"),
   sku: z
@@ -35,7 +35,9 @@ export const CreateProductSchema = z.object({
   highlights: z.string().min(1, "Product highlights is required"),
   box_items: z.string().min(1, "Product box items is required"),
   category: z.uuid("Category is required"),
-  variants: z.array(VariantDraftSchema).min(1, "Select at least one variant"),
+  variants: z
+    .array(VariantDraftSchema)
+    .min(1, "At least one sellable SKU is required"),
 });
 export const UpdateProductSchema = z.object({
   type: z.string(),
@@ -54,5 +56,7 @@ export const UpdateProductSchema = z.object({
   }),
   highlights: z.string().min(1, "Product highlights is required"),
   box_items: z.string().min(1, "Product box items is required"),
-  variants: z.array(VariantDraftSchema).min(1, "Select at least one variant"),
+  variants: z
+    .array(VariantDraftSchema)
+    .min(1, "At least one sellable SKU is required"),
 });

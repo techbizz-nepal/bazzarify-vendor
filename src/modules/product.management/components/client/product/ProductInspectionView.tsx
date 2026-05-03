@@ -695,7 +695,7 @@ export default function ProductInspectionView({ productPayload }: Props) {
             </CardHeader>
             <CardContent>
               {!product.variants || product.variants.length === 0 ? (
-                <EmptyRow>No variants</EmptyRow>
+                <EmptyRow>No internal SKUs</EmptyRow>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>

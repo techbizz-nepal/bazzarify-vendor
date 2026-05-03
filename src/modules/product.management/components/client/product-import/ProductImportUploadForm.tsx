@@ -410,7 +410,7 @@ export default function ProductImportUploadForm({
               <div className="text-xs">
                 Rows sharing the same{" "}
                 <code className="rounded bg-amber-100 px-1">import_key</code>{" "}
-                describe variants of a single product and must (a) stay
+                describe sellable SKUs of a single product and must (a) stay
                 contiguous in the CSV and (b) keep these{" "}
                 <strong>product-level columns identical</strong> on every row:{" "}
                 <code className="rounded bg-amber-100 px-1">category_slug</code>
@@ -429,7 +429,13 @@ export default function ProductImportUploadForm({
                 </code>
                 . Only the{" "}
                 <code className="rounded bg-amber-100 px-1">variant_*</code>{" "}
-                columns should differ between rows.
+                columns should differ between rows. For an optionless product,
+                keep exactly one row and set{" "}
+                <code className="rounded bg-amber-100 px-1">
+                  variant_attributes_json
+                </code>{" "}
+                to <code className="rounded bg-amber-100 px-1">{`{}`}</code> or
+                leave it empty.
               </div>
             </div>
           </div>
@@ -467,7 +473,7 @@ export default function ProductImportUploadForm({
                 Image ZIP{" "}
                 <span className="text-xs text-muted-foreground">
                   (≤ {guidePayload.guide.constraints.image_archive_max_size_mb}{" "}
-                  MB, optional)
+                  MB, required by current image policy)
                 </span>
               </Label>
               <Input
@@ -485,7 +491,8 @@ export default function ProductImportUploadForm({
                 <p className="text-xs text-destructive">{imageArchiveError}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Required when the CSV references image filenames.
+                  Current import policy expects referenced product and SKU
+                  images to be present in the ZIP archive.
                 </p>
               )}
             </div>
@@ -504,6 +511,23 @@ export default function ProductImportUploadForm({
               <Upload className="mr-2 h-4 w-4" />
               {isPending ? "Uploading..." : "Upload Package"}
             </Button>
+          </div>
+
+          <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+            Use <code className="rounded bg-muted px-1">specifications.csv</code>{" "}
+            from the catalog ZIP to map each{" "}
+            <code className="rounded bg-muted px-1">specification_key</code> to
+            its readable{" "}
+            <code className="rounded bg-muted px-1">specification_label</code>{" "}
+            and <code className="rounded bg-muted px-1">specification_type</code>.
+            Keep <code className="rounded bg-muted px-1">specifications_json</code>{" "}
+            keyed by <code className="rounded bg-muted px-1">specification_key</code>.
+            Bulk import stays SKU-first: use{" "}
+            <code className="rounded bg-muted px-1">variant_sku</code>,{" "}
+            <code className="rounded bg-muted px-1">variant_price</code>,{" "}
+            <code className="rounded bg-muted px-1">variant_stock</code>, and{" "}
+            <code className="rounded bg-muted px-1">variant_available</code> for
+            the concrete sellable SKU. Do not add product-level stock columns.
           </div>
         </CardContent>
       </Card>
@@ -555,7 +579,7 @@ export default function ProductImportUploadForm({
                   </div>
                   <div className="rounded-md border p-3">
                     <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Should differ per row (variant-level)
+                      Should differ per row (SKU-level)
                     </div>
                     <ul className="mt-2 flex flex-wrap gap-1.5">
                       {[
@@ -577,7 +601,8 @@ export default function ProductImportUploadForm({
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Tip: to add more variants, copy the first row for that product
+                  Tip: to add more sellable SKUs, copy the first row for that
+                  product
                   and only change the{" "}
                   <code className="rounded bg-muted px-1 font-mono">
                     variant_*
@@ -587,7 +612,8 @@ export default function ProductImportUploadForm({
                   <code className="rounded bg-muted px-1 font-mono">
                     import_key
                   </code>{" "}
-                  rejects the whole group.
+                  rejects the whole group. Optionless products should keep a
+                  single row only.
                 </p>
               </div>
             </TabsContent>

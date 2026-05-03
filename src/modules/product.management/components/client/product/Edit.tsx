@@ -15,6 +15,7 @@ import {
 import useUpdateProduct from "@/modules/product.management/hooks/useUpdateProduct";
 import CategoryDropdown from "@/modules/product.management/ui/CategoryDropdown";
 import ImageUploader from "@/modules/product.management/ui/ImageUploader";
+import OptionlessSkuEditor from "@/modules/product.management/ui/OptionlessSkuEditor";
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import ProductDetail from "@/modules/product.management/ui/ProductDetail";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
@@ -60,6 +61,7 @@ function EditContent({
     specificationState,
     selectorState,
     variantState,
+    optionModeState,
     submissionState,
   } = useUpdateProduct(productPayload);
   const feedback = submissionState.feedback;
@@ -300,27 +302,84 @@ function EditContent({
           {/*** Product Specifications ends ***/}
 
           {/*** Product variants starts ***/}
-          {selectorState.attributes?.length > 0 && (
-            <ProductCard
-              title="Product Variants"
-              className={variantsError ? "border-destructive" : undefined}
-            >
-              <p className="mb-3 text-sm text-muted-foreground">
-                Existing variant image removals are staged locally and only
-                apply after you save this product.
+          <ProductCard
+            title="Customer Options"
+            className={variantsError ? "border-destructive" : undefined}
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Does this product have customer-selectable options?
               </p>
-              <ProductVariant
-                feedback={feedback}
-                variantState={variantState}
-                selectorState={selectorState}
-              />
-              {variantState.hasPendingExistingImageRemovals && (
-                <p className="mt-4 text-sm text-amber-700">
-                  Pending variant image removals will apply when you save.
+              <div className="flex gap-3">
+                <ThemedButton
+                  type="button"
+                  variant={
+                    optionModeState.hasCustomerSelectableOptions
+                      ? "default"
+                      : "outline"
+                  }
+                  onClick={() =>
+                    optionModeState.setHasCustomerSelectableOptions(true)
+                  }
+                >
+                  Yes
+                </ThemedButton>
+                <ThemedButton
+                  type="button"
+                  variant={
+                    optionModeState.hasCustomerSelectableOptions
+                      ? "outline"
+                      : "default"
+                  }
+                  onClick={() =>
+                    optionModeState.setHasCustomerSelectableOptions(false)
+                  }
+                >
+                  No
+                </ThemedButton>
+              </div>
+              {optionModeState.modeLockedMessage ? (
+                <p className="text-sm text-muted-foreground">
+                  {optionModeState.modeLockedMessage}
                 </p>
+              ) : null}
+              {optionModeState.hasCustomerSelectableOptions ? (
+                selectorState.attributes?.length > 0 ? (
+                  <>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      Existing variant image removals are staged locally and only
+                      apply after you save this product.
+                    </p>
+                    <ProductVariant
+                      feedback={feedback}
+                      variantState={variantState}
+                      selectorState={selectorState}
+                    />
+                    {variantState.hasPendingExistingImageRemovals && (
+                      <p className="mt-4 text-sm text-amber-700">
+                        Pending variant image removals will apply when you save.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    This category has no customer-selectable attributes, so use
+                    the internal SKU mode instead.
+                  </p>
+                )
+              ) : (
+                <OptionlessSkuEditor
+                  variant={optionModeState.optionlessVariant}
+                  feedback={feedback}
+                  onChange={optionModeState.handleOptionlessVariantChange}
+                  onUpload={optionModeState.handleOptionlessVariantImageUpload}
+                  onImageRemove={
+                    optionModeState.handleOptionlessVariantImageRemove
+                  }
+                />
               )}
-            </ProductCard>
-          )}
+            </div>
+          </ProductCard>
           {/*** Product description ends ***/}
 
           <div className="pb-10">
