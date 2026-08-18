@@ -1,6 +1,26 @@
 import { ImageSchema } from "@/modules/product.management/schemas/ImageSchema";
 import { z } from "zod";
 
+const ProductAuthoringCapabilitySchema = z.enum([
+  "product_sku",
+  "variants",
+  "customer_options",
+  "inventory",
+  "base_price",
+  "specifications",
+  "images",
+  "import",
+]);
+
+export const CategoryAuthoringProfileSchema = z
+  .object({
+    type: z.literal("retail"),
+    status: z.literal("active"),
+    capabilities: z.record(ProductAuthoringCapabilitySchema, z.boolean()),
+    unavailable_reasons: z.record(z.string(), z.string()),
+  })
+  .strict();
+
 export const CategoryCore = z
   .object({
     uuid: z.uuid(),
@@ -14,6 +34,7 @@ export const CategoryCore = z
     icon_base_url: z.string(),
     specifications: z.array(z.string()).optional(),
     attributes: z.array(z.string()).optional(),
+    authoring_profile: CategoryAuthoringProfileSchema.optional(),
   })
   .strict();
 

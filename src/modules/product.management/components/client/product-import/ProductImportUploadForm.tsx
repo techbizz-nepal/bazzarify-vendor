@@ -514,14 +514,18 @@ export default function ProductImportUploadForm({
           </div>
 
           <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-            Use <code className="rounded bg-muted px-1">specifications.csv</code>{" "}
+            Use{" "}
+            <code className="rounded bg-muted px-1">specifications.csv</code>{" "}
             from the catalog ZIP to map each{" "}
             <code className="rounded bg-muted px-1">specification_key</code> to
             its readable{" "}
             <code className="rounded bg-muted px-1">specification_label</code>{" "}
-            and <code className="rounded bg-muted px-1">specification_type</code>.
-            Keep <code className="rounded bg-muted px-1">specifications_json</code>{" "}
-            keyed by <code className="rounded bg-muted px-1">specification_key</code>.
+            and{" "}
+            <code className="rounded bg-muted px-1">specification_type</code>.
+            Keep{" "}
+            <code className="rounded bg-muted px-1">specifications_json</code>{" "}
+            keyed by{" "}
+            <code className="rounded bg-muted px-1">specification_key</code>.
             Bulk import stays SKU-first: use{" "}
             <code className="rounded bg-muted px-1">variant_sku</code>,{" "}
             <code className="rounded bg-muted px-1">variant_price</code>,{" "}
@@ -602,8 +606,7 @@ export default function ProductImportUploadForm({
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Tip: to add more sellable SKUs, copy the first row for that
-                  product
-                  and only change the{" "}
+                  product and only change the{" "}
                   <code className="rounded bg-muted px-1 font-mono">
                     variant_*
                   </code>{" "}

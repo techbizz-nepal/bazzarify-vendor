@@ -233,6 +233,7 @@ export async function AppSidebar({ className }: { className?: string }) {
               settingsHref={
                 hasSettingsAccess ? "/settings/store-onboarding" : null
               }
+              profileHref={isVendor ? "/vendor-capabilities" : null}
               storeAction={storeAction}
             />
           </SidebarFooter>

@@ -43,7 +43,10 @@ function getDefaultRole({
   hasStore: boolean;
   audience: "consumer" | "vendor";
 }): ManagedRole {
-  return getCurrentManagedRole(roles) ?? (hasStore || audience === "vendor" ? "vendor" : "consumer");
+  return (
+    getCurrentManagedRole(roles) ??
+    (hasStore || audience === "vendor" ? "vendor" : "consumer")
+  );
 }
 
 interface AdminUserRoleManagementCardProps {

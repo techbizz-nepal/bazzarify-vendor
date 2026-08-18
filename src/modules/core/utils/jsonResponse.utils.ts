@@ -1,7 +1,4 @@
-import {
-  IApiMetaData,
-  IApiResponse,
-} from "@/modules/core/schemas/response";
+import { IApiMetaData, IApiResponse } from "@/modules/core/schemas/response";
 import { AxiosError, isAxiosError } from "axios";
 
 export const handleError = (error: unknown) => {

@@ -26,8 +26,24 @@ export type TCategory = {
   specifications_with_model?: TSpecification[];
   attributes?: string[];
   attributes_with_model?: TAttribute[];
+  authoring_profile?: TCategoryAuthoringProfile;
   parent?: TCategory;
   children?: TCategory[];
+};
+export type TProductAuthoringCapability =
+  | "product_sku"
+  | "variants"
+  | "customer_options"
+  | "inventory"
+  | "base_price"
+  | "specifications"
+  | "images"
+  | "import";
+export type TCategoryAuthoringProfile = {
+  type: "retail";
+  status: "active";
+  capabilities: Record<TProductAuthoringCapability, boolean>;
+  unavailable_reasons: Partial<Record<TProductAuthoringCapability, string>>;
 };
 export type TProduct = {
   type: "retail" | "wholesale";
@@ -303,6 +319,7 @@ export type TCategoryAuthoringContextPayload = {
   subChildCategories: TCategory[];
   specifications: TSpecification[];
   attributes: TAttribute[];
+  authoringProfile: TCategoryAuthoringProfile;
 };
 export interface IPaginatedData<T> {
   current_page: number;
@@ -423,6 +440,7 @@ export interface ProductOptionModeState {
 }
 
 export interface ProductAuthoringController {
+  authoringProfile: TCategoryAuthoringProfile | null;
   basicState: ProductAuthoringBasicState;
   categoryState: ProductAuthoringCategoryState;
   mediaState: ProductAuthoringMediaState;

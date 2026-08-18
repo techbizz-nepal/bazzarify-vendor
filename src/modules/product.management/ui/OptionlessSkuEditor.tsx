@@ -3,7 +3,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ProductSubmissionFeedback, TImage, TVariant } from "@/modules/product.management";
+import {
+  ProductSubmissionFeedback,
+  TImage,
+  TVariant,
+} from "@/modules/product.management";
 import { resolveStorageImageUrl } from "@/modules/product.management/utils/imageUrl";
 import { getSubmissionFieldError } from "@/modules/product.management/utils/productSubmissionFeedback";
 import Image from "next/image";
@@ -39,9 +43,18 @@ export default function OptionlessSkuEditor({
   onImageRemove,
 }: OptionlessSkuEditorProps) {
   const submissionFeedback = feedback ?? null;
-  const skuError = getSubmissionFieldError(submissionFeedback, "variants.0.sku");
-  const stockError = getSubmissionFieldError(submissionFeedback, "variants.0.stock");
-  const priceError = getSubmissionFieldError(submissionFeedback, "variants.0.price");
+  const skuError = getSubmissionFieldError(
+    submissionFeedback,
+    "variants.0.sku",
+  );
+  const stockError = getSubmissionFieldError(
+    submissionFeedback,
+    "variants.0.stock",
+  );
+  const priceError = getSubmissionFieldError(
+    submissionFeedback,
+    "variants.0.price",
+  );
   const imagesError = getSubmissionFieldError(
     submissionFeedback,
     "variants.0.images",
@@ -73,7 +86,9 @@ export default function OptionlessSkuEditor({
             onChange={(event) => onChange("sku", event.target.value)}
             placeholder="FACE-WASH-01"
           />
-          {skuError ? <p className="text-sm text-destructive">{skuError}</p> : null}
+          {skuError ? (
+            <p className="text-sm text-destructive">{skuError}</p>
+          ) : null}
         </div>
 
         <div className="space-y-2">

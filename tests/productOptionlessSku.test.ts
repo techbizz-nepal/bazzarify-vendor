@@ -1,6 +1,6 @@
-import assert from "node:assert/strict";
 import { CreateProductSchema } from "@/modules/product.management/config/schemas/product";
 import { createOptionlessVariantPayload } from "@/modules/product.management/utils/productForm";
+import assert from "node:assert/strict";
 
 const variants = createOptionlessVariantPayload({
   productName: "Face Wash",

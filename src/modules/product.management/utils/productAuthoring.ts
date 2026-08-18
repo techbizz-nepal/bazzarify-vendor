@@ -135,7 +135,9 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
       },
     );
 
-    uploadedProductImages.forEach((image) => formData.append("images[]", image));
+    uploadedProductImages.forEach((image) =>
+      formData.append("images[]", image),
+    );
     Object.entries(specifications).forEach(([key, value]) => {
       formData.append(`specifications[${key}]`, value);
     });
@@ -160,10 +162,10 @@ export const prepareProductSubmission = <TSchema extends z.ZodTypeAny>({
     return {
       ok: false,
       kind: "variants",
-      message: "Please fill stock, price, SKU, and images for each sellable SKU.",
+      message:
+        "Please fill stock, price, SKU, and images for each sellable SKU.",
       feedback: {
-        summary:
-          "Please complete the required SKU fields before submitting.",
+        summary: "Please complete the required SKU fields before submitting.",
         fieldErrors: {},
       },
       updatedVariantData: updated,

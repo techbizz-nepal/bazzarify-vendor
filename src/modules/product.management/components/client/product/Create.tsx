@@ -37,6 +37,7 @@ function CreateContent({
   categoryIndexPayload: TCategoryIndexPayload;
 }) {
   const {
+    authoringProfile,
     basicState,
     categoryState,
     mediaState,
@@ -46,6 +47,12 @@ function CreateContent({
     optionModeState,
     submissionState,
   } = useCreateProduct();
+  const supportsImages = authoringProfile?.capabilities.images ?? true;
+  const supportsSpecifications =
+    authoringProfile?.capabilities.specifications ?? true;
+  const supportsVariants = authoringProfile?.capabilities.variants ?? true;
+  const supportsCustomerOptions =
+    authoringProfile?.capabilities.customer_options ?? true;
   const feedback = submissionState.feedback;
   const rootCategories = categoryIndexPayload.categories.data;
   const nameError = getSubmissionFieldError(feedback, "name");
@@ -174,158 +181,172 @@ function CreateContent({
       {categoryState.committedCategory && (
         <>
           {/*** Product Image Start ***/}
-          <ProductCard
-            title="Product Images"
-            className={imagesError ? "border-destructive" : undefined}
-            tooltip={{
-              trigger: { type: "icon" },
-              texts: [
-                "This is the main image of your product page. Maximum 8 images can be uploaded.",
-                "Image size between 330x330 and 5000x5000 px. Max file size: 3 MB.",
-                "Obscene image is strictly prohibited.",
-              ],
-            }}
-          >
-            <ImageUploader
-              onImageSelect={mediaState.handleProductImageUpload}
-              initialImages={mediaState.existingProductImages}
-              invalid={Boolean(imagesError)}
-              errorMessage={imagesError}
-            />
-          </ProductCard>
+          {supportsImages && (
+            <ProductCard
+              title="Product Images"
+              className={imagesError ? "border-destructive" : undefined}
+              tooltip={{
+                trigger: { type: "icon" },
+                texts: [
+                  "This is the main image of your product page. Maximum 8 images can be uploaded.",
+                  "Image size between 330x330 and 5000x5000 px. Max file size: 3 MB.",
+                  "Obscene image is strictly prohibited.",
+                ],
+              }}
+            >
+              <ImageUploader
+                onImageSelect={mediaState.handleProductImageUpload}
+                initialImages={mediaState.existingProductImages}
+                invalid={Boolean(imagesError)}
+                errorMessage={imagesError}
+              />
+            </ProductCard>
+          )}
           {/*** Product Image ends ***/}
           {/*** Product Specifications starts ***/}
-          {specificationState.categorySpecifications.length > 0 && (
-            <ProductCard
-              title="Specifications"
-              className={specificationErrors ? "border-destructive" : undefined}
-            >
-              <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-                {specificationState.categorySpecifications.map(
-                  (specification) => (
-                    <div
-                      className="flex-col space-y-3"
-                      key={specification.uuid}
-                    >
-                      <Label
-                        htmlFor={`specification-value-`.concat(
-                          specification.key,
-                        )}
+          {supportsSpecifications &&
+            specificationState.categorySpecifications.length > 0 && (
+              <ProductCard
+                title="Specifications"
+                className={
+                  specificationErrors ? "border-destructive" : undefined
+                }
+              >
+                <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+                  {specificationState.categorySpecifications.map(
+                    (specification) => (
+                      <div
+                        className="flex-col space-y-3"
+                        key={specification.uuid}
                       >
-                        {specification.key.replaceAll("-", " ")}
-                      </Label>
-                      {specification.type === "text" && (
-                        <>
-                          <Input
-                            name={`specifications[${specification.key}]`}
-                            id={`specification-value-`.concat(
-                              specification.key,
-                            )}
-                            type={specification.type}
-                            required={true}
-                            className={cn(
-                              "focus-visible:ring-primary",
-                              getSubmissionFieldError(
-                                feedback,
-                                `specifications.${specification.key}`,
-                              ) && "border-destructive",
-                            )}
-                            value={
-                              specificationState.specificationValues[
-                                specification.key
-                              ] || ""
-                            }
-                            onChange={(e) =>
-                              specificationState.handleSpecificationChange(
-                                specification.key,
-                                e.target.value,
-                              )
-                            }
-                          />
-                          {getSubmissionFieldError(
-                            feedback,
-                            `specifications.${specification.key}`,
-                          ) && (
-                            <p className="text-sm text-destructive">
-                              {getSubmissionFieldError(
-                                feedback,
-                                `specifications.${specification.key}`,
-                              )}
-                            </p>
+                        <Label
+                          htmlFor={`specification-value-`.concat(
+                            specification.key,
                           )}
-                        </>
-                      )}
+                        >
+                          {specification.key.replaceAll("-", " ")}
+                        </Label>
+                        {specification.type === "text" && (
+                          <>
+                            <Input
+                              name={`specifications[${specification.key}]`}
+                              id={`specification-value-`.concat(
+                                specification.key,
+                              )}
+                              type={specification.type}
+                              required={true}
+                              className={cn(
+                                "focus-visible:ring-primary",
+                                getSubmissionFieldError(
+                                  feedback,
+                                  `specifications.${specification.key}`,
+                                ) && "border-destructive",
+                              )}
+                              value={
+                                specificationState.specificationValues[
+                                  specification.key
+                                ] || ""
+                              }
+                              onChange={(e) =>
+                                specificationState.handleSpecificationChange(
+                                  specification.key,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            {getSubmissionFieldError(
+                              feedback,
+                              `specifications.${specification.key}`,
+                            ) && (
+                              <p className="text-sm text-destructive">
+                                {getSubmissionFieldError(
+                                  feedback,
+                                  `specifications.${specification.key}`,
+                                )}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </ProductCard>
+            )}
+          {/*** Product Specifications ends ***/}
+
+          {/*** Product variants starts ***/}
+          {supportsVariants && (
+            <ProductCard
+              title="Customer Options"
+              className={variantsError ? "border-destructive" : undefined}
+            >
+              <div className="space-y-4">
+                {supportsCustomerOptions && (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Does this product have customer-selectable options?
+                    </p>
+                    <div className="flex gap-3">
+                      <ThemedButton
+                        type="button"
+                        variant={
+                          optionModeState.hasCustomerSelectableOptions
+                            ? "default"
+                            : "outline"
+                        }
+                        onClick={() =>
+                          optionModeState.setHasCustomerSelectableOptions(true)
+                        }
+                      >
+                        Yes
+                      </ThemedButton>
+                      <ThemedButton
+                        type="button"
+                        variant={
+                          optionModeState.hasCustomerSelectableOptions
+                            ? "outline"
+                            : "default"
+                        }
+                        onClick={() =>
+                          optionModeState.setHasCustomerSelectableOptions(false)
+                        }
+                      >
+                        No
+                      </ThemedButton>
                     </div>
-                  ),
+                  </>
+                )}
+                {supportsCustomerOptions &&
+                optionModeState.hasCustomerSelectableOptions ? (
+                  selectorState.attributes?.length > 0 ? (
+                    <ProductVariant
+                      feedback={feedback}
+                      selectorState={selectorState}
+                      variantState={variantState}
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      This category has no customer-selectable attributes, so
+                      use the internal SKU mode instead.
+                    </p>
+                  )
+                ) : (
+                  <OptionlessSkuEditor
+                    variant={optionModeState.optionlessVariant}
+                    feedback={feedback}
+                    onChange={optionModeState.handleOptionlessVariantChange}
+                    onUpload={
+                      optionModeState.handleOptionlessVariantImageUpload
+                    }
+                    onImageRemove={
+                      optionModeState.handleOptionlessVariantImageRemove
+                    }
+                  />
                 )}
               </div>
             </ProductCard>
           )}
-          {/*** Product Specifications ends ***/}
-
-          {/*** Product variants starts ***/}
-          <ProductCard
-            title="Customer Options"
-            className={variantsError ? "border-destructive" : undefined}
-          >
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Does this product have customer-selectable options?
-              </p>
-              <div className="flex gap-3">
-                <ThemedButton
-                  type="button"
-                  variant={
-                    optionModeState.hasCustomerSelectableOptions
-                      ? "default"
-                      : "outline"
-                  }
-                  onClick={() =>
-                    optionModeState.setHasCustomerSelectableOptions(true)
-                  }
-                >
-                  Yes
-                </ThemedButton>
-                <ThemedButton
-                  type="button"
-                  variant={
-                    optionModeState.hasCustomerSelectableOptions
-                      ? "outline"
-                      : "default"
-                  }
-                  onClick={() =>
-                    optionModeState.setHasCustomerSelectableOptions(false)
-                  }
-                >
-                  No
-                </ThemedButton>
-              </div>
-              {optionModeState.hasCustomerSelectableOptions ? (
-                selectorState.attributes?.length > 0 ? (
-                  <ProductVariant
-                    feedback={feedback}
-                    selectorState={selectorState}
-                    variantState={variantState}
-                  />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    This category has no customer-selectable attributes, so use
-                    the internal SKU mode instead.
-                  </p>
-                )
-              ) : (
-                <OptionlessSkuEditor
-                  variant={optionModeState.optionlessVariant}
-                  feedback={feedback}
-                  onChange={optionModeState.handleOptionlessVariantChange}
-                  onUpload={optionModeState.handleOptionlessVariantImageUpload}
-                  onImageRemove={
-                    optionModeState.handleOptionlessVariantImageRemove
-                  }
-                />
-              )}
-            </div>
-          </ProductCard>
           {/*** Product variants ends ***/}
           <div className="pb-10">
             {feedback && (

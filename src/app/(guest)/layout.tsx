@@ -1,8 +1,8 @@
+import AppProviders from "@/modules/core/components/client/AppProviders";
 import {
   getCookieStore,
   getSessionDecrypted,
 } from "@/modules/core/lib/utils.session";
-import AppProviders from "@/modules/core/components/client/AppProviders";
 import { Sora } from "next/font/google";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";

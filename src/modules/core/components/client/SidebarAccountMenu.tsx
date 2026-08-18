@@ -29,6 +29,7 @@ type SidebarAccountMenuProps = {
   roleSummary: string;
   identitySummary: string;
   settingsHref: string | null;
+  profileHref: string | null;
   storeAction: SidebarAccountAction | null;
 };
 
@@ -40,6 +41,7 @@ export default function SidebarAccountMenu({
   roleSummary,
   identitySummary,
   settingsHref,
+  profileHref,
   storeAction,
 }: SidebarAccountMenuProps) {
   return (
@@ -93,8 +95,18 @@ export default function SidebarAccountMenu({
             </div>
           </div>
         </DropdownMenuLabel>
-        {(settingsHref || storeAction) && <DropdownMenuSeparator />}
+        {(settingsHref || profileHref || storeAction) && (
+          <DropdownMenuSeparator />
+        )}
         <DropdownMenuGroup>
+          {profileHref ? (
+            <DropdownMenuItem asChild>
+              <Link href={profileHref}>
+                <Store className="size-4" />
+                Vendor capability profile
+              </Link>
+            </DropdownMenuItem>
+          ) : null}
           {settingsHref ? (
             <DropdownMenuItem asChild>
               <Link href={settingsHref}>
