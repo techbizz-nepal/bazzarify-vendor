@@ -47,6 +47,7 @@ export const actionGetDashboardSummary = async (
           typeof parsed.data.metaData.error === "string"
             ? parsed.data.metaData.error
             : "Unable to load dashboard summary.",
+        errorCode: parsed.data.metaData.errorCode ?? undefined,
       };
     }
 

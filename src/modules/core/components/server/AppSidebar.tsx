@@ -128,9 +128,6 @@ export async function AppSidebar({ className }: { className?: string }) {
   const isSuperAdmin = Boolean(
     sessionUser?.roles.some((role) => role.name === "super-admin"),
   );
-  const entries = (isVendor ? vendorNavigations : adminNavigations).filter(
-    (entry) => isEntryVisible(entry, isSuperAdmin),
-  );
   const roleNames = sessionUser?.roles.map((role) => role.name) ?? [];
   const displayName = getDisplayName(
     sessionUser?.name ?? null,
@@ -147,6 +144,16 @@ export async function AppSidebar({ className }: { className?: string }) {
   const hasStore = Boolean(sessionUser?.store);
   const hasBlockedStoreSetup =
     sessionUser?.store?.product_authoring_ready === false;
+  const vendorIsNotReady = isVendor && (!hasStore || hasBlockedStoreSetup);
+  const vendorLandingNavigation: TMenuEntry = vendorIsNotReady
+    ? { type: "link", title: "Onboarding", path: "/onboarding", icon: FaStore }
+    : { type: "link", title: "Dashboard", path: "/", icon: FaHome };
+  const navigations: TMenuEntry[] = isVendor
+    ? [vendorLandingNavigation, ...vendorNavigations.slice(1)]
+    : adminNavigations;
+  const entries = navigations.filter((entry) =>
+    isEntryVisible(entry, isSuperAdmin),
+  );
 
   const secondaryText = storeName || sessionUser?.email || "Signed in";
   const identitySummary = hasBlockedStoreSetup

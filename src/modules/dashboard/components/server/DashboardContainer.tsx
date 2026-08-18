@@ -15,6 +15,7 @@ import {
   type DashboardWindow,
 } from "@/modules/dashboard/schemas/dashboard-summary-schema";
 import { AlertTriangle } from "lucide-react";
+import { redirect } from "next/navigation";
 
 type Props = {
   searchParams?: Promise<{ window?: string }>;
@@ -41,6 +42,10 @@ export default async function DashboardContainer({ searchParams }: Props) {
   const result = await actionGetDashboardSummary(window);
 
   if ("error" in result) {
+    if (result.errorCode === 403) {
+      redirect("/onboarding");
+    }
+
     return (
       <PageContainer pageTitle="Dashboard">
         <div className="text-destructive flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
@@ -64,14 +69,18 @@ export default async function DashboardContainer({ searchParams }: Props) {
           {greeting} for the last {window.replace("d", " days")}.
         </p>
         <DashboardKpiGrid summary={result} />
-        <div className="grid items-stretch gap-4 lg:grid-cols-5">
-          <div className="lg:col-span-2">
-            <DashboardAttentionList items={result.attention} />
+        {result.attention.length > 0 ? (
+          <div className="grid items-stretch gap-4 lg:grid-cols-5">
+            <div className="lg:col-span-2">
+              <DashboardAttentionList items={result.attention} />
+            </div>
+            <div className="lg:col-span-3">
+              <DashboardRecentActivity items={result.recent} />
+            </div>
           </div>
-          <div className="lg:col-span-3">
-            <DashboardRecentActivity items={result.recent} />
-          </div>
-        </div>
+        ) : (
+          <DashboardRecentActivity items={result.recent} />
+        )}
         {result.scope === "global" && result.topStores.length > 0 && (
           <DashboardTopStores stores={result.topStores} />
         )}
