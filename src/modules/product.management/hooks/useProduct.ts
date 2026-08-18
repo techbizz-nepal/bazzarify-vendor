@@ -1,11 +1,9 @@
-import { RichTextEditorHandle } from "@/modules/core/components/client/RichTextEditor";
 import { TProductForm } from "@/modules/product.management";
 import { useRef, useState } from "react";
 
 export default function useProduct() {
   const nameRef = useRef<HTMLInputElement>(null);
   const basePriceRef = useRef<HTMLInputElement>(null);
-  const productDescriptionRef = useRef<RichTextEditorHandle>(null);
   const productHighlightsRef = useRef<HTMLTextAreaElement>(null);
   const productBoxItemsRef = useRef<HTMLInputElement>(null);
   const [existingProductImages, setExistingProductImages] = useState<string[]>([
@@ -41,7 +39,6 @@ export default function useProduct() {
   return {
     nameRef,
     basePriceRef,
-    productDescriptionRef,
     productHighlightsRef,
     productBoxItemsRef,
     existingProductImages,
