@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   MAX_FILE_SIZE_MB,
   MAX_PRODUCT_IMAGES_COUNT,
@@ -13,6 +14,8 @@ interface ImageUploadProps {
   initialImages?: string[];
   onRemoveExisting?: (url: string) => Promise<boolean>;
   onExistingListChange?: (urls: string[]) => void;
+  invalid?: boolean;
+  errorMessage?: string;
 }
 
 type PreviewItem = {
@@ -25,10 +28,13 @@ export default function ImageUploader({
   initialImages = [],
   onRemoveExisting,
   onExistingListChange,
+  invalid = false,
+  errorMessage,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<PreviewItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [brokenUrls, setBrokenUrls] = useState<Record<string, boolean>>({});
 
   // When initialImages change, merge existing URLs with current new previews; trim to max
   useEffect(() => {
@@ -179,38 +185,58 @@ export default function ImageUploader({
   };
 
   return (
-    <div className="flex items-center space-x-4 ">
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleFileChange}
-        className="hidden"
-      />
-      <div className="flex flex-wrap gap-4">
-        {previews.map((p, index) => (
-          <div key={index} className="relative">
-            <NextImage
-              width={100}
-              height={100}
-              src={p.url}
-              alt={`preview-${index}`}
-              className="w-20 h-20 object-cover rounded border"
-            />
-            <button
-              type="button"
-              onClick={() => handleRemoveImage(index)}
-              className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow"
-            >
-              <X className="w-4 h-4 text-red-500" />
-            </button>
-          </div>
-        ))}
+    <div
+      className={cn(
+        "rounded-lg border border-transparent p-3 transition-colors",
+        invalid && "border-destructive bg-destructive/5 shadow-sm",
+      )}
+    >
+      <div className="flex items-center space-x-4">
+        <input
+          name="files[]"
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <div className="flex flex-wrap gap-4">
+          {previews.map((p, index) => (
+            <div key={index} className="relative">
+              {brokenUrls[p.url] ? (
+                <div className="flex h-20 w-20 items-center justify-center rounded border border-dashed text-center text-xs text-muted-foreground">
+                  Image unavailable
+                </div>
+              ) : (
+                <NextImage
+                  width={100}
+                  height={100}
+                  src={p.url}
+                  alt={`preview-${index}`}
+                  className="h-20 w-20 rounded border object-cover"
+                  onError={() =>
+                    setBrokenUrls((prev) => ({ ...prev, [p.url]: true }))
+                  }
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(index)}
+                className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow"
+              >
+                <X className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div onClick={handleIconClick}>
+          <CirclePlus width={80} height={80} />
+        </div>
       </div>
-      <div onClick={handleIconClick}>
-        <CirclePlus width={80} height={80} />
-      </div>
+      {errorMessage && (
+        <p className="mt-3 text-sm text-destructive">{errorMessage}</p>
+      )}
     </div>
   );
 }

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { ListChecksIcon } from "lucide-react"
+import { ListChecksIcon } from "lucide-react";
 
-import { useToolbarContext } from "@/components/editor/context/toolbar-context"
-import { InsertPollDialog } from "@/components/editor/plugins/poll-plugin"
-import { SelectItem } from "@/components/ui/select"
+import { useToolbarContext } from "@/components/editor/context/toolbar-context";
+import { InsertPollDialog } from "@/components/editor/plugins/poll-plugin";
+import { SelectItem } from "@/components/ui/select";
 
 export function InsertPoll() {
-  const { activeEditor, showModal } = useToolbarContext()
+  const { activeEditor, showModal } = useToolbarContext();
 
   return (
     <SelectItem
@@ -24,5 +24,5 @@ export function InsertPoll() {
         <span>Poll</span>
       </div>
     </SelectItem>
-  )
+  );
 }

@@ -1,11 +1,12 @@
 "use server";
 
 import { defaultAxiosInstance } from "@/modules/core/lib/utils.axios";
+import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { handleRemoteError } from "@/modules/core/lib/utils.index";
 import { AUTH_ROUTES } from "@/modules/guest/config/routes";
-import { RegistrationVerificationFormValues } from "@/modules/guest/config/schemas/registrationVerificationForm";
 import { ResetPasswordFormValues } from "@/modules/guest/config/schemas/reset.password.form";
-import { BusinessAndEmailFormValues } from "@/modules/guest/config/schemas/set.business.email.form";
+import { ResetPasswordVerificationFormValues } from "@/modules/guest/config/schemas/reset.password.verification.form";
+import { toPasswordResetVerificationPayload } from "@/modules/guest/utils/passwordReset";
 
 export const actionRequestPasswordReset = async (
   data: ResetPasswordFormValues,
@@ -15,25 +16,28 @@ export const actionRequestPasswordReset = async (
       AUTH_ROUTES.reset.requestPasswordReset.path,
       data,
     );
+    const remoteError = extractRemoteErrorFeedback(response.data);
+    if (remoteError) {
+      return handleRemoteError(response.data);
+    }
     return response.data;
   } catch (error: unknown) {
     return handleRemoteError(error);
   }
 };
-export const handlePasswordResetVerification = async (
-  data: RegistrationVerificationFormValues,
-) => {
-  console.log(data);
-};
 
-export const actionSetBusinessAndEmail = async (
-  data: BusinessAndEmailFormValues,
+export const actionVerifyPasswordReset = async (
+  data: ResetPasswordVerificationFormValues,
 ) => {
   try {
     const response = await defaultAxiosInstance.post(
-      AUTH_ROUTES.register.verifySignup.path,
-      data,
+      AUTH_ROUTES.reset.verifyResetPassword.path,
+      toPasswordResetVerificationPayload(data),
     );
+    const remoteError = extractRemoteErrorFeedback(response.data);
+    if (remoteError) {
+      return handleRemoteError(response.data);
+    }
     return response.data;
   } catch (error: unknown) {
     return handleRemoteError(error);

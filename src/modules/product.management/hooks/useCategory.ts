@@ -1,23 +1,14 @@
-import {
-  TAttribute,
-  TCategory,
-  TSpecification,
-} from "@/modules/product.management";
-import { actionGetAttributes } from "@/modules/product.management/actions/attribute";
-import { actionViewCategorySpecifications } from "@/modules/product.management/actions/category";
-import { Dispatch, SetStateAction, useState } from "react";
-import { toast } from "sonner";
+import { TCategory, TSpecification } from "@/modules/product.management";
+import { useState } from "react";
 
-interface useCategoryProps {
-  setCategoryAttributes: Dispatch<SetStateAction<TAttribute[]>>;
-  setVariantSelections?: Dispatch<SetStateAction<Record<string, string[]>>>;
-}
-
-export default function useCategory({
-  setCategoryAttributes,
-  setVariantSelections,
-}: useCategoryProps) {
+export default function useCategory() {
   const [selectedCategories, setSelectedCategories] = useState<TCategory[]>([]);
+  const [committedCategories, setCommittedCategories] = useState<TCategory[]>(
+    [],
+  );
+  const [committedCategory, setCommittedCategory] = useState<TCategory | null>(
+    null,
+  );
   const [showDropdown, setShowDropdown] = useState(false);
   const [subCategories, setSubCategories] = useState<TCategory[]>([]);
   const [subChildCategories, setSubChildCategories] = useState<TCategory[]>([]);
@@ -44,33 +35,8 @@ export default function useCategory({
     setSelectedCategories((prev) => [prev[0], category]);
   };
 
-  const handleClickSubChild = async (category: TCategory) => {
+  const handleClickSubChild = (category: TCategory) => {
     setSelectedCategories((prev) => [prev[0], prev[1], category]);
-    const promises = await Promise.all([
-      actionViewCategorySpecifications(category.slug),
-      actionGetAttributes({
-        uuids: category.attributes?.join(","),
-      }),
-    ]);
-    const [specificationsResponse, attributesResponse] = promises;
-    if ("error" in specificationsResponse || "error" in attributesResponse) {
-      toast.error("Oops, something went wrong while fetching data!");
-      return;
-    }
-
-    const specificationsData = specificationsResponse.specifications?.data;
-    if (specificationsData) {
-      setCategorySpecifications(specificationsData);
-      setSpecifications({});
-    }
-
-    const attributesData = attributesResponse.attributes?.data;
-    if (attributesData) {
-      setCategoryAttributes(attributesData);
-      setVariantSelections?.({});
-    }
-
-    setShowDropdown(!showDropdown);
   };
 
   const updateFilter = (level: "root" | "sub" | "subchild", value: string) => {
@@ -82,6 +48,8 @@ export default function useCategory({
 
   return {
     selectedCategories,
+    committedCategories,
+    committedCategory,
     showDropdown,
     subCategories,
     subChildCategories,
@@ -95,10 +63,11 @@ export default function useCategory({
     updateFilter,
     setSpecifications,
     setCategorySpecifications,
-    setCategoryAttributes,
     setFilters,
     setSubChildCategories,
     setSubCategories,
+    setCommittedCategories,
+    setCommittedCategory,
     setSelectedCategories,
     setShowDropdown,
     handleSpecificationChange,

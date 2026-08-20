@@ -10,3 +10,12 @@ export function toTitleCase(str: string) {
     })
     .join(" ");
 }
+
+export function getJsonOrString(value: string | null) {
+  if (!value) return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}

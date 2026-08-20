@@ -8,11 +8,41 @@ import {
   MAX_DIMENSION,
   MIN_DIMENSION,
 } from "@/modules/product.management/config/constants/IMAGE_CONSTANTS";
+import {
+  createVariantDraftKey,
+  createVariantName,
+} from "@/modules/product.management/utils/variantDraft";
 import slugify from "slugify";
 import { toast } from "sonner";
 
+export const OPTIONLESS_VARIANT_KEY = createVariantDraftKey([]);
+
+const normalizeVariantSkuSegment = (value: string) =>
+  slugify(value, {
+    lower: false,
+    strict: true,
+    replacement: "-",
+    trim: true,
+  });
+
+export const deriveVariantSku = (
+  productSku: string,
+  variantName: string,
+): string => {
+  const normalizedProductSku = normalizeVariantSkuSegment(productSku);
+  const normalizedVariantName = normalizeVariantSkuSegment(variantName);
+
+  return [normalizedProductSku, normalizedVariantName]
+    .filter(Boolean)
+    .join("-");
+};
+
 export const isValidVariant = (variant: TVariant): boolean => {
   return !!(variant.stock && variant.price && variant.images?.length);
+};
+
+export const isValidOptionlessVariant = (variant: TVariant): boolean => {
+  return !!(variant.stock && variant.price && variant.sku);
 };
 
 export const updateVariantValidity = (
@@ -23,8 +53,7 @@ export const updateVariantValidity = (
   const updated: TVariantDataMap = { ...variantData };
 
   combinations.forEach((combo) => {
-    const key = combo.join("|");
-    console.log(key);
+    const key = createVariantDraftKey(combo);
     const variant = updated[key] || {};
     const isValid = isValidVariant(variant);
     updated[key] = { ...variant, isValid };
@@ -34,6 +63,7 @@ export const updateVariantValidity = (
 };
 
 export const createVariantsPayload = (
+  productSku: string,
   combinations: string[][],
   columns: string[],
   variantData: TVariantDataMap,
@@ -44,20 +74,42 @@ export const createVariantsPayload = (
       data[slugify(attr, { lower: true })] = combo[i] || "";
     });
 
-    const key = combo.join("|");
+    const key = createVariantDraftKey(combo);
     const variant = variantData[key] || {};
+    const variantName = createVariantName(combo);
 
     return {
       ...data,
       uuid: variant.uuid,
-      name: key.toLowerCase(),
+      name: variantName,
       stock: variant.stock || "0",
       price: variant.price || "",
+      sku: deriveVariantSku(productSku, variantName),
       images: variant.images,
       available: variant.available ?? true,
     };
   });
 };
+
+export const createOptionlessVariantPayload = ({
+  productName,
+  productSku,
+  variant,
+}: {
+  productName: string;
+  productSku: string;
+  variant: TVariant;
+}): TVariantPayload[] => [
+  {
+    uuid: variant.uuid,
+    name: productName.trim() || productSku.trim() || String(variant.sku || ""),
+    stock: variant.stock || "0",
+    price: variant.price || "",
+    sku: String(variant.sku || ""),
+    images: variant.images,
+    available: variant.available ?? true,
+  },
+];
 
 export const appendFormDataVariants = (
   formData: FormData,
@@ -90,6 +142,7 @@ export const appendFormDataVariants = (
       formData.append(`variants[${index}][uuid]`, variant.uuid);
     }
     formData.append(`variants[${index}][name]`, variant.name);
+    formData.append(`variants[${index}][sku]`, String(variant.sku || ""));
     formData.append(`variants[${index}][stock]`, variant.stock || "0");
     formData.append(`variants[${index}][price]`, variant.price || "0");
     formData.append(

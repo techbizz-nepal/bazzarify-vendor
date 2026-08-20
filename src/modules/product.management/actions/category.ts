@@ -3,7 +3,9 @@
 import { ApiResponse, IMetaData, TURLSearchParams } from "@/modules/core";
 import { authAxiosInstance } from "@/modules/core/lib/utils.axios";
 import { handleUnknownError } from "@/modules/core/lib/utils.index";
+import { getValidationFeedback } from "@/modules/core/lib/utils.validationFeedback";
 import {
+  TCategoryAuthoringContextPayload,
   TCategoryIndexPayload,
   TSpecificationsIndexPayload,
 } from "@/modules/product.management";
@@ -31,6 +33,17 @@ export async function actionGetCategories(
     return handleUnknownError(error);
   }
 }
+
+export const actionCreateCategory = async (body: object) => {
+  try {
+    const response = await (
+      await authAxiosInstance()
+    ).post(PRODUCT_MANAGEMENT_ROUTES.category.create.path, body);
+    return response.data;
+  } catch (error) {
+    return getValidationFeedback(error, "Please fix the highlighted fields.");
+  }
+};
 
 export const actionViewCategory = async (slug: string) => {
   try {
@@ -67,6 +80,29 @@ export const actionViewCategorySpecifications = async (
   }
 };
 
+export const actionViewCategoryAuthoringContext = async (
+  slug: string,
+): Promise<TCategoryAuthoringContextPayload | IMetaData> => {
+  try {
+    const response = await (
+      await authAxiosInstance()
+    ).get(
+      PRODUCT_MANAGEMENT_ROUTES.category.viewParentRecursive.path.replace(
+        ":slug",
+        slug,
+      ),
+    );
+    const responseData =
+      response.data as ApiResponse<TCategoryAuthoringContextPayload>;
+    if (responseData.metaData.error) {
+      return { error: responseData.metaData.error };
+    }
+    return responseData.data.payload;
+  } catch (error) {
+    return handleUnknownError(error);
+  }
+};
+
 export const actionUpdateCategory = async (slug: string, body: object) => {
   try {
     const response = await (
@@ -77,7 +113,28 @@ export const actionUpdateCategory = async (slug: string, body: object) => {
     );
     return response.data;
   } catch (error) {
-    console.error(error);
-    return null;
+    return getValidationFeedback(error, "Please fix the highlighted fields.");
+  }
+};
+
+export const actionUploadCategoryIcon = async (
+  slug: string,
+  body: FormData,
+) => {
+  try {
+    const response = await (
+      await authAxiosInstance()
+    ).post(
+      PRODUCT_MANAGEMENT_ROUTES.category.icon.path.replace(":slug", slug),
+      body,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    return getValidationFeedback(error, "Please fix the highlighted fields.");
   }
 };

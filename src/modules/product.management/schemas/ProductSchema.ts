@@ -7,7 +7,8 @@ export const ProductSchema = z
   .object({
     type: z.enum(["retail", "wholesale"]),
     uuid: z.uuid(),
-    user_uuid: z.uuid().nullable(),
+    created_by_user_uuid: z.uuid().nullable(),
+    updated_by_user_uuid: z.uuid().nullable().optional(),
     image_base_path: z.string(),
     image_base_url: z.string(),
     id: z.number().nullable(),
@@ -22,6 +23,28 @@ export const ProductSchema = z
     brand_uuid: z.uuid().nullable(),
     status: z.number().nonnegative(),
     brand: z.object().nullable().optional(),
+    createdBy: z
+      .object({
+        uuid: z.uuid(),
+        name: z.string().nullable().optional(),
+      })
+      .nullable()
+      .optional(),
+    updatedBy: z
+      .object({
+        uuid: z.uuid(),
+        name: z.string().nullable().optional(),
+      })
+      .nullable()
+      .optional(),
+    categories: z
+      .array(
+        z.object({
+          uuid: z.uuid(),
+          name: z.string(),
+        }),
+      )
+      .optional(),
     images: z.union([z.array(ImageSchema).optional(), z.array(z.unknown())]),
   })
   .extend({
@@ -36,7 +59,8 @@ export const OmittedProductWithImagesSchema = ProductSchema.omit({
   highlights: true,
   description: true,
   brand: true,
-  user_uuid: true,
+  created_by_user_uuid: true,
+  updated_by_user_uuid: true,
   brand_uuid: true,
   created_at: true,
   updated_at: true,

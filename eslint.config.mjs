@@ -1,18 +1,20 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import coreWebVitals from "eslint-config-next/core-web-vitals";
+import typescript from "eslint-config-next/typescript";
+import paths from "eslint-plugin-paths";
 
 const eslintConfig = [
-  { ignores: ["src/components/editor"] },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  { ignores: ["src/components/editor/**"] },
+  ...coreWebVitals,
+  ...typescript,
+  {
+    files: ["**/*.{ts,tsx}"],
+    plugins: {
+      paths,
+    },
+    rules: {
+      "paths/alias": "error",
+    },
+  },
 ];
 
 export default eslintConfig;

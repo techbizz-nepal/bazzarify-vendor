@@ -1,16 +1,14 @@
 import { actionGetCategories } from "@/modules/product.management/actions/category";
 import Create from "@/modules/product.management/components/client/product/Create";
-import { Loader } from "lucide-react";
-import { Suspense } from "react";
+import { requireVendorStoreGuard } from "@/modules/vendor/domain/requireVendorStoreGuard";
 
 export default async function Page() {
-  const categoryIndexPayloadPromise = actionGetCategories({
+  await requireVendorStoreGuard("/products/create");
+
+  const categoryIndexPayload = await actionGetCategories({
     filter: { rootOnly: true },
     sort: "name",
   });
-  return (
-    <Suspense fallback={<Loader />}>
-      <Create categoryIndexPayloadPromise={categoryIndexPayloadPromise} />
-    </Suspense>
-  );
+
+  return <Create categoryIndexPayload={categoryIndexPayload} />;
 }

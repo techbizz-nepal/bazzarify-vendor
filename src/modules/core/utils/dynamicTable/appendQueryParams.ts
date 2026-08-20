@@ -1,9 +1,9 @@
-import { IQueryParams } from "@/modules/core/types/dynamicTable";
+import { TQueryParams } from "@/modules/core/domain/schemas/QueryParams";
 import appendFilterParams from "@/modules/core/utils/dynamicTable/appendFilters";
 
 export default function appendQueryParams(
   formData: FormData,
-  queryParams: IQueryParams,
+  queryParams: TQueryParams,
 ) {
   const { filters, page } = queryParams;
   const params = appendFilterParams(formData, filters);

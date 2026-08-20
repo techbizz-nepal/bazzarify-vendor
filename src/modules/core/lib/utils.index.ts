@@ -3,26 +3,23 @@ import {
   SimplePaginationMeta,
   TURLSearchParams,
 } from "@/modules/core";
-import { AxiosError } from "axios";
+import { extractRemoteErrorFeedback } from "@/modules/core/lib/utils.feedback";
 import { Duration, intervalToDuration } from "date-fns";
 
 export const phoneRegex = /^9\d{9}$/;
-export const handleRemoteError = (error: unknown) => {
-  let message: string = "Something went wrong!";
-  let errorCode = 500;
-  if (error instanceof AxiosError) {
-    message = error.response?.data?.metaData?.error;
-    errorCode = error.response?.data?.metaData?.errorCode;
-  }
-
+export const handleRemoteError = (
+  error: unknown,
+  code: number | undefined = 500,
+) => {
+  const feedback = extractRemoteErrorFeedback(error, "Something went wrong!");
   return {
     data: {
       payload: [],
       message: "",
     },
     metaData: {
-      error: message,
-      errorCode: errorCode,
+      error: feedback?.error ?? "Something went wrong!",
+      errorCode: feedback?.errorCode ?? code,
     },
   };
 };
@@ -72,12 +69,14 @@ export function isValidJson(value: string) {
 }
 
 export function handleUnknownError(error: unknown): IMetaData {
-  if (error instanceof AxiosError) {
-    return { error: error.code || "An unexpected error occurred" };
-  } else {
-    console.log(error);
-    return { error: "An unexpected error occurred" };
-  }
+  const feedback = extractRemoteErrorFeedback(
+    error,
+    "An unexpected error occurred",
+  );
+  return {
+    error: feedback?.error ?? "An unexpected error occurred",
+    errorCode: feedback?.errorCode,
+  };
 }
 
 export function getDurationFromTimestamps(pastDate: Date) {
@@ -104,3 +103,6 @@ export function getDurationFromTimestamps(pastDate: Date) {
     ? `${duration[interval]} ${interval.slice(0, -1)}${duration[interval] === 1 ? "" : "s"} ${isFuture ? "from now" : "ago"}`
     : "just now";
 }
+
+export const getTokenExpirationDate = () =>
+  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

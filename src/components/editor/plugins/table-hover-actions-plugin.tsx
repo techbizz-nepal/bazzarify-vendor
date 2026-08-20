@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -7,10 +7,8 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import { JSX, useEffect, useMemo, useRef, useState } from "react"
-import * as React from "react"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { useLexicalEditable } from "@lexical/react/useLexicalEditable"
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
 import {
   $getTableColumnIndexFromTableCellNode,
   $getTableRowIndexFromTableCellNode,
@@ -21,82 +19,84 @@ import {
   TableCellNode,
   TableNode,
   TableRowNode,
-} from "@lexical/table"
-import { $findMatchingParent, mergeRegister } from "@lexical/utils"
-import { $getNearestNodeFromDOMNode, NodeKey } from "lexical"
-import { PlusIcon } from "lucide-react"
-import { createPortal } from "react-dom"
+} from "@lexical/table";
+import { $findMatchingParent, mergeRegister } from "@lexical/utils";
+import { $getNearestNodeFromDOMNode, NodeKey } from "lexical";
+import { PlusIcon } from "lucide-react";
+import * as React from "react";
+import { JSX, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
-import { useDebounce } from "@/components/editor/editor-hooks/use-debounce"
+import { useDebounce } from "@/components/editor/editor-hooks/use-debounce";
 
-const BUTTON_WIDTH_PX = 20
+const BUTTON_WIDTH_PX = 20;
 
 function TableHoverActionsContainer({
   anchorElem,
 }: {
-  anchorElem: HTMLElement
+  anchorElem: HTMLElement;
 }): JSX.Element | null {
-  const [editor] = useLexicalComposerContext()
-  const isEditable = useLexicalEditable()
-  const [isShownRow, setShownRow] = useState<boolean>(false)
-  const [isShownColumn, setShownColumn] = useState<boolean>(false)
+  const [editor] = useLexicalComposerContext();
+  const isEditable = useLexicalEditable();
+  const [isShownRow, setShownRow] = useState<boolean>(false);
+  const [isShownColumn, setShownColumn] = useState<boolean>(false);
   const [shouldListenMouseMove, setShouldListenMouseMove] =
-    useState<boolean>(false)
-  const [position, setPosition] = useState({})
-  const tableSetRef = useRef<Set<NodeKey>>(new Set())
-  const tableCellDOMNodeRef = useRef<HTMLElement | null>(null)
+    useState<boolean>(false);
+  const [position, setPosition] = useState({});
+  const tableSetRef = useRef<Set<NodeKey>>(new Set());
+  const tableCellDOMNodeRef = useRef<HTMLElement | null>(null);
 
   const debouncedOnMouseMove = useDebounce(
     (event: MouseEvent) => {
-      const { isOutside, tableDOMNode } = getMouseInfo(event)
+      const { isOutside, tableDOMNode } = getMouseInfo(event);
 
       if (isOutside) {
-        setShownRow(false)
-        setShownColumn(false)
-        return
+        setShownRow(false);
+        setShownColumn(false);
+        return;
       }
 
       if (!tableDOMNode) {
-        return
+        return;
       }
 
-      tableCellDOMNodeRef.current = tableDOMNode
+      tableCellDOMNodeRef.current = tableDOMNode;
 
-      let hoveredRowNode: TableCellNode | null = null
-      let hoveredColumnNode: TableCellNode | null = null
-      let tableDOMElement: HTMLElement | null = null
+      let hoveredRowNode: TableCellNode | null = null;
+      let hoveredColumnNode: TableCellNode | null = null;
+      let tableDOMElement: HTMLElement | null = null;
 
       editor.update(() => {
-        const maybeTableCell = $getNearestNodeFromDOMNode(tableDOMNode)
+        const maybeTableCell = $getNearestNodeFromDOMNode(tableDOMNode);
 
         if ($isTableCellNode(maybeTableCell)) {
           const table = $findMatchingParent(maybeTableCell, (node) =>
-            $isTableNode(node)
-          )
+            $isTableNode(node),
+          );
           if (!$isTableNode(table)) {
-            return
+            return;
           }
 
-          tableDOMElement = editor.getElementByKey(table?.getKey())
+          tableDOMElement = editor.getElementByKey(table?.getKey());
 
           if (tableDOMElement) {
-            const rowCount = table.getChildrenSize()
+            const rowCount = table.getChildrenSize();
             const colCount = (
               (table as TableNode).getChildAtIndex(0) as TableRowNode
-            )?.getChildrenSize()
+            )?.getChildrenSize();
 
-            const rowIndex = $getTableRowIndexFromTableCellNode(maybeTableCell)
+            const rowIndex = $getTableRowIndexFromTableCellNode(maybeTableCell);
             const colIndex =
-              $getTableColumnIndexFromTableCellNode(maybeTableCell)
+              $getTableColumnIndexFromTableCellNode(maybeTableCell);
 
             if (rowIndex === rowCount - 1) {
-              hoveredRowNode = maybeTableCell
+              hoveredRowNode = maybeTableCell;
             } else if (colIndex === colCount - 1) {
-              hoveredColumnNode = maybeTableCell
+              hoveredColumnNode = maybeTableCell;
             }
           }
         }
-      })
+      });
 
       if (tableDOMElement) {
         const {
@@ -106,59 +106,59 @@ function TableHoverActionsContainer({
           left: tableElemLeft,
           bottom: tableElemBottom,
           height: tableElemHeight,
-        } = (tableDOMElement as HTMLTableElement).getBoundingClientRect()
+        } = (tableDOMElement as HTMLTableElement).getBoundingClientRect();
 
         const { y: editorElemY, left: editorElemLeft } =
-          anchorElem.getBoundingClientRect()
+          anchorElem.getBoundingClientRect();
 
         if (hoveredRowNode) {
-          setShownColumn(false)
-          setShownRow(true)
+          setShownColumn(false);
+          setShownRow(true);
           setPosition({
             height: BUTTON_WIDTH_PX,
             left: tableElemLeft - editorElemLeft,
             top: tableElemBottom - editorElemY + 5,
             width: tableElemWidth,
-          })
+          });
         } else if (hoveredColumnNode) {
-          setShownColumn(true)
-          setShownRow(false)
+          setShownColumn(true);
+          setShownRow(false);
           setPosition({
             height: tableElemHeight,
             left: tableElemRight - editorElemLeft + 5,
             top: tableElemY - editorElemY,
             width: BUTTON_WIDTH_PX,
-          })
+          });
         }
       }
     },
     50,
-    250
-  )
+    250,
+  );
 
   // Hide the buttons on any table dimensions change to prevent last row cells
   // overlap behind the 'Add Row' button when text entry changes cell height
   const tableResizeObserver = useMemo(() => {
     return new ResizeObserver(() => {
-      setShownRow(false)
-      setShownColumn(false)
-    })
-  }, [])
+      setShownRow(false);
+      setShownColumn(false);
+    });
+  }, []);
 
   useEffect(() => {
     if (!shouldListenMouseMove) {
-      return
+      return;
     }
 
-    document.addEventListener("mousemove", debouncedOnMouseMove)
+    document.addEventListener("mousemove", debouncedOnMouseMove);
 
     return () => {
-      setShownRow(false)
-      setShownColumn(false)
-      debouncedOnMouseMove.cancel()
-      document.removeEventListener("mousemove", debouncedOnMouseMove)
-    }
-  }, [shouldListenMouseMove, debouncedOnMouseMove])
+      setShownRow(false);
+      setShownColumn(false);
+      debouncedOnMouseMove.cancel();
+      document.removeEventListener("mousemove", debouncedOnMouseMove);
+    };
+  }, [shouldListenMouseMove, debouncedOnMouseMove]);
 
   useEffect(() => {
     return mergeRegister(
@@ -167,60 +167,60 @@ function TableHoverActionsContainer({
         (mutations) => {
           editor.getEditorState().read(() => {
             for (const [key, type] of Array.from(mutations)) {
-              const tableDOMElement = editor.getElementByKey(key)
+              const tableDOMElement = editor.getElementByKey(key);
               switch (type) {
                 case "created":
-                  tableSetRef.current.add(key)
-                  setShouldListenMouseMove(tableSetRef.current.size > 0)
+                  tableSetRef.current.add(key);
+                  setShouldListenMouseMove(tableSetRef.current.size > 0);
                   if (tableDOMElement) {
-                    tableResizeObserver.observe(tableDOMElement)
+                    tableResizeObserver.observe(tableDOMElement);
                   }
-                  break
+                  break;
 
                 case "destroyed":
-                  tableSetRef.current.delete(key)
-                  setShouldListenMouseMove(tableSetRef.current.size > 0)
+                  tableSetRef.current.delete(key);
+                  setShouldListenMouseMove(tableSetRef.current.size > 0);
                   // Reset resize observers
-                  tableResizeObserver.disconnect()
+                  tableResizeObserver.disconnect();
                   tableSetRef.current.forEach((tableKey: NodeKey) => {
-                    const tableElement = editor.getElementByKey(tableKey)
+                    const tableElement = editor.getElementByKey(tableKey);
                     if (tableElement) {
-                      tableResizeObserver.observe(tableElement)
+                      tableResizeObserver.observe(tableElement);
                     }
-                  })
-                  break
+                  });
+                  break;
 
                 default:
-                  break
+                  break;
               }
             }
-          })
+          });
         },
-        { skipInitialization: false }
-      )
-    )
-  }, [editor, tableResizeObserver])
+        { skipInitialization: false },
+      ),
+    );
+  }, [editor, tableResizeObserver]);
 
   const insertAction = (insertRow: boolean) => {
     editor.update(() => {
       if (tableCellDOMNodeRef.current) {
         const maybeTableNode = $getNearestNodeFromDOMNode(
-          tableCellDOMNodeRef.current
-        )
-        maybeTableNode?.selectEnd()
+          tableCellDOMNodeRef.current,
+        );
+        maybeTableNode?.selectEnd();
         if (insertRow) {
-          $insertTableRow__EXPERIMENTAL()
-          setShownRow(false)
+          $insertTableRow__EXPERIMENTAL();
+          setShownRow(false);
         } else {
-          $insertTableColumn__EXPERIMENTAL()
-          setShownColumn(false)
+          $insertTableColumn__EXPERIMENTAL();
+          setShownColumn(false);
         }
       }
-    })
-  }
+    });
+  };
 
   if (!isEditable) {
-    return null
+    return null;
   }
 
   return (
@@ -248,48 +248,48 @@ function TableHoverActionsContainer({
         </button>
       )}
     </>
-  )
+  );
 }
 
 function getMouseInfo(event: MouseEvent): {
-  tableDOMNode: HTMLElement | null
-  isOutside: boolean
+  tableDOMNode: HTMLElement | null;
+  isOutside: boolean;
 } {
-  const target = event.target
+  const target = event.target;
 
   if (target && target instanceof HTMLElement) {
     const tableDOMNode = target.closest<HTMLElement>(
-      "td.EditorTheme__tableCell, th.EditorTheme__tableCell"
-    )
+      "td.EditorTheme__tableCell, th.EditorTheme__tableCell",
+    );
 
     const isOutside = !(
       tableDOMNode ||
       target.closest<HTMLElement>("button.EditorTheme__tableAddRows") ||
       target.closest<HTMLElement>("button.EditorTheme__tableAddColumns") ||
       target.closest<HTMLElement>("div.TableCellResizer__resizer")
-    )
+    );
 
-    return { isOutside, tableDOMNode }
+    return { isOutside, tableDOMNode };
   } else {
-    return { isOutside: true, tableDOMNode: null }
+    return { isOutside: true, tableDOMNode: null };
   }
 }
 
 export function TableHoverActionsPlugin({
   anchorElem,
 }: {
-  anchorElem: HTMLDivElement | null
+  anchorElem: HTMLDivElement | null;
 }): React.ReactPortal | null {
-  const isEditable = useLexicalEditable()
+  const isEditable = useLexicalEditable();
 
   if (!anchorElem) {
-    return null
+    return null;
   }
 
   return isEditable
     ? createPortal(
         <TableHoverActionsContainer anchorElem={anchorElem} />,
-        anchorElem
+        anchorElem,
       )
-    : null
+    : null;
 }

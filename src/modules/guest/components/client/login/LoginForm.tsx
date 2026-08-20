@@ -11,6 +11,10 @@ import {
 import { Input } from "@/components/ui/input";
 import FormTitle from "@/modules/core/components/server/FormTitle";
 import { ThemedButton } from "@/modules/core/components/server/ThemedButton";
+import {
+  applyValidationFeedback,
+  getValidationFeedback,
+} from "@/modules/core/lib/utils.validationFeedback";
 import { actionLogin } from "@/modules/guest/actions/login";
 import {
   LoginFormSchema,
@@ -29,36 +33,60 @@ export default function LoginForm() {
     },
   });
 
-  function handleSubmit(data: LoginFormValues) {
+  async function runLogin(data: LoginFormValues) {
     toast.info("Signing In...");
-    const loginData =
-      process.env.NEXT_PUBLIC_ENVIRONMENT === "development"
-        ? {
-            ...data,
-            credential: "gracysusant@gmail.com",
-            password: "H@nds0me1522",
-          }
-        : { ...data };
-
-    actionLogin(loginData)
+    return actionLogin(data)
       .then((response) => {
         if (response?.metaData?.error) {
+          const feedback = getValidationFeedback(response);
+          if (feedback) {
+            applyValidationFeedback(form.setError, feedback);
+            toast.warning(feedback.summary);
+            return;
+          }
           toast.warning(response?.metaData?.error);
           return;
         }
         toast.success("Signing you in...");
       })
-      .catch(() => {
+      .catch((error) => {
+        const feedback = getValidationFeedback(error);
+        if (feedback) {
+          applyValidationFeedback(form.setError, feedback);
+          toast.error(feedback.summary);
+          return;
+        }
         toast.error("Cannot login");
       });
   }
 
+  function handleSubmit(data: LoginFormValues) {
+    void runLogin(data);
+  }
+
+  function handleDevLogin() {
+    void runLogin({
+      credential: "techbizznepal@gmail.com",
+      password: "H@nds0me1522",
+    });
+  }
+
   return (
     <>
+      {process.env.NODE_ENV == "development" ? (
+        <ThemedButton
+          type="button"
+          onClick={handleDevLogin}
+          className="text-md w-full py-6"
+        >
+          Dev Login
+        </ThemedButton>
+      ) : null}
       <FormTitle
         label="Sign In"
         className="flex w-full items-center justify-center"
       />
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
@@ -100,7 +128,9 @@ export default function LoginForm() {
             )}
             name="password"
           />
-          <ThemedButton className="text-md w-full py-6">Sign In</ThemedButton>
+          <ThemedButton type="submit" className="text-md w-full py-6">
+            Sign In
+          </ThemedButton>
         </form>
       </Form>
     </>

@@ -13,28 +13,11 @@ export interface ApiResponse<T> {
   metaData: IMetaData;
 }
 
-export interface FetchAction<T> {
-  (params?: Record<string, T>): Promise<T>;
-}
-
-export interface UseDataTableControllerOptions {
-  entityKey: string;
-  fetchAction: FetchAction;
-}
-
 export interface Entity {
   uuid: string;
-  slug: string;
+  slug?: string;
 
   [key: string]: string | number | boolean | null;
-}
-
-interface DataTableProps<T> {
-  entityKey: string;
-  columns: { label: string; accessor: string }[];
-  fetchAction: FetchAction<T>;
-  filterOptions?: { label: string; value: string; key: string }[];
-  defaultFilter?: string;
 }
 
 export interface SimplePaginationMeta {
@@ -76,5 +59,5 @@ export type IRoute = {
 };
 
 export type IPageParams = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ uuid: string }>;
 };

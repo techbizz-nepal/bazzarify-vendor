@@ -1,10 +1,12 @@
+import { ServerDataTableMetaSchema } from "@/modules/core/domain/schemas/ServerDataTableMeta";
 import { SimplePaginatedSchema } from "@/modules/core/schemas/SimplePaginated";
-import { OrderListSchema } from "@/modules/order.management/schemas/orderSchema";
+import { OrderListItemSchema } from "@/modules/order.management/schemas/orderSchema";
 import { z } from "zod";
 
 export const OrderListPayloadSchema = z
   .object({
-    orders: SimplePaginatedSchema(OrderListSchema).nullable(),
+    orders: SimplePaginatedSchema(OrderListItemSchema).nullable(),
+    table: ServerDataTableMetaSchema,
   })
   .strip();
 

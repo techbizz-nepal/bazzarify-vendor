@@ -1,7 +1,9 @@
 "use client";
 
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { TMenuItem } from "@/modules/core/data";
+import { TMenuLink } from "@/modules/core/data";
+import { isNavLinkActive } from "@/modules/core/lib/nav-active";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 
@@ -11,22 +13,21 @@ export default function SidebarMenuButtonComponent({
   title,
 }: {
   children: ReactNode;
-  routePath: TMenuItem["path"];
-  title: TMenuItem["title"];
+  routePath: TMenuLink["path"];
+  title: TMenuLink["title"];
 }) {
   const pathname = usePathname();
   return (
     <SidebarMenuButton
       asChild
-      className="py-6"
-      isActive={
-        routePath === "/" ? pathname === "/" : pathname.includes(routePath)
-      }
+      className="py-6 font-medium hover:bg-sidebar-selected/15 hover:text-sidebar-foreground"
+      tooltip={title}
+      isActive={isNavLinkActive(pathname, routePath)}
     >
-      <a href={routePath}>
+      <Link href={routePath}>
         {children}
         <span>{title}</span>
-      </a>
+      </Link>
     </SidebarMenuButton>
   );
 }

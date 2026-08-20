@@ -10,5 +10,11 @@ const order: IRoute["order"] = {
   update: {
     path: "/order-management/orders/:orderId",
   },
+  itemFulfillment: {
+    path: "/order-management/orders/:orderId/items/:itemId/fulfillment",
+  },
+  statuses: {
+    path: "/order-management/orders/statuses",
+  },
 };
 export default order;

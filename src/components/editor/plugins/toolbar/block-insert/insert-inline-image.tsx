@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { FileImageIcon } from "lucide-react"
+import { FileImageIcon } from "lucide-react";
 
-import { useToolbarContext } from "@/components/editor/context/toolbar-context"
-import { InsertInlineImageDialog } from "@/components/editor/plugins/inline-image-plugin"
-import { SelectItem } from "@/components/ui/select"
+import { useToolbarContext } from "@/components/editor/context/toolbar-context";
+import { InsertInlineImageDialog } from "@/components/editor/plugins/inline-image-plugin";
+import { SelectItem } from "@/components/ui/select";
 
 export function InsertInlineImage() {
-  const { activeEditor, showModal } = useToolbarContext()
+  const { activeEditor, showModal } = useToolbarContext();
 
   return (
     <SelectItem
@@ -27,5 +27,5 @@ export function InsertInlineImage() {
         <span>Inline Image</span>
       </div>
     </SelectItem>
-  )
+  );
 }

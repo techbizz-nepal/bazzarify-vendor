@@ -1,18 +1,21 @@
 import type { NextConfig } from "next";
 
+const isDevelopment = process.env.NODE_ENV !== "production";
+
 const nextConfig: NextConfig = {
   output: "standalone",
   allowedDevOrigins: [
     "larashops.local",
     "bazzarify.local",
-    "vendor.larashops.local",
-    "admin.larashops.local",
+    "*.larashops.local",
   ],
   images: {
+    dangerouslyAllowLocalIP: isDevelopment,
     remotePatterns: [
       new URL("https://gw.alicdn.com/**"),
       new URL("http://local-ne.bazzarify.local:8081/**"),
       new URL("http://local-ne.larashops.local:8081/**"),
+      new URL("https://bazzarify-assets.s3.ap-southeast-1.amazonaws.com/**"),
     ],
   },
   experimental: {

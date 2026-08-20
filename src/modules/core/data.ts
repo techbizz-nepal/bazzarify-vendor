@@ -102,8 +102,20 @@ export const categoriesData = [
   "Motors, Tools & DIY",
 ];
 
-export type TMenuItem = {
+export type TMenuLink = {
+  type: "link";
   icon: IconType;
   title: string;
   path: string;
 };
+
+export type TMenuGroup = {
+  type: "group";
+  icon: IconType;
+  title: string;
+  defaultPath: string;
+  pathMatch: string;
+  children: TMenuLink[];
+};
+
+export type TMenuEntry = TMenuLink | TMenuGroup;

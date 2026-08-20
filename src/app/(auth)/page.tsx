@@ -1,4 +1,4 @@
-import DashboardContainer from "@/modules/dashboard/components/client/DashboardContainer";
+import DashboardContainer from "@/modules/dashboard/components/server/DashboardContainer";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

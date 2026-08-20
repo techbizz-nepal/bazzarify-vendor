@@ -8,12 +8,13 @@ import { isAxiosError } from "axios";
 export const actionUpdateOrderStatus = async (
   uuid: string,
   updatedStatus: string,
+  note?: string,
 ) => {
   try {
     const client = await authAxiosInstance();
-    const response = await client.put(
+    const response = await client.patch(
       ORDER_MANAGEMENT_ROUTES.order.update.path.replace(":orderId", uuid),
-      { status: updatedStatus },
+      { status: updatedStatus, ...(note ? { note } : {}) },
     );
 
     const responseData = response.data; //as ApiResponse<TOrderShowPayloadSchema>;
@@ -21,7 +22,6 @@ export const actionUpdateOrderStatus = async (
     if (responseData.metaData.error) {
       return { error: responseData.metaData.error };
     }
-    console.log("success fetch order: ", responseData.data.payload.order);
     return responseData.data.payload.order;
   } catch (error) {
     if (isAxiosError(error)) {

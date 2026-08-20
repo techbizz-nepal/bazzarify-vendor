@@ -34,8 +34,8 @@ export default function Page() {
 
 const Footer = () => (
   <footer className="flex flex-col space-y-7">
-    <div className="px-24">
-      <div className="grid grid-cols-5 gap-4">
+    <div className="px-24 flex-col space-y-10 py-10">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="flex flex-col space-y-5">
           <div>
             <Image
@@ -43,7 +43,7 @@ const Footer = () => (
               alt="logo"
               width={150}
               height={20}
-              className="hidden h-auto w-auto md:block"
+              className="h-auto w-auto"
               priority={true}
             />
           </div>
@@ -64,7 +64,7 @@ const Footer = () => (
             {footerData.contactDetails.openingTime}
           </div>
         </div>
-        <div className="flex flex-col space-y-4">
+        <div className="hidden  md:flex flex-col space-y-4">
           <div className="p-3">
             <p className="text-2xl font-semibold">Information</p>
           </div>
@@ -80,7 +80,7 @@ const Footer = () => (
             ))}
           </div>
         </div>
-        <div className="flex flex-col space-y-4">
+        <div className="hidden  md:flex flex-col space-y-4">
           <div className="p-3">
             <p className="text-2xl font-semibold">Account</p>
           </div>
@@ -96,7 +96,7 @@ const Footer = () => (
             ))}
           </div>
         </div>
-        <div className="flex flex-col space-y-4">
+        <div className="hidden  md:flex flex-col space-y-4">
           <div className="p-3">
             <p className="text-2xl font-semibold">Services</p>
           </div>
@@ -112,7 +112,7 @@ const Footer = () => (
             ))}
           </div>
         </div>
-        <div className="flex flex-col space-y-4">
+        <div className="hidden  md:flex flex-col space-y-4">
           <div className="p-3">
             <p className="text-2xl font-semibold">Download App</p>
           </div>
@@ -134,7 +134,7 @@ const Footer = () => (
           </div>
         </div>
       </div>
-      <div className="flex w-full flex-row flex-wrap items-center justify-center space-x-8 px-64 py-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 items-center space-x-8 ">
         {categoriesData.map((item) => (
           <div
             className="flex cursor-pointer flex-row text-lg font-semibold"

@@ -6,9 +6,24 @@ import {
 } from "@/components/ui/popover";
 import { TableColumn } from "@/modules/core/components/client/DynamicTable";
 import { OrderData } from "@/modules/core/types/dynamicTable";
+import { TOrderStatusOption } from "@/modules/order.management/actions/actionGetOrderStatuses";
 import Link from "next/link";
 
-export const orderIndexColumns: TableColumn<OrderData>[] = [
+type TOrderIndexColumnParams = {
+  statusOptions: TOrderStatusOption[];
+  isUpdatingStatus: boolean;
+  onUpdateStatus: (
+    orderUuid: string,
+    statusCode: string,
+    statusLabel: string,
+  ) => void;
+};
+
+export const orderIndexColumns = ({
+  statusOptions,
+  isUpdatingStatus,
+  onUpdateStatus,
+}: TOrderIndexColumnParams): TableColumn<OrderData>[] => [
   {
     key: "order_number",
     title: "Order Number",
@@ -80,13 +95,31 @@ export const orderIndexColumns: TableColumn<OrderData>[] = [
         </Link>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline">Update Status</Button>
+            <Button
+              variant="outline"
+              disabled={isUpdatingStatus || !statusOptions.length}
+            >
+              Update Status
+            </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-32 flex flex-col space-y-3">
-            <Button variant="outline">Shipped</Button>
-            <Button variant="outline">Delivered</Button>
-            <Button variant="outline">Completed</Button>
-            <Button variant="outline">Returned</Button>
+          <PopoverContent className="w-full flex flex-col space-y-3">
+            {statusOptions.length ? (
+              statusOptions.map((status) => (
+                <Button
+                  key={status.code}
+                  variant="outline"
+                  onClick={() =>
+                    onUpdateStatus(record.uuid, status.code, status.label)
+                  }
+                >
+                  {status.label}
+                </Button>
+              ))
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                No statuses available.
+              </p>
+            )}
           </PopoverContent>
         </Popover>
       </div>

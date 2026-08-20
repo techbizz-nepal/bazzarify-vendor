@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/select";
 
 export default function FilterDropdown({
-                          id,
-                          label,
-                          options,
-                          value,
-                          onChange,
-                        }: {
+  id,
+  label,
+  options,
+  value,
+  onChange,
+}: {
   id: string;
   label: string;
   options: { id: string; label: string; value: string }[];

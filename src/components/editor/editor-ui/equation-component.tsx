@@ -1,8 +1,6 @@
-import * as React from "react"
-import { JSX, useCallback, useEffect, useRef, useState } from "react"
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { useLexicalEditable } from "@lexical/react/useLexicalEditable"
-import { mergeRegister } from "@lexical/utils"
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalEditable } from "@lexical/react/useLexicalEditable";
+import { mergeRegister } from "@lexical/utils";
 import {
   $getNodeByKey,
   $getSelection,
@@ -11,100 +9,101 @@ import {
   KEY_ESCAPE_COMMAND,
   NodeKey,
   SELECTION_CHANGE_COMMAND,
-} from "lexical"
-import { ErrorBoundary } from "react-error-boundary"
+} from "lexical";
+import { JSX, useCallback, useEffect, useRef, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
-import EquationEditor from "@/components/editor/editor-ui/equation-editor"
-import KatexRenderer from "@/components/editor/editor-ui/katex-renderer"
-import { $isEquationNode } from "@/components/editor/nodes/equation-node"
+import EquationEditor from "@/components/editor/editor-ui/equation-editor";
+import KatexRenderer from "@/components/editor/editor-ui/katex-renderer";
+import { $isEquationNode } from "@/components/editor/nodes/equation-node";
 
 type EquationComponentProps = {
-  equation: string
-  inline: boolean
-  nodeKey: NodeKey
-}
+  equation: string;
+  inline: boolean;
+  nodeKey: NodeKey;
+};
 
 export default function EquationComponent({
   equation,
   inline,
   nodeKey,
 }: EquationComponentProps): JSX.Element {
-  const [editor] = useLexicalComposerContext()
-  const isEditable = useLexicalEditable()
-  const [equationValue, setEquationValue] = useState(equation)
-  const [showEquationEditor, setShowEquationEditor] = useState<boolean>(false)
-  const inputRef = useRef(null)
+  const [editor] = useLexicalComposerContext();
+  const isEditable = useLexicalEditable();
+  const [equationValue, setEquationValue] = useState(equation);
+  const [showEquationEditor, setShowEquationEditor] = useState<boolean>(false);
+  const inputRef = useRef(null);
 
   const onHide = useCallback(
     (restoreSelection?: boolean) => {
-      setShowEquationEditor(false)
+      setShowEquationEditor(false);
       editor.update(() => {
-        const node = $getNodeByKey(nodeKey)
+        const node = $getNodeByKey(nodeKey);
         if ($isEquationNode(node)) {
-          node.setEquation(equationValue)
+          node.setEquation(equationValue);
           if (restoreSelection) {
-            node.selectNext(0, 0)
+            node.selectNext(0, 0);
           }
         }
-      })
+      });
     },
-    [editor, equationValue, nodeKey]
-  )
+    [editor, equationValue, nodeKey],
+  );
 
   useEffect(() => {
     if (!showEquationEditor && equationValue !== equation) {
-      setEquationValue(equation)
+      setEquationValue(equation);
     }
-  }, [showEquationEditor, equation, equationValue])
+  }, [showEquationEditor, equation, equationValue]);
 
   useEffect(() => {
     if (!isEditable) {
-      return
+      return;
     }
     if (showEquationEditor) {
       return mergeRegister(
         editor.registerCommand(
           SELECTION_CHANGE_COMMAND,
           (payload) => {
-            const activeElement = document.activeElement
-            const inputElem = inputRef.current
+            const activeElement = document.activeElement;
+            const inputElem = inputRef.current;
             if (inputElem !== activeElement) {
-              onHide()
+              onHide();
             }
-            return false
+            return false;
           },
-          COMMAND_PRIORITY_HIGH
+          COMMAND_PRIORITY_HIGH,
         ),
         editor.registerCommand(
           KEY_ESCAPE_COMMAND,
           (payload) => {
-            const activeElement = document.activeElement
-            const inputElem = inputRef.current
+            const activeElement = document.activeElement;
+            const inputElem = inputRef.current;
             if (inputElem === activeElement) {
-              onHide(true)
-              return true
+              onHide(true);
+              return true;
             }
-            return false
+            return false;
           },
-          COMMAND_PRIORITY_HIGH
-        )
-      )
+          COMMAND_PRIORITY_HIGH,
+        ),
+      );
     } else {
       return editor.registerUpdateListener(({ editorState }) => {
         const isSelected = editorState.read(() => {
-          const selection = $getSelection()
+          const selection = $getSelection();
           return (
             $isNodeSelection(selection) &&
             selection.has(nodeKey) &&
             selection.getNodes().length === 1
-          )
-        })
+          );
+        });
         if (isSelected) {
-          setShowEquationEditor(true)
+          setShowEquationEditor(true);
         }
-      })
+      });
     }
-  }, [editor, nodeKey, onHide, showEquationEditor, isEditable])
+  }, [editor, nodeKey, onHide, showEquationEditor, isEditable]);
 
   return (
     <>
@@ -116,18 +115,27 @@ export default function EquationComponent({
           ref={inputRef}
         />
       ) : (
-        <ErrorBoundary onError={(e) => editor._onError(e)} fallback={null}>
+        <ErrorBoundary
+          onError={(e) => {
+            const error = new Error(e instanceof Error ? e.message : String(e));
+            error.stack = e instanceof Error ? e.stack : undefined;
+            error.name = e instanceof Error ? e.name : "undefined";
+            error.cause = e instanceof Error ? e.cause : undefined;
+            editor._onError(error);
+          }}
+          fallback={null}
+        >
           <KatexRenderer
             equation={equationValue}
             inline={inline}
             onDoubleClick={() => {
               if (isEditable) {
-                setShowEquationEditor(true)
+                setShowEquationEditor(true);
               }
             }}
           />
         </ErrorBoundary>
       )}
     </>
-  )
+  );
 }

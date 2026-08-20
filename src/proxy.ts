@@ -1,15 +1,19 @@
+import { shouldRedirectToNotFound } from "@/modules/core/lib/proxy/notFoundRules";
+import { redirectToNotFound } from "@/modules/core/lib/proxy/redirects";
+import { getRequestHostname } from "@/modules/core/lib/utils.requestHost";
 import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
-  const host = request.headers.get("host") || "";
+  const host = getRequestHostname(request.headers);
+  const pathname = request.nextUrl.pathname;
 
-  if (host.startsWith("admin.")) {
-    const url = request.nextUrl.clone();
-    url.pathname = `/not-found`;
-    return NextResponse.redirect(url, 302);
+  if (shouldRedirectToNotFound(pathname, host)) {
+    return redirectToNotFound(request.url);
   }
+
   return NextResponse.next();
 }
+
 export const config = {
-  matcher: ["/register", "/reset-password", "/verify-otp"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

@@ -1,3 +1,4 @@
+import BackLinkButton from "@/modules/core/components/server/BackLinkButton";
 import PageContainer from "@/modules/core/components/server/PageContainer";
 import View from "@/modules/product.management/components/client/category/View";
 
@@ -9,7 +10,12 @@ export default async function Page({
   const { slug } = await params;
   const pageTitle = slug.replaceAll("-", " ");
   return (
-    <PageContainer pageTitle={`View ${pageTitle}`}>
+    <PageContainer
+      pageTitle={`View ${pageTitle}`}
+      actionSlot={
+        <BackLinkButton href="/categories" label="Back to Categories" />
+      }
+    >
       <View slug={slug} />
     </PageContainer>
   );

@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,97 +29,114 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import PageContainer from "@/modules/core/components/server/PageContainer";
 import { toTitleCase } from "@/modules/core/utils";
-import { actionUpdateOrderStatus } from "@/modules/order.management/actions/actionUpdateOrderStatus";
+import { actionUpdateOrderItemFulfillment } from "@/modules/order.management/actions/actionUpdateOrderItemFulfillment";
+import ItemCell from "@/modules/order.management/components/client/orderItem/ItemCell";
+import useOrderShow from "@/modules/order.management/hooks/order/useOrderShow";
 import { TOrder } from "@/modules/order.management/schemas/orderSchema";
-import { SyntheticEvent, useOptimistic, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
-export default function Show({ order }: { order: TOrder }) {
-  const [orderStatus, setOrderStatus] = useState(order.status);
-  const [optimisticStatus, setOptimisticStatus] = useOptimistic(
-    orderStatus,
-    (currentState, optimisticValue) => optimisticValue as string,
+export default function Show({
+  order,
+  canManageWholeOrder,
+}: {
+  order: TOrder;
+  canManageWholeOrder: boolean;
+}) {
+  const {
+    isPending,
+    optimisticStatus,
+    statusOptions,
+    handleOrderStatusChange,
+  } = useOrderShow({ order, canManageWholeOrder });
+  const router = useRouter();
+  const [isItemActionPending, startItemAction] = useTransition();
+  const scopedItemCount = order.items.length;
+  const scopedQuantity = order.items.reduce(
+    (total, item) => total + item.qty_ordered,
+    0,
   );
-  const [isPending, startTransition] = useTransition();
-  const handleOrderStatusChange = (e: SyntheticEvent<HTMLButtonElement>) => {
-    const updatedStatus = e.currentTarget.value;
-
-    startTransition(async () => {
-      setOptimisticStatus(updatedStatus);
-      try {
-        const result = await actionUpdateOrderStatus(order.uuid, updatedStatus);
-        if (result.error) {
-          console.error("Error updating status:", result.error);
-        } else {
-          setOrderStatus(result.status);
-        }
-      } catch (error) {
-        console.error(
-          "Mock server error (should not happen in this version):",
-          error,
-        );
-      }
-    });
+  const scopedTotals = order.store_scoped_totals ?? {
+    sub_total: 0,
+    discount_total: 0,
+    tax_total: 0,
+    shipping_total: 0,
+    grand_total: 0,
   };
+
+  const itemRemainingQuantity = (item: TOrder["items"][number]) =>
+    Math.max(0, item.qty_ordered - item.qty_canceled - item.qty_shipped);
   return (
-    <PageContainer pageTitle="View Order">
-      <div className="grid grid-cols-2 gap-2">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-2xl">Order Details</CardTitle>
+        <CardDescription>
+          {canManageWholeOrder
+            ? "Manage full order information and platform-level status."
+            : "Review the items in this order that belong to your store."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Basic information</CardTitle>
             <CardDescription>
-              View order details and manage order status.
+              {canManageWholeOrder
+                ? "View full order details and manage order status."
+                : "View the platform order identifier and your scoped fulfillment slice."}
             </CardDescription>
-            <CardAction>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="default">Update Status</Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-32 flex flex-col space-y-3">
-                  <Button
-                    value={"shipped"}
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Shipped
-                  </Button>
-                  <Button
-                    value="delivered"
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Delivered
-                  </Button>
-                  <Button
-                    value={"completed"}
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Completed
-                  </Button>
-                  <Button
-                    value="returned"
-                    onClick={handleOrderStatusChange}
-                    variant="outline"
-                  >
-                    Returned
-                  </Button>
-                </PopoverContent>
-              </Popover>
-            </CardAction>
+            {canManageWholeOrder ? (
+              <CardAction>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="default" disabled={!statusOptions.length}>
+                      Update Status
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full flex flex-col space-y-3">
+                    {statusOptions.length ? (
+                      statusOptions.map((status) => (
+                        <Button
+                          key={status.code}
+                          value={status.code}
+                          data-note={`Order marked as ${status.label.toLowerCase()} by super admin.`}
+                          onClick={handleOrderStatusChange}
+                          variant="outline"
+                        >
+                          {status.label}
+                        </Button>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        No statuses available.
+                      </p>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              </CardAction>
+            ) : null}
           </CardHeader>
           <CardContent>
             <p>Order Number: {order.order_number}</p>
             <p>Status: {isPending ? "Updating status..." : optimisticStatus}</p>
-            <p>Total Items: {order.item_count}</p>
-            <p>Total Ordered Quantity: {order.item_quantity}</p>
+            <p>
+              {canManageWholeOrder ? "Total Items" : "Your Store Items"}:{" "}
+              {canManageWholeOrder ? order.item_count : scopedItemCount}
+            </p>
+            <p>
+              {canManageWholeOrder
+                ? "Total Ordered Quantity"
+                : "Your Store Quantity"}
+              : {canManageWholeOrder ? order.item_quantity : scopedQuantity}
+            </p>
             <p>Placed At: {order.placed_at}</p>
+            {!canManageWholeOrder ? (
+              <p className="text-sm text-muted-foreground">
+                Whole-order status is platform-managed. You are only viewing the
+                items assigned to your store.
+              </p>
+            ) : null}
           </CardContent>
         </Card>
         <Card>
@@ -146,105 +169,226 @@ export default function Show({ order }: { order: TOrder }) {
         )}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Payment information</CardTitle>
-            <CardDescription>View payment details</CardDescription>
+            <CardTitle className="text-lg">
+              {canManageWholeOrder
+                ? "Payment information"
+                : "Your Store Totals"}
+            </CardTitle>
+            <CardDescription>
+              {canManageWholeOrder
+                ? "View payment details"
+                : "These totals are calculated from the items visible to your store."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p>Sub Total: {order.sub_total}</p>
-            <p>Discount: {order.discount_total}</p>
-            <p>Tax: {order.tax_total}</p>
-            <p>Shipping: {order.shipping_total}</p>
-            <p>Method: {order.payment_method}</p>
-            <p>Type: {order.payment_status}</p>
-            <p>Fee: {order.payment_fee}</p>
+            <p>
+              Sub Total:{" "}
+              {canManageWholeOrder ? order.sub_total : scopedTotals.sub_total}
+            </p>
+            <p>
+              Discount:{" "}
+              {canManageWholeOrder
+                ? order.discount_total
+                : scopedTotals.discount_total}
+            </p>
+            <p>
+              Tax:{" "}
+              {canManageWholeOrder ? order.tax_total : scopedTotals.tax_total}
+            </p>
+            {canManageWholeOrder ? (
+              <>
+                <p>Shipping: {order.shipping_total}</p>
+                <p>Method: {order.payment_method}</p>
+                <p>Type: {order.payment_status}</p>
+                <p>Fee: {order.payment_fee}</p>
+                <p>Grand Total: {order.grand_total}</p>
+              </>
+            ) : (
+              <>
+                <p>Shipping: {scopedTotals.shipping_total}</p>
+                <p>Your Total: {scopedTotals.grand_total}</p>
+              </>
+            )}
           </CardContent>
         </Card>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Order Items</CardTitle>
-          <CardDescription>View order items.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Unit Price</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Discount</TableHead>
-                <TableHead>Shipping fee</TableHead>
-                <TableHead>Payment fee</TableHead>
-                <TableHead>Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {order?.items?.map((item) => (
-                <TableRow key={item.uuid}>
-                  <TableCell>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="truncate w-72">{item.name}</p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{item.name}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.unit_price}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.qty_ordered}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.row_discount}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.row_shipping}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {order.payment_fee}
-                  </TableCell>
-                  <TableCell className="text-right">{item.row_total}</TableCell>
+        <Card className="grid md:col-span-2 grid-cols-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Order Items</CardTitle>
+            <CardDescription>View order items.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Unit Price</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Discount</TableHead>
+                  <TableHead>Shipping fee</TableHead>
+                  <TableHead>Total</TableHead>
+                  {!canManageWholeOrder ? (
+                    <TableHead>Item Actions</TableHead>
+                  ) : null}
                 </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter className="text-end">
-              <TableRow>
-                <TableCell colSpan={6}>Sub Total</TableCell>
-                <TableCell className="text-right">{order.sub_total}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={6}>Discount</TableCell>
-                <TableCell className="text-right">
-                  {order.discount_total}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={6}>Tax</TableCell>
-                <TableCell className="text-right">{order.tax_total}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={6}>Shipping</TableCell>
-                <TableCell className="text-right">
-                  {order.shipping_total}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={6}>Payment Fee</TableCell>
-                <TableCell>{order.payment_fee}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={6}>Grand Total</TableCell>
-                <TableCell className="text-right">
-                  {order.grand_total}
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </CardContent>
-      </Card>
-    </PageContainer>
+              </TableHeader>
+              <TableBody>
+                {order?.items?.map((item) => (
+                  <TableRow key={item.uuid}>
+                    <TableCell>
+                      <Accordion
+                        type="single"
+                        collapsible
+                        className="w-full"
+                        defaultValue="item-1"
+                      >
+                        <AccordionItem value={item.uuid}>
+                          <AccordionTrigger>
+                            <p className="truncate w-72">{item.name}</p>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <ItemCell
+                              item={item}
+                              className="flex flex-col w-72 gap-4 text-balance"
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.unit_price}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.qty_ordered}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.row_discount}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.row_shipping}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.row_total}
+                    </TableCell>
+                    {!canManageWholeOrder ? (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            disabled={
+                              isItemActionPending ||
+                              itemRemainingQuantity(item) === 0
+                            }
+                            onClick={() => {
+                              startItemAction(async () => {
+                                const result =
+                                  await actionUpdateOrderItemFulfillment(
+                                    order.uuid,
+                                    item.uuid,
+                                    "ship_remaining",
+                                    `Store item marked shipped for ${item.name}.`,
+                                  );
+
+                                if (!("error" in result)) {
+                                  router.refresh();
+                                }
+                              });
+                            }}
+                          >
+                            Ship Remaining
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={
+                              isItemActionPending ||
+                              itemRemainingQuantity(item) === 0
+                            }
+                            onClick={() => {
+                              startItemAction(async () => {
+                                const result =
+                                  await actionUpdateOrderItemFulfillment(
+                                    order.uuid,
+                                    item.uuid,
+                                    "cancel_remaining",
+                                    `Store item canceled for ${item.name}.`,
+                                  );
+
+                                if (!("error" in result)) {
+                                  router.refresh();
+                                }
+                              });
+                            }}
+                          >
+                            Cancel Remaining
+                          </Button>
+                        </div>
+                      </TableCell>
+                    ) : null}
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter className="text-end bg-transparent">
+                <TableRow>
+                  <TableCell className="text-left">Sub Total</TableCell>
+                  <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
+                    {canManageWholeOrder
+                      ? order.sub_total
+                      : scopedTotals.sub_total}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left">Discount</TableCell>
+                  <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
+                    {canManageWholeOrder
+                      ? order.discount_total
+                      : scopedTotals.discount_total}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left">Tax</TableCell>
+                  <TableCell colSpan={canManageWholeOrder ? 5 : 6}>
+                    {canManageWholeOrder
+                      ? order.tax_total
+                      : scopedTotals.tax_total}
+                  </TableCell>
+                </TableRow>
+                {canManageWholeOrder ? (
+                  <>
+                    <TableRow>
+                      <TableCell className="text-left">Shipping</TableCell>
+                      <TableCell colSpan={5}>{order.shipping_total}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-left">Payment Fee</TableCell>
+                      <TableCell colSpan={5}>{order.payment_fee}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-left">Grand Total</TableCell>
+                      <TableCell colSpan={5}>{order.grand_total}</TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  <>
+                    <TableRow>
+                      <TableCell className="text-left">Shipping</TableCell>
+                      <TableCell colSpan={6}>
+                        {scopedTotals.shipping_total}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-left">Your Total</TableCell>
+                      <TableCell colSpan={6}>
+                        {scopedTotals.grand_total}
+                      </TableCell>
+                    </TableRow>
+                  </>
+                )}
+              </TableFooter>
+            </Table>
+          </CardContent>
+        </Card>
+      </CardContent>
+    </Card>
   );
 }

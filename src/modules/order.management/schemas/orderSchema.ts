@@ -1,6 +1,23 @@
-import { UserSchema } from "@/modules/auth/schemas/UserSchema";
-import { VariantSchema } from "@/modules/product.management/schemas/VariantSchema";
+import { UserSchema } from "@/modules/auth/domain/schemas/UserSchema";
 import { z } from "zod";
+
+const StoreSummarySchema = z
+  .object({
+    uuid: z.uuid(),
+    name: z.string(),
+    slug: z.string().optional(),
+  })
+  .strip();
+
+const StoreScopedTotalsSchema = z
+  .object({
+    sub_total: z.float64().nonnegative().default(0),
+    discount_total: z.float64().nonnegative().default(0),
+    tax_total: z.float64().nonnegative().default(0),
+    shipping_total: z.float64().nonnegative().default(0),
+    grand_total: z.float64().nonnegative().default(0),
+  })
+  .strip();
 
 export const ShippingInformationSchema = z
   .object({
@@ -21,13 +38,7 @@ export const OrderItemSchema = z
     orderable_type: z.string(),
     sku: z.string(),
     name: z.string(),
-    variant_attrs: VariantSchema.pick({
-      uuid: true,
-      name: true,
-      sku: true,
-    })
-      .strict()
-      .nullable(),
+    variant_attributes: z.string().nullable(),
     qty_ordered: z.number().int().nonnegative(),
     qty_canceled: z.number().int().nonnegative().default(0),
     qty_shipped: z.number().int().nonnegative().default(0),
@@ -38,7 +49,10 @@ export const OrderItemSchema = z
     row_tax: z.float64().nonnegative().default(0),
     row_shipping: z.float64().nonnegative().default(0),
     row_total: z.float64().nonnegative().nonoptional(),
-
+    created_by_user_uuid: z.uuid().nullable().optional(),
+    store_uuid: z.uuid().nullable().optional(),
+    vendor: UserSchema.nullable(),
+    store: StoreSummarySchema.nullable().optional(),
     meta: z.record(z.any(), z.string()).nullable(), // JSON column
     created_at: z.iso.datetime().optional(),
     updated_at: z.iso.datetime().optional(),
@@ -64,9 +78,18 @@ export const OrderSchema = z
     payment_status: z.string().max(32),
     payment_method: z.string().max(32),
     payment_fee: z.float64().nonnegative().default(0),
+    store_scoped_totals: StoreScopedTotalsSchema.nullable().optional(),
     placed_at: z.iso.datetime(),
     cancelled_at: z.iso.datetime().nullable().optional(),
     completed_at: z.iso.datetime().nullable().optional(),
+    status_history: z
+      .array(z.record(z.string(), z.unknown()))
+      .nullable()
+      .optional(),
+    status_histories: z
+      .array(z.record(z.string(), z.unknown()))
+      .nullable()
+      .optional(),
     created_at: z.iso.datetime().optional().optional(),
     updated_at: z.iso.datetime().optional().optional(),
     deleted_at: z.iso.datetime().nullable().optional(),
@@ -80,7 +103,7 @@ export const CartItem = OrderItemSchema.pick({
   uuid: true,
   name: true,
   sku: true,
-  variant_attrs: true,
+  variant_attributes: true,
   unit_price: true,
   row_discount: true,
   row_tax: true,
@@ -95,8 +118,8 @@ export const CartMeta = OrderSchema.pick({
   tax_total: true,
   shipping_total: true,
   grand_total: true,
-  items_count: true,
-  items_quantity: true,
+  item_count: true,
+  item_quantity: true,
 }).strict();
 
 export const Cart = z
@@ -110,7 +133,7 @@ export const Cart = z
 export const CartItemToUpdateQuantitySchema = CartItem.pick({
   line_id: true,
   uuid: true,
-  variant_attrs: true,
+  variant_attributes: true,
   qty_ordered: true,
 });
 export const OrderTotalsSchema = OrderSchema.pick({
@@ -121,25 +144,32 @@ export const OrderTotalsSchema = OrderSchema.pick({
   grand_total: true,
   payment_fee: true,
 }).strict();
-export const OrderListSchema = z.array(
-  OrderSchema.pick({
-    uuid: true,
-    order_number: true,
-    placed_at: true,
-    status: true,
-    grand_total: true,
-    shipping_total: true,
-    buyer_uuid: true,
-    buyer_type: true,
-    items: true,
-  }).extend(
-    z.object({
-      buyer: z.object({
-        name: z.string(),
-      }),
-    }),
-  ),
-);
+export const OrderListItemSchema = OrderSchema.pick({
+  uuid: true,
+  order_number: true,
+  placed_at: true,
+  status: true,
+  grand_total: true,
+  buyer_uuid: true,
+  buyer_type: true,
+}).extend({
+  shipping_total: z.number().nonnegative().optional(),
+  payment_method: z.string().max(32).optional(),
+  item_count: z.number().int().nonnegative().optional(),
+  item_quantity: z.number().int().nonnegative().optional(),
+  items_count: z.number().int().nonnegative().nullable().optional(),
+  visible_items_count: z.number().int().nonnegative().nullable().optional(),
+  visible_item_quantity: z.number().int().nonnegative().nullable().optional(),
+  visible_grand_total: z.number().nonnegative().nullable().optional(),
+  buyer: z
+    .object({
+      name: z.string().nullable().optional(),
+      email: z.string().email().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+});
+export const OrderListSchema = z.array(OrderListItemSchema);
 export type TOrder = z.infer<typeof OrderSchema>;
 export type TOrderItem = z.infer<typeof OrderItemSchema>;
 export type TCart = z.infer<typeof Cart>;
@@ -149,4 +179,5 @@ export type TCartItemToUpdateQuantity = z.infer<
   typeof CartItemToUpdateQuantitySchema
 >;
 export type TOrderTotals = z.infer<typeof OrderTotalsSchema>;
+export type TOrderListItem = z.infer<typeof OrderListItemSchema>;
 export type TOrderList = z.infer<typeof OrderListSchema>;

@@ -1,3 +1,3 @@
-import { LexicalTypeaheadMenuPlugin } from "@lexical/react/LexicalTypeaheadMenuPlugin"
+import { LexicalTypeaheadMenuPlugin } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 
-export default LexicalTypeaheadMenuPlugin
+export default LexicalTypeaheadMenuPlugin;

@@ -1,75 +1,102 @@
 "use server";
 
 import { jwtVerify, SignJWT } from "jose";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
 
-type SessionPayload = {
-  token: string;
-  expiresAt: Date;
-};
+interface IDeleteSession {
+  actionBeforeDeleteCookieCallback:
+    | ((store: ReadonlyRequestCookies) => Promise<void>)
+    | undefined;
+}
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
-const SESSION_DOMAIN= process.env.SESSION_DOMAIN;
 
-export async function getSessionPayload() {
-  const cookieStore = await cookies();
-
+export const getCookieStore = async () => cookies();
+async function getSessionCookieEncrypted(
+  cookieStore: ReadonlyRequestCookies | undefined,
+) {
+  if (!cookieStore) return null;
   const session = cookieStore.get("session")?.value;
   if (!session) return null;
-  const payload = await decrypt(session);
+  return session;
+}
+
+export async function getSessionDecrypted(
+  cookieStore: ReadonlyRequestCookies | undefined,
+) {
+  if (!cookieStore) return null;
+  const sessionCookie = await getSessionCookieEncrypted(cookieStore);
+  if (!sessionCookie) return null;
+  const payload = await decrypt(sessionCookie);
   if (!payload) return null;
   return payload;
 }
+export async function createAuthCookieSession({
+  token,
+  userUUID,
+}: {
+  token: string;
+  userUUID: string | null;
+}): Promise<void> {
+  try {
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-export async function createSession(token: string) {
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const session = await encrypt({ token, expiresAt });
-  const cookieStore = await cookies();
+    const session = await new SignJWT({ token, userUUID, expiresAt })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("7d")
+      .sign(encodedKey);
+    const cookieStore = await cookies();
 
-  cookieStore.set("session", session, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    expires: expiresAt,
-    sameSite: "lax",
-    path: "/",
-    domain: SESSION_DOMAIN,
-  });
-}
-
-export async function updateSession() {
-  const session = (await cookies()).get("session")?.value;
-  const payload = await decrypt(session);
-
-  if (!session || !payload) {
-    return null;
+    cookieStore.set("session", session, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: expiresAt,
+      sameSite: "strict",
+      path: "/",
+    });
+  } catch (error) {
+    console.log("cookie storing error: ", error);
+    throw error;
   }
-
-  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-  const cookieStore = await cookies();
-  cookieStore.set("session", session, {
-    httpOnly: true,
-    secure: true,
-    expires: expires,
-    sameSite: "lax",
-    path: "/",
-  });
 }
 
-export async function deleteSession() {
-  const cookieStore = await cookies();
-  cookieStore.delete("session");
+export async function deleteSession({
+  actionBeforeDeleteCookieCallback,
+}: IDeleteSession): Promise<void> {
+  const cookieStore = await getCookieStore();
+  try {
+    // Attempt to execute some task before deleting cookie
+    if (actionBeforeDeleteCookieCallback !== undefined) {
+      await actionBeforeDeleteCookieCallback(cookieStore);
+    }
+    // Attempt standard deletion first (no domain)
+    cookieStore.delete("session");
+
+    // Force expire for robustness (no domain)
+    cookieStore.set("session", "", {
+      expires: new Date(0),
+      maxAge: 0,
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+  } catch {
+    // Ensure removal even if delete throws in certain runtimes
+    cookieStore.set("session", "", {
+      expires: new Date(0),
+      maxAge: 0,
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
 }
 
-export async function encrypt(payload: SessionPayload) {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(encodedKey);
-}
-
-export async function decrypt(session: string | undefined = "") {
+async function decrypt(session: string | undefined = "") {
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ["HS256"],
