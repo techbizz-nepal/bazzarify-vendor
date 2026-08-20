@@ -14,6 +14,7 @@ import SidebarAccountMenu from "@/modules/core/components/client/SidebarAccountM
 import SidebarMenuButtonComponent from "@/modules/core/components/client/SidebarMenuButton";
 import SidebarMenuGroupComponent from "@/modules/core/components/client/SidebarMenuGroup";
 import { TMenuEntry } from "@/modules/core/data";
+import { isStoreProductAuthoringReady } from "@/modules/vendor/domain/schemas/store";
 import { headers } from "next/headers";
 import Image from "next/image";
 import { FaHome, FaImage } from "react-icons/fa";
@@ -142,8 +143,9 @@ export async function AppSidebar({ className }: { className?: string }) {
     );
   const storeName = sessionUser?.store?.name?.trim() || null;
   const hasStore = Boolean(sessionUser?.store);
-  const hasBlockedStoreSetup =
-    sessionUser?.store?.product_authoring_ready === false;
+  const hasBlockedStoreSetup = Boolean(
+    sessionUser?.store && !isStoreProductAuthoringReady(sessionUser.store),
+  );
   const vendorIsNotReady = isVendor && (!hasStore || hasBlockedStoreSetup);
   const vendorLandingNavigation: TMenuEntry = vendorIsNotReady
     ? { type: "link", title: "Onboarding", path: "/onboarding", icon: FaStore }
