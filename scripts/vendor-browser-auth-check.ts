@@ -21,8 +21,20 @@ type PersonaDefinition = {
 const baseUrl = process.env.VENDOR_BASE_URL ?? "http://127.0.0.1:3001";
 const verificationPassword = "H@nds0me1522";
 const personas: Record<string, PersonaDefinition> = {
-  vendor_no_store: {
+  vendor_admin: {
     credential: "techbizznepal@gmail.com",
+    password: verificationPassword,
+  },
+  vendor_no_store: {
+    credential: "vendor.no-store@bazarify.local",
+    password: verificationPassword,
+  },
+  vendor_incomplete: {
+    credential: "vendor.store.nocategories@bazarify.local",
+    password: verificationPassword,
+  },
+  vendor_ready: {
+    credential: "vendor.store.categories@bazarify.local",
     password: verificationPassword,
   },
   vendor_with_store_no_categories: {
