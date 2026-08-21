@@ -1,7 +1,9 @@
 import type { TUser } from "@/modules/auth/domain/schemas/UserSchema";
 import type { TServerDataTableMeta } from "@/modules/core/domain/schemas/ServerDataTableMeta";
+import type { TProductAuthoringSchema } from "@/modules/product.management/schemas/ProductAuthoringSchema";
 import type { SerializedEditorState } from "lexical";
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction } from "react";
+export type { TProductAuthoringSchema } from "@/modules/product.management/schemas/ProductAuthoringSchema";
 
 export type TSpecification = {
   uuid: string;
@@ -320,6 +322,7 @@ export type TCategoryAuthoringContextPayload = {
   specifications: TSpecification[];
   attributes: TAttribute[];
   authoringProfile: TCategoryAuthoringProfile;
+  authoringSchema: TProductAuthoringSchema;
 };
 export interface IPaginatedData<T> {
   current_page: number;
@@ -441,6 +444,7 @@ export interface ProductOptionModeState {
 
 export interface ProductAuthoringController {
   authoringProfile: TCategoryAuthoringProfile | null;
+  authoringSchema: TProductAuthoringSchema | null;
   basicState: ProductAuthoringBasicState;
   categoryState: ProductAuthoringCategoryState;
   mediaState: ProductAuthoringMediaState;
