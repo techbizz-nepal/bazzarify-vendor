@@ -19,6 +19,8 @@ import OptionlessSkuEditor from "@/modules/product.management/ui/OptionlessSkuEd
 import ProductCard from "@/modules/product.management/ui/ProductCard";
 import ProductDetail from "@/modules/product.management/ui/ProductDetail";
 import ProductVariant from "@/modules/product.management/ui/ProductVariant";
+import UnavailableAuthoringFields from "@/modules/product.management/ui/UnavailableAuthoringFields";
+import { isAuthoringFieldRenderable } from "@/modules/product.management/utils/productAuthoringRenderer";
 import {
   getSubmissionFieldError,
   hasSubmissionFieldPrefix,
@@ -55,7 +57,7 @@ function EditContent({
   categoryIndexPayload: TCategoryIndexPayload;
 }) {
   const {
-    authoringProfile,
+    authoringSchema,
     basicState,
     categoryState,
     mediaState,
@@ -65,12 +67,15 @@ function EditContent({
     optionModeState,
     submissionState,
   } = useUpdateProduct(productPayload);
-  const supportsImages = authoringProfile?.capabilities.images ?? true;
-  const supportsSpecifications =
-    authoringProfile?.capabilities.specifications ?? true;
-  const supportsVariants = authoringProfile?.capabilities.variants ?? true;
-  const supportsCustomerOptions =
-    authoringProfile?.capabilities.customer_options ?? true;
+  const supportsField = (fieldKey: string) =>
+    authoringSchema
+      ? isAuthoringFieldRenderable(authoringSchema, fieldKey)
+      : false;
+  const supportsImages = supportsField("images");
+  const supportsSpecifications = supportsField("specifications");
+  const supportsVariants = supportsField("variants");
+  const supportsCustomerOptions = supportsField("variants.attribute");
+  const supportsBasePrice = supportsField("base_price");
   const feedback = submissionState.feedback;
   const rootCategories = categoryIndexPayload.categories.data;
   const nameError = getSubmissionFieldError(feedback, "name");
@@ -124,21 +129,25 @@ function EditContent({
             placeholder="Ex. Nikon Coolpix A300 Digital Camera"
           />
           {nameError && <p className="text-sm text-destructive">{nameError}</p>}
-          <Label>Base Price</Label>
-          <Input
-            value={basicState.productForm.base_price}
-            onChange={basicState.onProductFormInputChange}
-            className={cn(
-              "focus-visible:ring-primary",
-              basePriceError && "border-destructive",
-            )}
-            type="number"
-            id="base_price"
-            placeholder="base price"
-            name="base_price"
-          />
-          {basePriceError && (
-            <p className="text-sm text-destructive">{basePriceError}</p>
+          {supportsBasePrice && (
+            <>
+              <Label>Base Price</Label>
+              <Input
+                value={basicState.productForm.base_price}
+                onChange={basicState.onProductFormInputChange}
+                className={cn(
+                  "focus-visible:ring-primary",
+                  basePriceError && "border-destructive",
+                )}
+                type="number"
+                id="base_price"
+                placeholder="base price"
+                name="base_price"
+              />
+              {basePriceError && (
+                <p className="text-sm text-destructive">{basePriceError}</p>
+              )}
+            </>
           )}
           <Label htmlFor="name">SKU</Label>
           <Input
@@ -159,6 +168,7 @@ function EditContent({
             productForm={basicState.productForm}
             onChange={basicState.onProductFormInputChange}
             feedback={feedback}
+            authoringSchema={authoringSchema}
           />
         </div>
       </ProductCard>
@@ -201,7 +211,21 @@ function EditContent({
           existing product.
         </p>
       </ProductCard>
-      {categoryState.committedCategory && (
+      {authoringSchema && (
+        <UnavailableAuthoringFields
+          fields={authoringSchema.unavailable_fields}
+        />
+      )}
+      {categoryState.committedCategory && !authoringSchema && (
+        <p
+          className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          The category authoring contract is unavailable. Refresh the page or
+          contact an administrator before editing this product.
+        </p>
+      )}
+      {categoryState.committedCategory && authoringSchema && (
         <>
           {/*** Product Image Start ***/}
           {supportsImages && (

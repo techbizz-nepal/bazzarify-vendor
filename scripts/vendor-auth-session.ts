@@ -68,12 +68,16 @@ const PERSONAS: Record<string, PersonaDefinition> = {
     credential: "vendor.store.categories@bazarify.local",
     password: VERIFICATION_PASSWORD,
   },
+  vendor_multi_category: {
+    credential: "vendor.store.multiple-categories@bazarify.local",
+    password: VERIFICATION_PASSWORD,
+  },
   vendor_with_store_no_categories: {
     credential: "vendor.store.nocategories@bazarify.local",
     password: VERIFICATION_PASSWORD,
   },
   vendor_with_store_with_categories: {
-    credential: "vendor.store.categories@bazarify.local",
+    credential: "vendor.store.multiple-categories@bazarify.local",
     password: VERIFICATION_PASSWORD,
   },
 };

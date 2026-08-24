@@ -6,6 +6,7 @@ import {
   TCategoryAuthoringProfile,
   TEditProductPayload,
   TImage,
+  TProductAuthoringSchema,
   TProductForm,
   TSpecification,
   TVariant,
@@ -33,6 +34,7 @@ import {
   loadProductCategoryContext,
   prepareProductSubmission,
 } from "@/modules/product.management/utils/productAuthoring";
+import { isAuthoringFieldRenderable } from "@/modules/product.management/utils/productAuthoringRenderer";
 import { OPTIONLESS_VARIANT_KEY } from "@/modules/product.management/utils/productForm";
 import { lexicalJsonToHtml } from "@/modules/product.management/utils/richTextEditorUtils";
 import {
@@ -65,6 +67,8 @@ export default function useProductAuthoring({
   const router = useRouter();
   const [authoringProfile, setAuthoringProfile] =
     useState<TCategoryAuthoringProfile | null>(null);
+  const [authoringSchema, setAuthoringSchema] =
+    useState<TProductAuthoringSchema | null>(null);
   const [categoryAttributes, setCategoryAttributes] = useState<TAttribute[]>(
     [],
   );
@@ -327,6 +331,7 @@ export default function useProductAuthoring({
     category.setCategorySpecifications(categoryContext.specifications ?? []);
     setCategoryAttributes(categoryContext.attributes ?? []);
     setAuthoringProfile(categoryContext.authoringProfile);
+    setAuthoringSchema(categoryContext.authoringSchema);
     category.setShowDropdown(false);
     clearSubmissionFieldError("category");
   };
@@ -386,6 +391,7 @@ export default function useProductAuthoring({
       setCategorySpecifications: category.setCategorySpecifications,
       setCategoryAttributes,
       setAuthoringProfile,
+      setAuthoringSchema,
       setSelectedSpecifications: setSpecificationValues,
       setVariantData: variant.setVariantData,
       setVariantSelections,
@@ -409,6 +415,7 @@ export default function useProductAuthoring({
     product.setProductForm,
     setCategoryAttributes,
     setAuthoringProfile,
+    setAuthoringSchema,
     setSpecificationValues,
     setVariantImageIdMap,
     setVariantSelections,
@@ -421,7 +428,15 @@ export default function useProductAuthoring({
       return;
     }
 
-    if (mode === "create" && product.uploadedProductImages.length === 0) {
+    const imagesEnabled =
+      authoringSchema === null ||
+      isAuthoringFieldRenderable(authoringSchema, "images");
+
+    if (
+      mode === "create" &&
+      imagesEnabled &&
+      product.uploadedProductImages.length === 0
+    ) {
       const feedback: {
         summary: string;
         fieldErrors: Record<string, string[]>;
@@ -439,7 +454,8 @@ export default function useProductAuthoring({
     if (
       mode === "update" &&
       (!product.productForm.uuid ||
-        (!product.existingProductImages.length &&
+        (imagesEnabled &&
+          !product.existingProductImages.length &&
           !product.uploadedProductImages.length))
     ) {
       const feedback: {
@@ -608,6 +624,7 @@ export default function useProductAuthoring({
 
   return {
     authoringProfile,
+    authoringSchema,
     basicState: {
       productForm: product.productForm,
       onProductFormInputChange,
@@ -707,6 +724,7 @@ interface HydrateEditProductArgs {
   setAuthoringProfile: Dispatch<
     SetStateAction<TCategoryAuthoringProfile | null>
   >;
+  setAuthoringSchema: Dispatch<SetStateAction<TProductAuthoringSchema | null>>;
   setSelectedSpecifications: (specifications: Record<string, string>) => void;
   setVariantData: Dispatch<SetStateAction<TVariantDataMap>>;
   setVariantSelections: Dispatch<SetStateAction<Record<string, string[]>>>;
@@ -730,6 +748,7 @@ function hydrateEditProduct({
   setCategorySpecifications,
   setCategoryAttributes,
   setAuthoringProfile,
+  setAuthoringSchema,
   setSelectedSpecifications,
   setVariantData,
   setVariantSelections,
@@ -785,6 +804,7 @@ function hydrateEditProduct({
 
   if (!categoryContext) {
     setAuthoringProfile(null);
+    setAuthoringSchema(null);
     return;
   }
 
@@ -804,6 +824,7 @@ function hydrateEditProduct({
   setCategorySpecifications(categorySpecifications);
   setCategoryAttributes(categoryAttributes);
   setAuthoringProfile(categoryContext.authoringProfile);
+  setAuthoringSchema(categoryContext.authoringSchema);
 
   const optionlessVariant = getOptionlessVariant(product.variants);
   if (optionlessVariant) {

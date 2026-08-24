@@ -12,6 +12,7 @@ type PersonaName =
   | "vendor_no_store"
   | "vendor_incomplete"
   | "vendor_ready"
+  | "vendor_multi_category"
   | "vendor_with_store_no_categories"
   | "vendor_with_store_with_categories";
 
@@ -50,12 +51,16 @@ const personas: Record<
     credential: "vendor.store.categories@bazarify.local",
     password: verificationPassword,
   },
+  vendor_multi_category: {
+    credential: "vendor.store.multiple-categories@bazarify.local",
+    password: verificationPassword,
+  },
   vendor_with_store_no_categories: {
     credential: "vendor.store.nocategories@bazarify.local",
     password: verificationPassword,
   },
   vendor_with_store_with_categories: {
-    credential: "vendor.store.categories@bazarify.local",
+    credential: "vendor.store.multiple-categories@bazarify.local",
     password: verificationPassword,
   },
 };
