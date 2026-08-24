@@ -5,6 +5,8 @@ type CliOptions = {
   visitPath: string;
   expectPath?: string;
   authMode: "cookie" | "ui";
+  expectCategories: string[];
+  expectText: string[];
 };
 
 type SessionPayload = {
@@ -37,12 +39,16 @@ const personas: Record<string, PersonaDefinition> = {
     credential: "vendor.store.categories@bazarify.local",
     password: verificationPassword,
   },
+  vendor_multi_category: {
+    credential: "vendor.store.multiple-categories@bazarify.local",
+    password: verificationPassword,
+  },
   vendor_with_store_no_categories: {
     credential: "vendor.store.nocategories@bazarify.local",
     password: verificationPassword,
   },
   vendor_with_store_with_categories: {
-    credential: "vendor.store.categories@bazarify.local",
+    credential: "vendor.store.multiple-categories@bazarify.local",
     password: verificationPassword,
   },
 };
@@ -51,8 +57,10 @@ function parseArgs(argv: string[]): CliOptions {
   const options: CliOptions = {
     persona: "vendor_no_store",
     visitPath: "/products/create",
-    expectPath: "/store-required",
+    expectPath: undefined,
     authMode: "cookie",
+    expectCategories: [],
+    expectText: [],
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -79,6 +87,19 @@ function parseArgs(argv: string[]): CliOptions {
 
     if (current === "--no-expect-path") {
       options.expectPath = undefined;
+    }
+
+    if (current === "--expect-categories" && next) {
+      options.expectCategories = next
+        .split(",")
+        .map((category) => category.trim())
+        .filter((category) => category.length > 0);
+      index += 1;
+    }
+
+    if (current === "--expect-text" && next) {
+      options.expectText.push(next);
+      index += 1;
     }
 
     if (
@@ -141,6 +162,8 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   const browser = await chromium.launch({
     headless: true,
+    executablePath:
+      process.env.PLAYWRIGHT_EXECUTABLE_PATH ?? chromium.executablePath(),
   });
 
   const context = await browser.newContext();
@@ -169,10 +192,41 @@ async function main() {
       waitUntil: "networkidle",
     });
 
+    const essentialCookieButton = page.getByRole("button", {
+      name: "Essential only",
+      exact: true,
+    });
+    if (await essentialCookieButton.isVisible().catch(() => false)) {
+      await essentialCookieButton.click();
+    }
+
     if (options.expectPath) {
       await page.waitForURL((url) => url.pathname === options.expectPath, {
         timeout: 15_000,
       });
+    }
+
+    if (options.expectCategories.length > 0) {
+      await page.getByText("Select a Category", { exact: true }).click();
+      await page.getByText("Verification Root", { exact: true }).click();
+
+      for (const category of options.expectCategories) {
+        const categoryLocator = page.getByText(category, { exact: true });
+        if (!(await categoryLocator.isVisible())) {
+          throw new Error(
+            `Expected authorized category is not visible: ${category}`,
+          );
+        }
+      }
+    }
+
+    for (const expectedText of options.expectText) {
+      const textLocator = page.getByText(expectedText, { exact: false });
+      if (!(await textLocator.isVisible())) {
+        throw new Error(
+          `Expected browser text is not visible: ${expectedText}`,
+        );
+      }
     }
 
     console.log(
@@ -184,6 +238,8 @@ async function main() {
           finalPathname: new URL(page.url()).pathname,
           visitedPath: options.visitPath,
           expectedPath: options.expectPath ?? null,
+          expectedCategories: options.expectCategories,
+          expectedText: options.expectText,
           authMode: options.authMode,
         },
         null,
