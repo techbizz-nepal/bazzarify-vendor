@@ -40,9 +40,10 @@ export type TProductAuthoringCapability =
   | "base_price"
   | "specifications"
   | "images"
-  | "import";
+  | "import"
+  | "minimum_order_quantity";
 export type TCategoryAuthoringProfile = {
-  type: "retail";
+  type: "retail" | "wholesale";
   status: "active";
   capabilities: Record<TProductAuthoringCapability, boolean>;
   unavailable_reasons: Partial<Record<TProductAuthoringCapability, string>>;
@@ -69,6 +70,9 @@ export type TProduct = {
   images: TImage[];
   specifications: Record<string, string>;
   variants: TVariant[];
+  wholesale_product_detail?: {
+    minimum_order_quantity: number;
+  } | null;
   status_text?: string;
   status?: number;
   created_at?: string | null;
@@ -85,6 +89,7 @@ export interface TProductForm {
   uuid?: string;
   name: string;
   base_price: string;
+  minimum_order_quantity: string;
   description: string;
   highlights: string;
   box_items: string;

@@ -11,6 +11,7 @@ const ProductAuthoringCapabilitySchema = z.enum([
   "specifications",
   "images",
   "import",
+  "minimum_order_quantity",
 ]);
 
 const ProductAuthoringFieldTypeSchema = z.enum([
@@ -59,7 +60,7 @@ export const ProductAuthoringSchema = z
       .object({
         uuid: z.uuid().nullable(),
         version: z.number().int().nullable(),
-        type: z.literal("retail"),
+        type: z.enum(["retail", "wholesale"]),
         status: z.literal("active"),
       })
       .strict(),

@@ -58,10 +58,15 @@ function CreateContent({
   const supportsVariants = supportsField("variants");
   const supportsCustomerOptions = supportsField("variants.attribute");
   const supportsBasePrice = supportsField("base_price");
+  const supportsMinimumOrderQuantity = supportsField("minimum_order_quantity");
   const feedback = submissionState.feedback;
   const rootCategories = categoryIndexPayload.categories.data;
   const nameError = getSubmissionFieldError(feedback, "name");
   const basePriceError = getSubmissionFieldError(feedback, "base_price");
+  const minimumOrderQuantityError = getSubmissionFieldError(
+    feedback,
+    "minimum_order_quantity",
+  );
   const skuError = getSubmissionFieldError(feedback, "sku");
   const categoryError = getSubmissionFieldError(feedback, "category");
   const variantsError = hasSubmissionFieldPrefix(feedback, "variants");
@@ -82,6 +87,7 @@ function CreateContent({
   const basicInfoError = Boolean(
     nameError ||
     basePriceError ||
+    minimumOrderQuantityError ||
     skuError ||
     getSubmissionFieldError(feedback, "description") ||
     getSubmissionFieldError(feedback, "highlights") ||
@@ -129,6 +135,31 @@ function CreateContent({
               />
               {basePriceError && (
                 <p className="text-sm text-destructive">{basePriceError}</p>
+              )}
+            </>
+          )}
+          {supportsMinimumOrderQuantity && (
+            <>
+              <Label htmlFor="minimum_order_quantity">
+                Minimum order quantity
+              </Label>
+              <Input
+                value={basicState.productForm.minimum_order_quantity}
+                onChange={basicState.onProductFormInputChange}
+                className={cn(
+                  "focus-visible:ring-primary",
+                  minimumOrderQuantityError && "border-destructive",
+                )}
+                type="number"
+                min={1}
+                id="minimum_order_quantity"
+                placeholder="minimum quantity per order"
+                name="minimum_order_quantity"
+              />
+              {minimumOrderQuantityError && (
+                <p className="text-sm text-destructive">
+                  {minimumOrderQuantityError}
+                </p>
               )}
             </>
           )}

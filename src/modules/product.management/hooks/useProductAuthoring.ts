@@ -332,6 +332,7 @@ export default function useProductAuthoring({
     setCategoryAttributes(categoryContext.attributes ?? []);
     setAuthoringProfile(categoryContext.authoringProfile);
     setAuthoringSchema(categoryContext.authoringSchema);
+    product.handleProductForm("type", categoryContext.authoringProfile.type);
     category.setShowDropdown(false);
     clearSubmissionFieldError("category");
   };
@@ -495,7 +496,7 @@ export default function useProductAuthoring({
         : prepareProductSubmission({
             schema: UpdateProductSchema,
             product: {
-              type: "retail",
+              type: product.productForm.type,
               uuid: product.productForm.uuid,
               sku: product.productForm.sku,
               name: product.productForm.name,
@@ -503,6 +504,8 @@ export default function useProductAuthoring({
               description: product.productForm.description,
               highlights: product.productForm.highlights,
               box_items: product.productForm.box_items,
+              minimum_order_quantity:
+                product.productForm.minimum_order_quantity,
             },
             productSku: product.productForm.sku,
             committedCategoryUuid: category.committedCategory?.uuid,
@@ -533,7 +536,7 @@ export default function useProductAuthoring({
         : prepareProductSubmission({
             schema: UpdateProductSchema,
             product: {
-              type: "retail",
+              type: product.productForm.type,
               uuid: product.productForm.uuid,
               sku: product.productForm.sku,
               name: product.productForm.name,
@@ -541,6 +544,8 @@ export default function useProductAuthoring({
               description: product.productForm.description,
               highlights: product.productForm.highlights,
               box_items: product.productForm.box_items,
+              minimum_order_quantity:
+                product.productForm.minimum_order_quantity,
             },
             productSku: product.productForm.sku,
             committedCategoryUuid: category.committedCategory?.uuid,
@@ -786,7 +791,7 @@ function hydrateEditProduct({
   setExistingProductImages(existingProductImages);
   setExistingImageIdMap(existingImageIdMap);
   setProductForm({
-    type: "retail",
+    type: product.type,
     sku: product.sku,
     name: product.name,
     uuid: product.uuid,
@@ -797,6 +802,11 @@ function hydrateEditProduct({
       product.base_price === undefined || product.base_price === null
         ? ""
         : String(product.base_price),
+    minimum_order_quantity:
+      product.wholesale_product_detail?.minimum_order_quantity === undefined ||
+      product.wholesale_product_detail?.minimum_order_quantity === null
+        ? ""
+        : String(product.wholesale_product_detail.minimum_order_quantity),
   });
   setSelectedSpecifications(product.specifications ?? {});
 
